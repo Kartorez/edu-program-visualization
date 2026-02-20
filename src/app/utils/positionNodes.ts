@@ -2,8 +2,11 @@ import type { Node } from '@xyflow/react';
 import type { StudyNodeData } from '@/types/node';
 import type { StudyNodeSource } from '@/data/node';
 
-const COL_WIDTH = 240;
-const ROW_HEIGHT = 160;
+const COL_WIDTH = 180;
+const ROW_HEIGHT = 120;
+
+const NODE_WIDTH = 120;
+const NODE_HEIGHT = 80;
 
 export function positionNodes(
   rawNodes: StudyNodeSource[]
@@ -24,6 +27,8 @@ export function positionNodes(
           x: 0,
           y: semester * ROW_HEIGHT,
         },
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
         data: {
           title: `Semester ${semester + 1}`,
           semester: semester + 1,
@@ -41,6 +46,8 @@ export function positionNodes(
         x: columnIndex * COL_WIDTH,
         y: semester * ROW_HEIGHT,
       },
+      width: NODE_WIDTH,
+      height: NODE_HEIGHT,
       data: {
         title: node.title,
         subject: node.subject,

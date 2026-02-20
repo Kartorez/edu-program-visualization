@@ -9,7 +9,6 @@ export type StudyNodeSource = {
   prerequisites: number[];
   postrequisites: number[];
 };
-
 export const rawNodes: StudyNodeSource[] = [
   // --- Семестр 0 ---
   {
@@ -19,7 +18,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 0,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [2],
+    postrequisites: [2, 11],
   },
   {
     id: 2,
@@ -28,7 +27,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 0,
     kind: 'course',
     prerequisites: [1],
-    postrequisites: [],
+    postrequisites: [3, 7],
   },
   {
     id: 3,
@@ -36,8 +35,8 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Правознавство',
     semester: 0,
     kind: 'course',
-    prerequisites: [],
-    postrequisites: [],
+    prerequisites: [2],
+    postrequisites: [14],
   },
   {
     id: 4,
@@ -55,7 +54,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 0,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [],
+    postrequisites: [48], // Стрілка в Біопаливо
   },
   {
     id: 6,
@@ -64,7 +63,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 0,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [],
+    postrequisites: [48], // Стрілка в Біопаливо
   },
 
   // --- Семестр 1 ---
@@ -74,7 +73,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Історія та етнокульт.',
     semester: 1,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [2],
     postrequisites: [],
   },
   {
@@ -93,7 +92,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 1,
     kind: 'course',
     prerequisites: [8],
-    postrequisites: [16],
+    postrequisites: [16, 21],
   },
   {
     id: 10,
@@ -102,7 +101,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 1,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [],
+    postrequisites: [22],
   },
   {
     id: 11,
@@ -120,7 +119,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 1,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [],
+    postrequisites: [17],
   },
   {
     id: 13,
@@ -139,7 +138,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Охорона праці',
     semester: 2,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [3],
     postrequisites: [],
   },
   {
@@ -149,7 +148,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 2,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [22],
+    postrequisites: [22, 29],
   },
   {
     id: 16,
@@ -158,7 +157,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 2,
     kind: 'course',
     prerequisites: [9],
-    postrequisites: [],
+    postrequisites: [23, 36],
   },
   {
     id: 17,
@@ -166,7 +165,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Електротехніка',
     semester: 2,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [12],
     postrequisites: [],
   },
   {
@@ -204,7 +203,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Чисельні методи',
     semester: 3,
     kind: 'course',
-    prerequisites: [22],
+    prerequisites: [9],
     postrequisites: [],
   },
   {
@@ -213,8 +212,8 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Алгоритмізація та прогр.',
     semester: 3,
     kind: 'course',
-    prerequisites: [15],
-    postrequisites: [27, 28, 29],
+    prerequisites: [10, 15],
+    postrequisites: [27, 28, 29, 24],
   },
   {
     id: 23,
@@ -222,8 +221,8 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Моделювання систем',
     semester: 3,
     kind: 'course',
-    prerequisites: [],
-    postrequisites: [],
+    prerequisites: [16],
+    postrequisites: [34],
   },
   {
     id: 24,
@@ -231,8 +230,8 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Організація БД',
     semester: 3,
     kind: 'course',
-    prerequisites: [],
-    postrequisites: [36],
+    prerequisites: [22],
+    postrequisites: [35, 36],
   },
   {
     id: 25,
@@ -261,7 +260,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 4,
     kind: 'course',
     prerequisites: [22],
-    postrequisites: [41],
+    postrequisites: [41, 47],
   },
   {
     id: 28,
@@ -270,7 +269,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 4,
     kind: 'course',
     prerequisites: [22],
-    postrequisites: [47],
+    postrequisites: [47, 40],
   },
   {
     id: 29,
@@ -278,7 +277,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Теорія алгоритмів',
     semester: 4,
     kind: 'course',
-    prerequisites: [22],
+    prerequisites: [15, 22],
     postrequisites: [],
   },
   {
@@ -325,7 +324,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Методи та сист. ШІ',
     semester: 5,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [23],
     postrequisites: [],
   },
   {
@@ -334,7 +333,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Розподілені системи',
     semester: 5,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [24],
     postrequisites: [],
   },
   {
@@ -343,7 +342,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Інтелект. аналіз даних',
     semester: 5,
     kind: 'course',
-    prerequisites: [24],
+    prerequisites: [16, 24],
     postrequisites: [],
   },
   {
@@ -371,7 +370,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 5,
     kind: 'course',
     prerequisites: [26],
-    postrequisites: [],
+    postrequisites: [51],
   },
 
   // --- Семестр 6 ---
@@ -381,7 +380,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Техн. захисту інф.',
     semester: 6,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [28],
     postrequisites: [],
   },
   {
@@ -391,7 +390,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 6,
     kind: 'course',
     prerequisites: [27],
-    postrequisites: [],
+    postrequisites: [51],
   },
   {
     id: 42,
@@ -400,7 +399,7 @@ export const rawNodes: StudyNodeSource[] = [
     semester: 6,
     kind: 'course',
     prerequisites: [],
-    postrequisites: [],
+    postrequisites: [49, 48], // Стрілки в наступну політику та Біопаливо
   },
   {
     id: 43,
@@ -446,8 +445,8 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Крос-платформне прогр.',
     semester: 7,
     kind: 'course',
-    prerequisites: [28],
-    postrequisites: [],
+    prerequisites: [27, 28],
+    postrequisites: [51],
   },
   {
     id: 48,
@@ -455,7 +454,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Біопаливо',
     semester: 7,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [5, 6, 42], // ВХОДЯТЬ: Рослинництво, Тваринництво, Аграрна політика
     postrequisites: [],
   },
   {
@@ -464,7 +463,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Аграрна політика',
     semester: 7,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [42],
     postrequisites: [],
   },
   {
@@ -482,7 +481,7 @@ export const rawNodes: StudyNodeSource[] = [
     subject: 'Виробнича практика',
     semester: 7,
     kind: 'course',
-    prerequisites: [],
+    prerequisites: [39, 41, 47],
     postrequisites: [52],
   },
   {

@@ -57,7 +57,6 @@ export function buildEdges(rawNodes: StudyNodeSource[]) {
         target: targetId,
         sourceHandle,
         targetHandle,
-        type: 'custom',
         data: {
           sourceSide,
           targetSide,
