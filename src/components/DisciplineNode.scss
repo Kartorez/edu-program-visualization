@@ -1,0 +1,103 @@
+.node {
+  display: flex;
+  align-items: stretch;
+  width: 140px;
+  height: 90px;
+  box-sizing: border-box;
+  color: #000;
+  font-size: 11px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  overflow: hidden;
+
+  &__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    padding: 2px;
+  }
+
+  &__code {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  &__title {
+    font-size: 10px;
+    line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  &__title {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  &__req {
+    display: flex;
+    height: 100%;
+    .node__req-col + .node__req-col {
+      border-left: 1px solid #aaa;
+    }
+  }
+
+  &__req-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    line-height: 1.3;
+    padding: 0 2px;
+    span {
+      white-space: nowrap;
+    }
+  }
+
+  &__prereqs,
+  &__postreqs {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  &__prereqs {
+    background: #f8d7e3;
+    border-right: 1px solid #aaa;
+  }
+
+  &__postreqs {
+    background: #e6f0ff;
+    border-left: 1px solid #aaa;
+  }
+}
+
+.semester {
+  width: 100px;
+  height: 90px;
+  background: #dae8fc;
+  border-color: #6c8ebf;
+  border-radius: 3px;
+}
+
+.discipline {
+  background: #fff2cc;
+  border-color: #d6b656;
+}
+
+.selective {
+  background: #d5e8d4;
+  border-color: #82b366;
+}
+
+.study--plan {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}

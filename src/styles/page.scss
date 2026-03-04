@@ -1,0 +1,27 @@
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 0.5cm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .study--plan,
+  .study--plan * {
+    visibility: visible;
+  }
+
+  .study--plan {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .react-flow__controls,
+  .react-flow__panel {
+    display: none !important;
+  }
+}

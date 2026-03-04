@@ -1,11 +1,10 @@
-
-import StudyPlanCanvas from "@/components/StudyPlanCanvas";
-import styles from "./styles/page.module.scss";
+import StudyPlanCanvas from 'src/components/StudyPlanCanvas';
+import styles from './styles/page.module.scss';
 
 export default function Home() {
   return (
-   <div>
-  <StudyPlanCanvas></StudyPlanCanvas>
+    <div>
+      <StudyPlanCanvas></StudyPlanCanvas>
     </div>
   );
 }
