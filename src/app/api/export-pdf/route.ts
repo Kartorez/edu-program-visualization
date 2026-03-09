@@ -1,69 +1,43 @@
-'use server';
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import { withPage } from './browser';
+import { hashNodes, readCache, writeCache } from './cache';
+import { stripSelection } from './positions';
+import { buildHtml } from './build-html';
+import { DisciplineNode } from '@/types/DisciplineNode';
+
+const PDF_HEADERS = {
+  'Content-Type': 'application/pdf',
+  'Content-Disposition': 'attachment; filename="study-plan.pdf"',
+};
 
 export async function POST(req: NextRequest) {
-  const { html, styles, bounds } = await req.json();
+  const { nodes }: { nodes: DisciplineNode[] } = await req.json();
 
-  const A4_WIDTH = 1122;
-  const A4_HEIGHT = 794;
+  const normalized = stripSelection(nodes);
+  const hash = hashNodes(normalized);
 
-  const scale = Math.min(A4_WIDTH / bounds.width, A4_HEIGHT / bounds.height);
+  const cached = await readCache(hash);
+  if (cached) {
+    return new NextResponse(new Uint8Array(cached), {
+      headers: { ...PDF_HEADERS, 'X-Cache': 'HIT' },
+    });
+  }
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  const { html } = buildHtml(normalized);
+
+  const pdf = await withPage(async (page) => {
+    await page.setViewport({ width: 1123, height: 794 });
+    await page.setContent(html, { waitUntil: 'load' });
+
+    const result = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    });
+    return Buffer.from(result);
   });
 
-  const page = await browser.newPage();
-
-  await page.setViewport({ width: A4_WIDTH, height: A4_HEIGHT });
-
-  await page.setContent(
-    `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8"/>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body {
-            width: ${A4_WIDTH}px;
-            height: ${A4_HEIGHT}px;
-            overflow: hidden;
-            background: white;
-              display: flex;
-          }
-          #scale-wrapper {
-            transform-origin: top left;
-            transform: scale(${scale});
-            width: ${bounds.width}px;
-            height: ${bounds.height}px;
-          }
-          ${styles}
-        </style>
-      </head>
-      <body>
-        <div id="scale-wrapper">${html}</div>
-      </body>
-    </html>
-  `,
-    { waitUntil: 'networkidle0' }
-  );
-
-  const pdf = await page.pdf({
-    format: 'A4',
-    landscape: true,
-    printBackground: true,
-    margin: { top: 0, right: 0, bottom: 0, left: 0 },
-  });
-
-  await browser.close();
-
-  return new NextResponse(pdf, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="reactflow.pdf"',
-    },
-  });
+  await writeCache(hash, pdf);
+  return new NextResponse(new Uint8Array(pdf), { headers: { ...PDF_HEADERS, 'X-Cache': 'MISS' } });
 }

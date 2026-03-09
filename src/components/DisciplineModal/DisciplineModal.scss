@@ -1,0 +1,114 @@
+.discipline-modal {
+  width: 400px;
+  height: 80%;
+
+  .discipline-title {
+    font-size: 24px;
+    margin-bottom: 12px;
+    text-wrap: balance;
+    color: #0a2540;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+
+  &__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 2em;
+    background: #ffffff;
+    border: 1px solid #e1e8f0;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(10, 37, 64, 0.12);
+
+    overflow-y: auto;
+    z-index: 4;
+    .requisites {
+      margin-top: 12px;
+      max-height: 300px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+  }
+
+  &__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #007bff;
+    }
+
+    svg {
+      display: block;
+    }
+  }
+  .prerequisites,
+  .postrequisites {
+    margin-top: 12px;
+    overflow: hidden;
+    &__title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    &__list {
+      list-style: none;
+    }
+    &__item {
+      background: rgba(99, 91, 255, 0.08) !important;
+      border: 1px solid rgba(99, 91, 255, 0.2);
+      color: #635bff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      margin-bottom: 4px;
+      animation: fadeSlideIn 0.2s ease forwards;
+      opacity: 0;
+
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.07}s;
+        }
+      }
+
+      &:hover {
+        background: rgba(99, 91, 255, 0.14) !important;
+      }
+    }
+  }
+  .postrequisites {
+    &__item {
+      background: rgba(14, 164, 122, 0.08) !important;
+      border: 1px solid rgba(14, 164, 122, 0.2);
+      color: #0ea47a;
+
+      &:hover {
+        background: rgba(14, 164, 122, 0.14) !important;
+      }
+    }
+  }
+  &__details-button {
+    margin-top: 12px;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -43,3 +43,5 @@ next-env.d.ts
 # prettier
 .prettierrc
 .prettierignore
+
+.env

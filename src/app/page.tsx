@@ -1,10 +1,11 @@
-import StudyPlanCanvas from 'src/components/StudyPlanCanvas';
 import styles from './styles/page.module.scss';
+import HeroPage from '@/components/ui/HeroPage';
 
 export default function Home() {
   return (
     <div>
-      <StudyPlanCanvas></StudyPlanCanvas>
+      <HeroPage />
+      <div style={{ height: '100dvh', width: '100dvw' }}></div>
     </div>
   );
 }
