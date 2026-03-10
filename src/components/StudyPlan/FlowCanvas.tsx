@@ -1,32 +1,30 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { ReactFlow, Controls, Background, useReactFlow } from '@xyflow/react';
+import { ReactFlow, Controls, Background, useReactFlow, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import DisciplineNode from '../DisciplineNode';
 import DownloadButton from './DownloadButton';
-import { disciplines } from '@/data/node';
-import { positionNodes } from 'src/utils/positionNodes';
 import DisciplineModal from '../DisciplineModal';
 import FilterPanel, { FilterType } from '@/components/StudyPlan/FilterPanel';
 import { Discipline } from '@/schemas/discipline.schema';
-import { AnimatePresence } from 'framer-motion';
 
 const nodeTypes = { disciplineNode: DisciplineNode };
-const INITIAL_NODES = positionNodes(disciplines);
 
-export default function FlowCanvas() {
+export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discipline>[] }) {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [typeFilters, setTypeFilters] = useState<FilterType[]>([]);
   const [semesterFilters, setSemesterFilters] = useState<number[]>([]);
   const { fitView, getNodes } = useReactFlow();
 
-  const selectedNode = disciplines.find((d) => d.code === selectedCode) ?? null;
-
+  const selectedNode = useMemo(
+    () => initialNodes.find((n) => n.data.code === selectedCode)?.data ?? null,
+    [initialNodes, selectedCode]
+  );
   const nodes = useMemo(
     () =>
-      INITIAL_NODES.map((node) => {
+      initialNodes.map((node) => {
         const data = node.data as Discipline;
         if (!data?.code) return node;
 
@@ -49,7 +47,7 @@ export default function FlowCanvas() {
           },
         };
       }),
-    [typeFilters, semesterFilters, selectedCode]
+    [initialNodes, typeFilters, semesterFilters, selectedCode]
   );
 
   const onTypeToggle = (type: FilterType) =>
@@ -99,7 +97,7 @@ export default function FlowCanvas() {
   );
 
   return (
-    <section className="study--plan">
+    <section className="study-plan">
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}
@@ -109,6 +107,7 @@ export default function FlowCanvas() {
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick
+        onlyRenderVisibleElements={true}
         onNodeClick={onNodeClick}
       >
         <Controls showInteractive={false} />
@@ -123,17 +122,15 @@ export default function FlowCanvas() {
           onReset={onReset}
         />
       </ReactFlow>
-      <AnimatePresence>
-        {isOpen && selectedNode && (
-          <DisciplineModal
-            node={selectedNode}
-            allNodes={disciplines}
-            isOpen={isOpen}
-            onFocusNode={onFocusNode}
-            onClose={onClose}
-          />
-        )}
-      </AnimatePresence>
+      {isOpen && selectedNode && (
+        <DisciplineModal
+          node={selectedNode}
+          allNodes={initialNodes.map((nodes) => nodes.data)}
+          isOpen={isOpen}
+          onFocusNode={onFocusNode}
+          onClose={onClose}
+        />
+      )}
     </section>
   );
 }

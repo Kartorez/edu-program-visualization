@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Panel } from '@xyflow/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
 import './FilterPanel.scss';
 
@@ -56,65 +55,55 @@ export default function FilterPanel({
           )}
         </Button>
 
-        <AnimatePresence initial={false}>
-          {isOpen && (
-            <motion.div
-              className="filter-body"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
-            >
-              <div className="filter-section">
-                <span className="filter-label">Тип</span>
-                <div className="filter-group">
-                  <Button
-                    onClick={onTypeReset}
-                    className={`filter-chip ${typeFilters.length === 0 ? 'filter-chip--active' : ''}`}
-                  >
-                    Всі
-                  </Button>
-                  {(['ОК', 'ВК'] as FilterType[]).map((type) => (
-                    <Button
-                      key={type}
-                      onClick={() => onTypeToggle(type)}
-                      className={`filter-chip ${typeFilters.includes(type) ? 'filter-chip--active' : ''}`}
-                    >
-                      <span className="filter-checkbox" />
-                      {type}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+        <div className={`filter-body ${isOpen ? 'filter-body--open' : ''}`}>
+          <div className="filter-section">
+            <span className="filter-label">Тип</span>
+            <div className="filter-group">
+              <Button
+                onClick={onTypeReset}
+                className={`filter-chip ${typeFilters.length === 0 ? 'filter-chip--active' : ''}`}
+              >
+                Всі
+              </Button>
+              {(['ОК', 'ВК'] as FilterType[]).map((type) => (
+                <Button
+                  key={type}
+                  onClick={() => onTypeToggle(type)}
+                  className={`filter-chip ${typeFilters.includes(type) ? 'filter-chip--active' : ''}`}
+                >
+                  <span className="filter-checkbox" />
+                  {type}
+                </Button>
+              ))}
+            </div>
+          </div>
 
+          <div className="filter-divider" />
+
+          <div className="filter-section">
+            <span className="filter-label">Семестр</span>
+            <div className="filter-semester-grid">
+              {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
+                <Button
+                  key={sem}
+                  onClick={() => onSemesterToggle(sem)}
+                  className={`filter-semester-button ${semesterFilters.includes(sem) ? 'filter-semester-button--active' : ''}`}
+                >
+                  {sem}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {hasFilters && (
+            <>
               <div className="filter-divider" />
-
-              <div className="filter-section">
-                <span className="filter-label">Семестр</span>
-                <div className="filter-semester-grid">
-                  {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
-                    <Button
-                      key={sem}
-                      onClick={() => onSemesterToggle(sem)}
-                      className={`filter-sem-btn ${semesterFilters.includes(sem) ? 'filter-sem-btn--active' : ''}`}
-                    >
-                      {sem}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {hasFilters && (
-                <>
-                  <div className="filter-divider" />
-                  <Button onClick={onReset} className="filter-reset">
-                    Скинути фільтри
-                  </Button>
-                </>
-              )}
-            </motion.div>
+              <Button onClick={onReset} className="filter-reset">
+                Скинути фільтри
+              </Button>
+            </>
           )}
-        </AnimatePresence>
+        </div>
       </div>
     </Panel>
   );

@@ -14,31 +14,34 @@ function getKind(code: string) {
   return 'semester';
 }
 
-export default memo(function DisciplineNode({ data }: NodeProps<DisciplineNode>) {
-  const { code, name, shortName, prerequisites = [], postrequisites = [] } = data;
+export default memo(
+  function DisciplineNode({ data }: NodeProps<DisciplineNode>) {
+    const { code, name, shortName, prerequisites = [], postrequisites = [] } = data;
 
-  const kind = getKind(code);
-  const title = shortName ?? name;
+    const kind = getKind(code);
+    const title = shortName ?? name;
 
-  if (kind === 'semester') return <SemesterNode title={title} />;
-  if (kind === 'selective') return <SelectiveNode code={code} />;
+    if (kind === 'semester') return <SemesterNode title={title} />;
+    if (kind === 'selective') return <SelectiveNode code={code} />;
 
-  return (
-    <div className="node discipline">
-      {prerequisites.length > 0 && (
-        <div className="node__prereqs">
-          <ReqList ids={prerequisites} />
+    return (
+      <div className="node discipline">
+        {prerequisites.length > 0 && (
+          <div className="node__prereqs">
+            <ReqList ids={prerequisites} />
+          </div>
+        )}
+        <div className="node__text">
+          <div className="node__code">{code}</div>
+          <div className="node__title">{title}</div>
         </div>
-      )}
-      <div className="node__text">
-        <div className="node__code">{code}</div>
-        <div className="node__title">{title}</div>
+        {postrequisites.length > 0 && (
+          <div className="node__postreqs">
+            <ReqList ids={postrequisites} />
+          </div>
+        )}
       </div>
-      {postrequisites.length > 0 && (
-        <div className="node__postreqs">
-          <ReqList ids={postrequisites} />
-        </div>
-      )}
-    </div>
-  );
-});
+    );
+  },
+  (prev, next) => prev.data.code === next.data.code && prev.selected === next.selected
+);

@@ -1,39 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import './Button.scss';
-
-const MotionLink = motion.create(Link);
 
 type ButtonProps = {
   href?: string;
   onClick?: () => void;
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
 };
 
-export default function Button({ href, onClick, children, className }: ButtonProps) {
+export default function Button({ href, onClick, children, className, disabled }: ButtonProps) {
   const cn = `button ${className ?? ''}`.trim();
-
-  const motionProps = {
-    whileHover: { scale: 1.04 },
-    whileTap: { scale: 0.96 },
-    transition: { type: 'spring' as const, stiffness: 400, damping: 20 },
-    className: cn,
-  };
 
   if (href) {
     return (
-      <MotionLink href={href} {...motionProps}>
+      <Link href={href} className={cn}>
         {children}
-      </MotionLink>
+      </Link>
     );
   }
 
   return (
-    <motion.button onClick={onClick} {...motionProps}>
+    <button onClick={onClick} className={cn} disabled={disabled}>
       {children}
-    </motion.button>
+    </button>
   );
 }

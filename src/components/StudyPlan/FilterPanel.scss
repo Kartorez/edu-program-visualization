@@ -1,13 +1,11 @@
 .filter-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   padding: 14px;
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(0, 0, 0, 0.07);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.08);
   min-width: 220px;
   overflow: visible;
 }
@@ -20,7 +18,7 @@
 
 .filter-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-text-label);
@@ -110,7 +108,7 @@
   gap: 4px;
 }
 
-.filter-sem-btn {
+.filter-semester-button {
   border: 1.5px solid var(--color-border) !important;
   background: var(--color-bg-hover) !important;
   color: var(--color-text-muted) !important;
@@ -159,6 +157,11 @@
 .filter-toggle {
   width: 100%;
   justify-content: flex-start;
+  border: none;
+  background: rgba(233, 233, 233, 0.5);
+  &:hover {
+    box-shadow: none;
+  }
 
   &--active {
     color: var(--color-primary) !important;
@@ -175,10 +178,22 @@
 }
 
 .filter-body {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 8px;
-  overflow: visible;
+  gap: 10px;
+  padding-top: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    padding-top 0.2s ease;
+
+  &--open {
+    max-height: 400px;
+    opacity: 1;
+    padding-top: 8px;
+    overflow: visible;
+  }
 }

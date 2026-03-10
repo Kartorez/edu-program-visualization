@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { NODE_H, NODE_W, SEMESTER_W } from '@/constants/nodeLayout';
 import '@/styles/globals.scss';
 
 const geistSans = Geist({
@@ -23,7 +24,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      style={
+        {
+          '--node-w': `${NODE_W}px`,
+          '--node-h': `${NODE_H}px`,
+          '--semester-w': `${SEMESTER_W}px`,
+        } as React.CSSProperties
+      }
+    >
       <body>{children}</body>
     </html>
   );

@@ -8,6 +8,7 @@ export default function DownloadButton() {
 
   const onClick = async () => {
     setLoading(true);
+
     try {
       const nodes = getNodes();
       const res = await fetch('/api/export-pdf', {
@@ -30,7 +31,7 @@ export default function DownloadButton() {
 
   return (
     <Panel position="top-right">
-      <Button className="button--sm" onClick={onClick}>
+      <Button className="button--sm" disabled={loading} onClick={onClick}>
         {loading ? 'Генерація...' : 'Зберегти в PDF'}
       </Button>
     </Panel>

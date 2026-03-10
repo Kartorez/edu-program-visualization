@@ -15,14 +15,21 @@
   box-shadow: 0 2px 8px var(--color-primary-shadow);
   transition:
     box-shadow 0.2s ease,
-    background 0.2s ease;
+    background 0.2s ease,
+    transform 0.15s ease;
 
   &:hover {
     background: var(--color-primary-hover);
     box-shadow: 0 4px 16px var(--color-primary-shadow-hover);
+    transform: scale(1.04);
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 
   &--ghost {
+    border: 1px solid var(--color-primary);
     background: transparent;
     color: var(--color-text);
     box-shadow: none;

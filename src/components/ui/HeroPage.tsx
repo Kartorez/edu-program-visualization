@@ -17,8 +17,7 @@ export default function Hero() {
           {`Інтерактивна візуалізація навчального плану — дисципліни, зв'язки між предметами та шлях від першого до восьмого семестру.`}
         </p>
         <div className="hero__actions">
-          <Button>Переглянути план</Button>
-          <Button>Як це працює</Button>
+          <Button href="/plan">Переглянути план</Button>
         </div>
       </div>
     </section>

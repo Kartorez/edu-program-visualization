@@ -1,8 +1,8 @@
 .node {
   display: flex;
   align-items: stretch;
-  width: 140px;
-  height: 90px;
+  width: var(--node-w);
+  height: var(--node-h);
   box-sizing: border-box;
   color: #000;
   font-size: 11px;
@@ -22,7 +22,6 @@
   }
 
   &__code {
-    font-weight: 600;
     white-space: nowrap;
   }
   &__title {
@@ -79,8 +78,8 @@
 }
 
 .semester {
-  width: 100px;
-  height: 90px;
+  width: var(--semester-w);
+  height: var(--node-h);
   background: #dae8fc;
   border-color: #6c8ebf;
   border-radius: 3px;
@@ -96,7 +95,7 @@
   border-color: #82b366;
 }
 
-.study--plan {
+.study-plan {
   display: flex;
   width: 100%;
   height: 100vh;
