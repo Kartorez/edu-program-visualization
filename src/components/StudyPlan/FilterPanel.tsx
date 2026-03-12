@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Panel } from '@xyflow/react';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Button/Button';
 import './FilterPanel.scss';
 
 export type FilterType = 'ОК' | 'ВК';

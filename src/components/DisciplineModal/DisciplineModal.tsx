@@ -2,9 +2,11 @@
 
 import { useMemo } from 'react';
 import { Panel } from '@xyflow/react';
-import type { Discipline, Disciplines } from '../../schemas/discipline.schema';
+import RequisiteList from '@/components/DisciplineModal/RequisiteList';
+import ElectiveList from '@/components/DisciplineModal/ElectiveList';
+import { getElectiveGroup, Discipline, Disciplines } from '@/schemas/discipline.schema';
 import './DisciplineModal.scss';
-import Button from '@/components/ui/Button';
+import Button from '@/components/ui/Button/Button';
 
 const buildLabelMap = (allNodes: Disciplines) =>
   new Map(allNodes.map((n) => [n.code, `${n.code} ${n.name}`]));
@@ -14,14 +16,21 @@ export default function DisciplineModal({
   allNodes,
   onClose,
   onFocusNode,
+  isOpen,
 }: {
+  isOpen: boolean;
   node: Discipline | null;
   allNodes: Disciplines;
   onClose: () => void;
-  isOpen: boolean;
   onFocusNode: (code: string) => void;
 }) {
   const labelMap = useMemo(() => buildLabelMap(allNodes), [allNodes]);
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const electiveVariants = useMemo(() => {
+    if (!node?.code.startsWith('ВК')) return [];
+    return allNodes.filter((n) => getElectiveGroup(n.code) === node.code);
+  }, [node?.code, allNodes]);
 
   const prerequisites = useMemo(
     () => [...new Set(node?.prerequisites ?? [])],
@@ -32,8 +41,9 @@ export default function DisciplineModal({
     () => [...new Set(node?.postrequisites ?? [])],
     [node?.postrequisites]
   );
-
   if (!node) return null;
+
+  const isElective = electiveVariants.length > 0;
 
   return (
     <Panel position="center-right" className="discipline-modal">
@@ -65,39 +75,28 @@ export default function DisciplineModal({
           {node.code} {node.name}
         </h2>
 
-        <div className="requisites">
-          <div className="prerequisites">
-            <p className="prerequisites__title">Пререквізити</p>
-            {prerequisites.length ? (
-              <ul className="prerequisites__list">
-                {prerequisites.map((id) => (
-                  <li key={id} className="prerequisites__item" onClick={() => onFocusNode(id)}>
-                    {labelMap.get(id) ?? id}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="no-requisites">Немає пререквізитів</p>
-            )}
-          </div>
-
-          <div className="postrequisites">
-            <p className="postrequisites__title">Постреквізити</p>
-            {postrequisites.length ? (
-              <ul className="postrequisites__list">
-                {postrequisites.map((id) => (
-                  <li key={id} className="postrequisites__item" onClick={() => onFocusNode(id)}>
-                    {labelMap.get(id) ?? id}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="no-requisites">Немає постреквізитів</p>
-            )}
-          </div>
-        </div>
-
-        <Button className="discipline-modal__details-button button--lg">Детальніше</Button>
+        {isElective ? (
+          <ElectiveList variants={electiveVariants} />
+        ) : (
+          <>
+            <div className="requisites">
+              <RequisiteList
+                title="Пререквізити"
+                ids={prerequisites}
+                labelMap={labelMap}
+                onFocusNode={onFocusNode}
+              />
+              <RequisiteList
+                title="Постреквізити"
+                ids={postrequisites}
+                labelMap={labelMap}
+                variant="post"
+                onFocusNode={onFocusNode}
+              />
+            </div>
+            <Button className="discipline-modal__details-button button--lg">Детальніше</Button>
+          </>
+        )}
       </div>
     </Panel>
   );

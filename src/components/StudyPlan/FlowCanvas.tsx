@@ -8,6 +8,7 @@ import DownloadButton from './DownloadButton';
 import DisciplineModal from '../DisciplineModal';
 import FilterPanel, { FilterType } from '@/components/StudyPlan/FilterPanel';
 import { Discipline } from '@/schemas/discipline.schema';
+import { disciplines } from '@/data/node';
 
 const nodeTypes = { disciplineNode: DisciplineNode };
 
@@ -22,7 +23,8 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
     () => initialNodes.find((n) => n.data.code === selectedCode)?.data ?? null,
     [initialNodes, selectedCode]
   );
-  const nodes = useMemo(
+
+  const visibleNodes = useMemo(
     () =>
       initialNodes.map((node) => {
         const data = node.data as Discipline;
@@ -30,16 +32,12 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
 
         const matchesType =
           typeFilters.length === 0 || typeFilters.some((f) => data.code?.startsWith(f));
-
         const matchesSemester =
           semesterFilters.length === 0 || semesterFilters.some((s) => data.semesters?.includes(s));
-
         const isVisible = matchesType && matchesSemester;
-        const isSelected = node.id.startsWith(selectedCode ?? '___');
 
         return {
           ...node,
-          selected: isSelected,
           style: {
             ...node.style,
             opacity: isVisible ? 1 : 0.2,
@@ -47,7 +45,17 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
           },
         };
       }),
-    [initialNodes, typeFilters, semesterFilters, selectedCode]
+    [initialNodes, typeFilters, semesterFilters]
+  );
+
+  const nodes = useMemo(
+    () =>
+      visibleNodes.map((node) => {
+        const isSelected = node.id.startsWith(`${selectedCode}-`);
+        if (isSelected === (node.selected ?? false)) return node;
+        return { ...node, selected: isSelected };
+      }),
+    [visibleNodes, selectedCode]
   );
 
   const onTypeToggle = (type: FilterType) =>
@@ -106,7 +114,7 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
         panOnDrag
         zoomOnScroll
         zoomOnPinch
-        zoomOnDoubleClick
+        zoomOnDoubleClick={false}
         onlyRenderVisibleElements={true}
         onNodeClick={onNodeClick}
       >
@@ -125,7 +133,7 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
       {isOpen && selectedNode && (
         <DisciplineModal
           node={selectedNode}
-          allNodes={initialNodes.map((nodes) => nodes.data)}
+          allNodes={disciplines}
           isOpen={isOpen}
           onFocusNode={onFocusNode}
           onClose={onClose}

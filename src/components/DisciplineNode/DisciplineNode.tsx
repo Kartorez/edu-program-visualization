@@ -6,7 +6,7 @@ import SemesterNode from './SemesterNode';
 import SelectiveNode from './SelectiveNode';
 import './DisciplineNode.scss';
 
-type DisciplineNode = Node<Discipline, 'disciplineNode'>;
+type DisciplineNodeType = Node<Discipline, 'disciplineNode'>;
 
 function getKind(code: string) {
   if (code.startsWith('ОК')) return 'discipline';
@@ -15,12 +15,11 @@ function getKind(code: string) {
 }
 
 export default memo(
-  function DisciplineNode({ data }: NodeProps<DisciplineNode>) {
+  function DisciplineNode({ data, id, selected }: NodeProps<DisciplineNodeType>) {
     const { code, name, shortName, prerequisites = [], postrequisites = [] } = data;
-
     const kind = getKind(code);
     const title = shortName ?? name;
-
+    console.log('render', id, 'selected:', selected);
     if (kind === 'semester') return <SemesterNode title={title} />;
     if (kind === 'selective') return <SelectiveNode code={code} />;
 

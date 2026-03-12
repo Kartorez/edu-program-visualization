@@ -92,7 +92,7 @@
 
 .selective {
   background: #d5e8d4;
-  border-color: #82b366;
+  border-color: rgba(130, 179, 102, 1);
 }
 
 .study-plan {
@@ -101,7 +101,7 @@
   height: 100vh;
 }
 
-.react-flow__node.selected {
-  border-radius: 5px;
+.selected {
   border: 2px solid var(--color-primary-hover);
+  border-radius: 5px;
 }

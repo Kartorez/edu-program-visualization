@@ -1,5 +1,6 @@
 import type { Node } from '@xyflow/react';
 import type { Disciplines, Discipline } from '@/schemas/discipline.schema';
+import { getElectiveGroup } from '@/schemas/discipline.schema';
 import { ROW_HEIGHT, YEAR_GAP, COL_WIDTH, GRAPH_PADDING } from '@/constants/nodeLayout';
 
 function getYear(semester: number): number {
@@ -15,28 +16,31 @@ export function positionNodes(rawNodes: Disciplines): Node<Discipline>[] {
   const result: Node<Discipline>[] = [];
   const semesterCounters: Record<number, number> = {};
 
-  const allSemesters = rawNodes.flatMap((n) => n.semesters);
-  const uniqueSemesters = [...new Set(allSemesters)].sort((a, b) => a - b);
+  const seenGroups = new Set<string>();
+  const displayNodes = rawNodes.filter((node) => {
+    const group = getElectiveGroup(node.code);
+    if (!group) return true;
+    if (seenGroups.has(group)) return false;
+    seenGroups.add(group);
+    return true;
+  });
 
+  const allSemesters = displayNodes.flatMap((n) => n.semesters);
+  const uniqueSemesters = [...new Set(allSemesters)].sort((a, b) => a - b);
   const years = [...new Set(uniqueSemesters.map(getYear))];
 
   years.forEach((year) => {
     const semester1 = year * 2 + 1;
     const semester2 = year * 2 + 2;
 
-    const s1nodes = rawNodes.filter((n) => n.semesters.includes(semester1)).length;
-
-    const s2nodes = rawNodes.filter((n) => n.semesters.includes(semester2)).length;
-
+    const s1nodes = displayNodes.filter((n) => n.semesters.includes(semester1)).length;
+    const s2nodes = displayNodes.filter((n) => n.semesters.includes(semester2)).length;
     const width = (Math.max(s1nodes, s2nodes) + 1) * COL_WIDTH + GRAPH_PADDING;
 
     result.push({
       id: `year-${year}`,
       type: 'group',
-      position: {
-        x: 0,
-        y: year * 2 * ROW_HEIGHT + year * YEAR_GAP,
-      },
+      position: { x: 0, y: year * 2 * ROW_HEIGHT + year * YEAR_GAP },
       style: {
         height: ROW_HEIGHT * 2,
         width,
@@ -51,28 +55,19 @@ export function positionNodes(rawNodes: Disciplines): Node<Discipline>[] {
     });
   });
 
-  rawNodes.forEach((node) => {
+  displayNodes.forEach((node) => {
     node.semesters.forEach((semester) => {
       if (!(semester in semesterCounters)) {
         semesterCounters[semester] = 0;
 
-        const nodesInSemester = rawNodes.filter((n) => n.semesters.includes(semester)).length;
-
+        const nodesInSemester = displayNodes.filter((n) => n.semesters.includes(semester)).length;
         const width = (nodesInSemester + 1) * COL_WIDTH + GRAPH_PADDING;
 
         result.push({
           id: `semester-${semester}`,
           type: 'disciplineNode',
-          position: {
-            x: GRAPH_PADDING,
-            y: getSemesterY(semester) + GRAPH_PADDING,
-          },
-          style: {
-            height: ROW_HEIGHT,
-            width,
-            zIndex: -1,
-            pointerEvents: 'none',
-          },
+          position: { x: GRAPH_PADDING, y: getSemesterY(semester) + GRAPH_PADDING },
+          style: { height: ROW_HEIGHT, width, zIndex: -1, pointerEvents: 'none' },
           data: {
             code: '',
             name: `Семестр ${semester}`,
@@ -84,18 +79,19 @@ export function positionNodes(rawNodes: Disciplines): Node<Discipline>[] {
       }
 
       const columnIndex = 1 + semesterCounters[semester]++;
+      const group = getElectiveGroup(node.code);
 
       result.push({
-        id: `${node.code}-${semester}`,
+        id: `${group ?? node.code}-${semester}`,
         type: 'disciplineNode',
         parentId: `semester-${semester}`,
         extent: 'parent',
-        position: {
-          x: columnIndex * COL_WIDTH - 20,
-          y: 0,
-        },
+        position: { x: columnIndex * COL_WIDTH - 20, y: 0 },
         data: {
           ...node,
+          code: group ?? node.code,
+          name: group ? `Вибіркова дисципліна` : node.name,
+          shortName: group ?? node.shortName,
           semesters: [semester],
         },
       });

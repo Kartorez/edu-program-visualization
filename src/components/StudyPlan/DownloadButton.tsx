@@ -1,6 +1,6 @@
 import { Panel, useReactFlow } from '@xyflow/react';
 import { useState } from 'react';
-import Button from '../ui/Button';
+import Button from '../ui/Button/Button';
 
 export default function DownloadButton() {
   const { getNodes } = useReactFlow();
