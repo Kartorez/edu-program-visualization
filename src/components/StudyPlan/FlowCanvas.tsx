@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ReactFlow, Controls, Background, useReactFlow, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import DisciplineNode from '../DisciplineNode';
@@ -24,7 +24,7 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
     [initialNodes, selectedCode]
   );
 
-  const visibleNodes = useMemo(
+  const filterNodes = useMemo(
     () =>
       initialNodes.map((node) => {
         const data = node.data as Discipline;
@@ -50,12 +50,12 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
 
   const nodes = useMemo(
     () =>
-      visibleNodes.map((node) => {
+      filterNodes.map((node) => {
         const isSelected = node.id.startsWith(`${selectedCode}-`);
         if (isSelected === (node.selected ?? false)) return node;
         return { ...node, selected: isSelected };
       }),
-    [visibleNodes, selectedCode]
+    [filterNodes, selectedCode]
   );
 
   const onTypeToggle = (type: FilterType) =>
@@ -80,29 +80,32 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
     setSelectedCode(null);
   };
 
-  const onFocusNode = useCallback(
-    (code: string) => {
-      if (selectedCode === code) return;
-      const node = getNodes().find((n) => n.id.startsWith(code));
-      if (!node) return;
+  useEffect(() => {
+    if (!selectedCode) return;
+    const node = getNodes().find((n) => n.id.startsWith(selectedCode));
+    if (!node) return;
 
-      setSelectedCode(code);
-      setIsOpen(true);
-      requestAnimationFrame(() => {
-        fitView({ nodes: [{ id: node.id }], duration: 600, padding: 5 });
-      });
-    },
-    [selectedCode, fitView, getNodes]
-  );
+    fitView({ nodes: [{ id: node.id }], duration: 600, padding: 5 });
+  }, [selectedCode, fitView, getNodes]);
 
-  const onNodeClick = useCallback(
-    (_: unknown, node: { id: string; data: unknown }) => {
-      const data = node.data as Discipline;
-      if (!data.code.startsWith('ОК') && !data.code.startsWith('ВК')) return;
-      onFocusNode(data.code);
-    },
-    [onFocusNode]
-  );
+  const onFocusNode = useCallback((code: string) => {
+    setSelectedCode((prev) => {
+      if (prev === code) return prev;
+      return code;
+    });
+    setIsOpen(true);
+  }, []);
+
+  const onNodeClick = useCallback((_: unknown, node: { id: string; data: unknown }) => {
+    const data = node.data as Discipline;
+    if (!data.code.startsWith('ОК') && !data.code.startsWith('ВК')) return;
+
+    setSelectedCode((prev) => {
+      if (prev === data.code) return prev;
+      return data.code;
+    });
+    setIsOpen(true);
+  }, []);
 
   return (
     <section className="study-plan">
@@ -115,7 +118,9 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick={false}
+        /*
         onlyRenderVisibleElements={true}
+        */
         onNodeClick={onNodeClick}
       >
         <Controls showInteractive={false} />

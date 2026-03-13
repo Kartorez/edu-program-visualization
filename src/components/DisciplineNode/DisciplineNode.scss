@@ -101,6 +101,11 @@
   height: 100vh;
 }
 
+.export {
+  background-color: white;
+  font-family: 'Times New Roman', Times, serif;
+}
+
 .selected {
   border: 2px solid var(--color-primary-hover);
   border-radius: 5px;

@@ -15,11 +15,11 @@ function getKind(code: string) {
 }
 
 export default memo(
-  function DisciplineNode({ data, id, selected }: NodeProps<DisciplineNodeType>) {
+  function DisciplineNode({ data, selected }: NodeProps<DisciplineNodeType>) {
     const { code, name, shortName, prerequisites = [], postrequisites = [] } = data;
     const kind = getKind(code);
     const title = shortName ?? name;
-    console.log('render', id, 'selected:', selected);
+
     if (kind === 'semester') return <SemesterNode title={title} />;
     if (kind === 'selective') return <SelectiveNode code={code} />;
 

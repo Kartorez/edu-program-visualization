@@ -1,43 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withPage } from './browser';
-import { hashNodes, readCache, writeCache } from './cache';
-import { stripSelection } from './positions';
-import { buildHtml } from './build-html';
-import { DisciplineNode } from '@/types/DisciplineNode';
+import { readCache, writeCache, hashString } from './cache';
 
-const PDF_HEADERS = {
+const PDF_HEADERS: Record<string, string> = {
   'Content-Type': 'application/pdf',
   'Content-Disposition': 'attachment; filename="study-plan.pdf"',
 };
 
-export async function POST(req: NextRequest) {
-  const { nodes }: { nodes: DisciplineNode[] } = await req.json();
+const CACHE_KEY = hashString('export-static-v1');
 
-  const normalized = stripSelection(nodes);
-  const hash = hashNodes(normalized);
-
-  const cached = await readCache(hash);
+export async function GET() {
+  const cached = await readCache(CACHE_KEY);
   if (cached) {
-    return new NextResponse(new Uint8Array(cached), {
+    return new NextResponse(cached, {
       headers: { ...PDF_HEADERS, 'X-Cache': 'HIT' },
     });
   }
 
-  const { html } = buildHtml(normalized);
-
   const pdf = await withPage(async (page) => {
-    await page.setViewport({ width: 1123, height: 794 });
-    await page.setContent(html, { waitUntil: 'load' });
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+    await page.goto(`${baseUrl}/export`, {
+      waitUntil: 'networkidle0',
+      timeout: 30000,
+    });
 
-    const result = await page.pdf({
+    await page.waitForFunction(
+      () => (window as unknown as Record<string, unknown>)['__EXPORT_READY__'] === true,
+      { timeout: 15000 }
+    );
+
+    return page.pdf({
       format: 'A4',
       landscape: true,
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
-    return Buffer.from(result);
   });
 
-  await writeCache(hash, pdf);
-  return new NextResponse(new Uint8Array(pdf), { headers: { ...PDF_HEADERS, 'X-Cache': 'MISS' } });
+  await writeCache(CACHE_KEY, Buffer.from(pdf));
+
+  return new NextResponse(pdf, { headers: { ...PDF_HEADERS, 'X-Cache': 'MISS' } });
 }
