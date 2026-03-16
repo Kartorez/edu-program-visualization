@@ -67,9 +67,9 @@ export default function DisciplineView() {
             <div className="requisites__section">
               <span className="requisites__label">Пререквізити</span>
               <div className="requisites__row">
-                <Badge variant="code">ОК 8 Програмування</Badge>
+                <Badge variant="previous">ОК 8 Програмування</Badge>
                 <span className="requisites__arrow">→</span>
-                <Badge variant="semester">ОК 19</Badge>
+                <Badge variant="code">ОК 19</Badge>
               </div>
             </div>
 
@@ -78,12 +78,12 @@ export default function DisciplineView() {
             <div className="requisites__section">
               <span className="requisites__label">Постреквізити</span>
               <div className="requisites__row">
-                <Badge variant="semester">ОК 19</Badge>
+                <Badge variant="code">ОК 19</Badge>
                 <span className="requisites__arrow">→</span>
                 <Badge variant="next">ОК 23 Контроль якості</Badge>
               </div>
               <div className="requisites__row">
-                <Badge variant="semester">ОК 19</Badge>
+                <Badge variant="code">ОК 19</Badge>
                 <span className="requisites__arrow">→</span>
                 <Badge variant="next">ОК 31 Технологія ПЗ</Badge>
               </div>

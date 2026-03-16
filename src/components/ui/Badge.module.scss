@@ -22,10 +22,10 @@
   border: 1px solid var(--color-border);
 }
 
-.credit {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.code {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid #ddd6fe;
 }
 
 .primary {
@@ -54,7 +54,7 @@
   border: 1px solid #fed7aa;
 }
 
-.code {
+.previous {
   padding: 3px 10px;
   border-radius: var(--radius-sm);
   font-weight: 500;

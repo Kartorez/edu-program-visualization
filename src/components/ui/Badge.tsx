@@ -2,7 +2,15 @@
 import React from 'react';
 import styles from './Badge.module.scss';
 
-export type BadgeVariant = 'default' | 'primary' | 'zk' | 'sk' | 'rn' | `next` | 'code';
+export type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | `previous`
+  | 'zk'
+  | 'sk'
+  | 'rn'
+  | `next`
+  | 'code';
 
 export type BadgeShape = 'pill' | 'rect';
 
