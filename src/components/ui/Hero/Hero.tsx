@@ -1,4 +1,4 @@
-import Button from '@/components/ui/Button/Button';
+import Badge from '@/components/ui/Badge';
 import './Hero.scss';
 
 type HeroProps = {
@@ -26,10 +26,10 @@ export default function Hero({
       <div className="hero__grid" />
 
       <div className="hero__inner">
-        <div className="hero__badge">
+        <Badge shape="pill" className="hero__badge">
           <span className="hero__badge-dot" />
-          Компютерні науки · Бакалавр · 2024
-        </div>
+          {'Комп`ютерні науки · Бакалавр · 2024'}
+        </Badge>
 
         <h1 className="hero__title">
           Освітня програма
