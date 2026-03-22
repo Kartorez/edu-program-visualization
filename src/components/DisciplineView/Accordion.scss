@@ -1,0 +1,96 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    padding: 5px 0;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  &__chevron {
+    color: var(--color-subtle);
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease;
+
+    &--open {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  &__body-inner {
+    overflow: hidden;
+  }
+
+  &__preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  &__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 2px;
+  }
+
+  &__item {
+    display: grid;
+    grid-template-columns: 55px 1fr;
+    gap: 10px;
+    align-items: flex-start;
+    animation: fadeUp 0.25s ease both;
+  }
+
+  &__list.opened .accordion__item {
+    @for $i from 1 through 20 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.04}s;
+      }
+    }
+  }
+
+  &__text {
+    font-size: 13px;
+    color: var(--color-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

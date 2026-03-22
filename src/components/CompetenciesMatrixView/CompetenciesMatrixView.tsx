@@ -1,5 +1,5 @@
 import { Competency } from '@/data/competency';
-import './CompetencyMatrixView.scss';
+import './CompetenciesMatrixView.scss';
 
 const zkCount = Math.max(...Competency.flatMap((item) => item.zk));
 const skCount = Math.max(...Competency.flatMap((item) => item.sk));

@@ -1,4 +1,5 @@
 import Badge from '@/components/ui/Badge';
+import Accordion from './Accordion';
 import './DisciplineView.scss';
 
 export default function DisciplineView() {
@@ -31,13 +32,14 @@ export default function DisciplineView() {
           </div>
         </div>
       </div>
+
       <div className="discipline__content">
         <div className="discipline__topics card">
           <div className="discipline__topics-title title">Теми курсу</div>
           <ol className="discipline__topics-list">
             <li className="discipline__topics-item">Основи ООП: класи, обєкти, методи</li>
             <li className="discipline__topics-item">Інкапсуляція та модифікатори доступу</li>
-            <li className="discipline__topics-item">Успадкування та поліморфізм </li>
+            <li className="discipline__topics-item">Успадкування та поліморфізм</li>
             <li className="discipline__topics-item">Абстрактні класи та інтерфейси</li>
             <li className="discipline__topics-item">Принципи SOLID</li>
             <li className="discipline__topics-item">Патерни проєктування (GoF)</li>
@@ -45,24 +47,8 @@ export default function DisciplineView() {
             <li className="discipline__topics-item">Узагальнене програмування (Generics)</li>
           </ol>
         </div>
-        <div className="discipline__competency card">
-          <h3 className="discipline__competency-title title">Компетентності</h3>
-          <div className="competency__tags">
-            <Badge variant="zk">ЗК1</Badge>
-            <Badge variant="zk">ЗК2</Badge>
-            <Badge variant="zk">ЗК3</Badge>
-            <Badge variant="zk">ЗК7</Badge>
-            <Badge variant="sk">СК3</Badge>
-            <Badge variant="sk">СК8</Badge>
-            <Badge variant="sk">СК9</Badge>
-            <Badge variant="sk">СК10</Badge>
-            <Badge variant="sk">СК15</Badge>
-            <Badge variant="sk">СК16</Badge>
-          </div>
-        </div>
         <div className="discipline__requisites card">
           <h3 className="discipline__requisites-title title">Пререквізити та Постреквізити</h3>
-
           <div className="requisites">
             <div className="requisites__section">
               <span className="requisites__label">Пререквізити</span>
@@ -72,9 +58,7 @@ export default function DisciplineView() {
                 <Badge variant="code">ОК 19</Badge>
               </div>
             </div>
-
             <div className="requisites__divider" />
-
             <div className="requisites__section">
               <span className="requisites__label">Постреквізити</span>
               <div className="requisites__row">
@@ -90,32 +74,75 @@ export default function DisciplineView() {
             </div>
           </div>
         </div>
-        <div className="discipline__results card">
-          <h3 className="discipline__results-title title">Результати навчання</h3>
+        <div className="discipline__competency card">
+          <Accordion
+            title="Компетентності"
+            variant="zk"
+            items={[
+              { badge: 'ЗК1', text: 'Здатність до абстрактного мислення, аналізу та синтезу' },
+              { badge: 'ЗК2', text: 'Здатність застосовувати знання у практичних ситуаціях' },
+              {
+                badge: 'ЗК3',
+                text: 'Знання та розуміння предметної області та професійної діяльності',
+              },
+              {
+                badge: 'ЗК7',
+                text: 'Здатність до пошуку, оброблення та аналізу інформації з різних джерел',
+              },
+              {
+                badge: 'СК3',
+                variant: 'sk',
+                text: 'Здатність до логічного мислення, побудови логічних висновків',
+              },
+              {
+                badge: 'СК8',
+                variant: 'sk',
+                text: 'Здатність проектувати та розробляти програмне забезпечення',
+              },
+              {
+                badge: 'СК9',
+                variant: 'sk',
+                text: 'Здатність реалізувати багаторівневу обчислювальну модель',
+              },
+              {
+                badge: 'СК10',
+                variant: 'sk',
 
-          <ul className="results__list">
-            <li className="results__item">
-              <Badge variant="rn">РН5</Badge>
-              <p className="results__text">
-                Проектувати, розробляти та аналізувати алгоритми розвязання задач, оцінювати
-                ефективність та складність алгоритмів на основі формальних моделей.
-              </p>
-            </li>
-            <li className="results__item">
-              <Badge variant="rn">РН9</Badge>
-              <p className="results__text">
-                Розробляти програмні моделі предметних середовищ, вибирати парадигму програмування з
-                позицій зручності та якості застосування.
-              </p>
-            </li>
-            <li className="results__item">
-              <Badge variant="rn">РН11</Badge>
-              <p className="results__text">
-                Володіти навичками управління життєвим циклом програмного забезпечення відповідно до
-                вимог і обмежень замовника.
-              </p>
-            </li>
-          </ul>
+                text: 'Здатність застосовувати методології управління життєвим циклом ПЗ',
+              },
+              {
+                badge: 'СК15',
+                variant: 'sk',
+
+                text: 'Здатність до аналізу та функціонального моделювання бізнес-процесів',
+              },
+              {
+                badge: 'СК16',
+                variant: 'sk',
+                text: 'Здатність реалізовувати високопродуктивні обчислення',
+              },
+            ]}
+          />
+        </div>
+        <div className="discipline__results card">
+          <Accordion
+            title="Результати навчання"
+            variant="rn"
+            items={[
+              {
+                badge: 'РН5',
+                text: 'Проектувати, розробляти та аналізувати алгоритми розвязання задач, оцінювати ефективність та складність алгоритмів на основі формальних моделей.',
+              },
+              {
+                badge: 'РН9',
+                text: 'Розробляти програмні моделі предметних середовищ, вибирати парадигму програмування з позицій зручності та якості застосування.',
+              },
+              {
+                badge: 'РН11',
+                text: 'Володіти навичками управління життєвим циклом програмного забезпечення відповідно до вимог і обмежень замовника.',
+              },
+            ]}
+          />
         </div>
       </div>
     </div>
