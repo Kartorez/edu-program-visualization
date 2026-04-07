@@ -1,20 +1,47 @@
 import './About.scss';
 import '@/components/DisciplineNode/DisciplineNode.scss';
-import { disciplines } from '@/data/node';
 import ReqList from '@/components/DisciplineNode/ReqList';
+import type { Discipline } from '@/payload-types';
 
-const mid = disciplines.find((d) => d.prerequisites.length > 0 && d.postrequisites.length > 0)!;
+export default function About({ disciplines }: { disciplines: Discipline[] }) {
+  const mid = disciplines.find(
+    (d) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
+  );
 
-const electiveTags = disciplines
-  .filter((d) => d.code.match(/^ВК \d+\.1$/))
-  .map((d) => d.shortName ?? d.name);
+  const electiveTags = disciplines
+    .filter((d) => d.code?.match(/^ВК \d+\.1$/))
+    .map((d) => d.shortName ?? d.name);
 
-export default function AboutSection({ countSemester }: { countSemester: number }) {
-  const semesterLabels = Array.from({ length: countSemester }, (_, i) => {
-    const sem = i + 1;
-    const count = disciplines.filter((d) => d.semesters.includes(sem)).length;
+  const allSemesters = [
+    ...new Set(disciplines.flatMap((d) => d.semesters?.map((s) => s.semester ?? 0) ?? [])),
+  ].sort((a, b) => a - b);
+
+  const semesterLabels = allSemesters.map((sem) => {
+    const seenGroups = new Set<string>();
+    let count = 0;
+
+    disciplines
+      .filter((d) => d.semesters?.some((s) => s.semester === sem))
+      .forEach((d) => {
+        const group = d.code?.match(/^ВК\s*\d+/)?.[0];
+        if (group) {
+          if (!seenGroups.has(group)) {
+            seenGroups.add(group);
+            count++;
+          }
+        } else {
+          count++;
+        }
+      });
+
     return { sem, count };
   });
+
+  const midPrereqs =
+    mid?.prerequisites?.map((p) => (typeof p === 'object' ? p.code : String(p))) ?? [];
+
+  const midPostreqs =
+    mid?.postrequisites?.map((p) => (typeof p === 'object' ? p.code : String(p))) ?? [];
 
   return (
     <section className="about-section" id="about">
@@ -35,18 +62,18 @@ export default function AboutSection({ countSemester }: { countSemester: number 
               <div className="flow__node-wrap">
                 <span className="flow__label flow__label--pre">Постреквізити</span>
                 <div className="node discipline">
-                  {mid.prerequisites.length > 0 && (
+                  {midPrereqs.length > 0 && (
                     <div className="node__prereqs">
-                      <ReqList ids={mid.prerequisites} />
+                      <ReqList codes={midPrereqs} />
                     </div>
                   )}
                   <div className="node__text">
                     <div className="node__code">{mid.code}</div>
                     <div className="node__title">{mid.shortName ?? mid.name}</div>
                   </div>
-                  {mid.postrequisites.length > 0 && (
+                  {midPostreqs.length > 0 && (
                     <div className="node__postreqs">
-                      <ReqList ids={mid.postrequisites} />
+                      <ReqList codes={midPostreqs} />
                     </div>
                   )}
                 </div>

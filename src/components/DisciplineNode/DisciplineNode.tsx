@@ -1,12 +1,19 @@
 import { memo } from 'react';
-import { Discipline } from '@/schemas/discipline.schema';
 import { Node, NodeProps } from '@xyflow/react';
 import ReqList from './ReqList';
 import SemesterNode from './SemesterNode';
 import SelectiveNode from './SelectiveNode';
 import './DisciplineNode.scss';
 
-type DisciplineNodeType = Node<Discipline, 'disciplineNode'>;
+type DisciplineData = {
+  code: string;
+  name: string;
+  shortName?: string;
+  prerequisites: string[];
+  postrequisites: string[];
+};
+
+type DisciplineNodeType = Node<DisciplineData, 'disciplineNode'>;
 
 function getKind(code: string) {
   if (code.startsWith('ОК')) return 'discipline';
@@ -27,7 +34,7 @@ export default memo(
       <div className="node discipline">
         {prerequisites.length > 0 && (
           <div className="node__prereqs">
-            <ReqList ids={prerequisites} />
+            <ReqList codes={prerequisites} />
           </div>
         )}
         <div className="node__text">
@@ -36,7 +43,7 @@ export default memo(
         </div>
         {postrequisites.length > 0 && (
           <div className="node__postreqs">
-            <ReqList ids={postrequisites} />
+            <ReqList codes={postrequisites} />
           </div>
         )}
       </div>

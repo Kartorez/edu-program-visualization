@@ -1,48 +1,43 @@
-import { Competency } from '@/data/competency';
 import './CompetenciesMatrixView.scss';
 
-const zkCount = Math.max(...Competency.flatMap((item) => item.zk));
-const skCount = Math.max(...Competency.flatMap((item) => item.sk));
+export default function CompetencyMatrixView({
+  disciplines,
+  competencies,
+}: {
+  disciplines: any[];
+  competencies: any[];
+}) {
+  const zkList = competencies.filter((c) => c.type === 'zk');
+  const skList = competencies.filter((c) => c.type === 'sk');
 
-export default function CompetencyMatrixView() {
+  const zkCount = zkList.length;
+  const skCount = skList.length;
+
   return (
     <div className="matrix-page">
       <div className="matrix-page__header">
         <div className="matrix-page__header-left">
           <div className="matrix-page__code">ОПП · Компютерні науки · Бакалавр</div>
           <h1 className="matrix-page__title">Матриця компетентностей</h1>
-          <p className="matrix-page__subtitle">
-            Відповідність навчальних дисциплін загальним і фаховим компетентностям
-            освітньо-професійної програми.
-          </p>
         </div>
 
         <div className="matrix-page__header-right">
           <div className="matrix-page__stat">
             <span className="matrix-page__stat-label">Дисциплін</span>
             <span className="matrix-page__stat-value matrix-page__stat-value--accent">
-              {Competency.length}
+              {disciplines.length}
             </span>
           </div>
+
           <div className="matrix-page__stat">
-            <span className="matrix-page__stat-label">Загальних ЗК</span>
+            <span className="matrix-page__stat-label">ЗК</span>
             <span className="matrix-page__stat-value">{zkCount}</span>
           </div>
+
           <div className="matrix-page__stat">
-            <span className="matrix-page__stat-label">Фахових СК</span>
+            <span className="matrix-page__stat-label">СК</span>
             <span className="matrix-page__stat-value">{skCount}</span>
           </div>
-        </div>
-      </div>
-
-      <div className="legend">
-        <div className="legend__item">
-          <span className="dot-zk" />
-          Загальні (ЗК)
-        </div>
-        <div className="legend__item">
-          <span className="dot-sk" />
-          Фахові (СК)
         </div>
       </div>
 
@@ -51,32 +46,53 @@ export default function CompetencyMatrixView() {
           <thead>
             <tr>
               <th className="matrix__discipline-column">Дисципліна</th>
-              {Array.from({ length: zkCount }, (_, i) => (
-                <th key={`zk-h-${i}`}>ЗК{i + 1}</th>
+
+              {zkList.map((c) => (
+                <th key={c.id}>{c.code}</th>
               ))}
-              {Array.from({ length: skCount }, (_, i) => (
-                <th key={`sk-h-${i}`}>СК{i + 1}</th>
+
+              {skList.map((c) => (
+                <th key={c.id}>{c.code}</th>
               ))}
             </tr>
           </thead>
+
           <tbody>
-            {Competency.map((item) => (
-              <tr key={item.id}>
-                <td className="matrix__discipline-name">
-                  {item.id} {item.shortName}
-                </td>
-                {Array.from({ length: zkCount }, (_, i) => (
-                  <td key={`zk-${i}`} className="matrix__cell">
-                    {item.zk.includes(i + 1) && <span className="dot-zk" />}
+            {disciplines.map((d) => {
+              const disciplineComps = d.competencies || [];
+
+              return (
+                <tr key={d.id}>
+                  <td className="matrix__discipline-name">
+                    {d.code} {d.shortName}
                   </td>
-                ))}
-                {Array.from({ length: skCount }, (_, i) => (
-                  <td key={`sk-${i}`} className="matrix__cell">
-                    {item.sk.includes(i + 1) && <span className="dot-sk" />}
-                  </td>
-                ))}
-              </tr>
-            ))}
+
+                  {zkList.map((c) => {
+                    const has = disciplineComps.some((dc: any) =>
+                      typeof dc === 'string' ? dc === c.id : dc.id === c.id
+                    );
+
+                    return (
+                      <td key={`zk-${c.id}`} className="matrix__cell">
+                        {has && <span className="dot-zk" />}
+                      </td>
+                    );
+                  })}
+
+                  {skList.map((c) => {
+                    const has = disciplineComps.some((dc: any) =>
+                      typeof dc === 'string' ? dc === c.id : dc.id === c.id
+                    );
+
+                    return (
+                      <td key={`sk-${c.id}`} className="matrix__cell">
+                        {has && <span className="dot-sk" />}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

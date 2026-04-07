@@ -1,6 +1,4 @@
-import type { Disciplines } from '@/schemas/discipline.schema';
-
-export const disciplines: Disciplines = [
+export const disciplines = [
   {
     code: 'ОК 1',
     name: 'Українська мова та етнокультурологія',

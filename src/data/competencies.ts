@@ -1,13 +1,4 @@
-export type CompetencyMatrix = {
-  id: string;
-  name: string;
-  shortName: string;
-  integral: boolean;
-  zk: number[];
-  sk: number[];
-};
-
-export const Competency: CompetencyMatrix[] = [
+export const competencies = [
   {
     id: 'ОК 1',
     name: 'Українська мова та етнокульторологія',

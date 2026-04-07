@@ -7,33 +7,48 @@ import DisciplineNode from '../DisciplineNode';
 import DownloadButton from './DownloadButton';
 import DisciplineModal from '../DisciplineModal';
 import FilterPanel, { FilterType } from '@/components/StudyPlan/FilterPanel';
-import { Discipline } from '@/schemas/discipline.schema';
-import { disciplines } from '@/data/node';
+import type { Discipline } from '@/payload-types';
 
 const nodeTypes = { disciplineNode: DisciplineNode };
 
-export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discipline>[] }) {
+export default function FlowCanvas({
+  initialNodes,
+  allDisciplines,
+}: {
+  initialNodes: Node<Record<string, unknown>>[];
+  allDisciplines: Discipline[];
+}) {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [typeFilters, setTypeFilters] = useState<FilterType[]>([]);
   const [semesterFilters, setSemesterFilters] = useState<number[]>([]);
   const { fitView, getNodes } = useReactFlow();
 
-  const selectedNode = useMemo(
-    () => initialNodes.find((n) => n.data.code === selectedCode)?.data ?? null,
-    [initialNodes, selectedCode]
-  );
+  const selectedNode = useMemo(() => {
+    return (
+      allDisciplines.find((n) => {
+        if (n.code.startsWith('ВК')) return n.code.split('.')[0].trim() === selectedCode;
+        return n.code === selectedCode;
+      }) ?? null
+    );
+  }, [allDisciplines, selectedCode]);
 
   const filterNodes = useMemo(
     () =>
       initialNodes.map((node) => {
-        const data = node.data as Discipline;
-        if (!data?.code) return node;
+        const code = node.data.code as string | undefined;
+        if (!code) return node;
 
-        const matchesType =
-          typeFilters.length === 0 || typeFilters.some((f) => data.code?.startsWith(f));
+        const semesters = node.data.semesters as { semester: number }[] | number[];
+
+        const matchesType = typeFilters.length === 0 || typeFilters.some((f) => code.startsWith(f));
         const matchesSemester =
-          semesterFilters.length === 0 || semesterFilters.some((s) => data.semesters?.includes(s));
+          semesterFilters.length === 0 ||
+          semesterFilters.some((s) =>
+            Array.isArray(semesters)
+              ? semesters.some((sem) => (typeof sem === 'number' ? sem === s : sem.semester === s))
+              : false
+          );
         const isVisible = matchesType && matchesSemester;
 
         return {
@@ -82,28 +97,25 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
 
   useEffect(() => {
     if (!selectedCode) return;
-    const node = getNodes().find((n) => n.id.startsWith(selectedCode));
+    const node = getNodes().find((n) => {
+      const nodeCode = n.id.replace(/-\d+$/, '');
+      return nodeCode === selectedCode;
+    });
+
     if (!node) return;
 
     fitView({ nodes: [{ id: node.id }], duration: 600, padding: 5 });
   }, [selectedCode, fitView, getNodes]);
 
   const onFocusNode = useCallback((code: string) => {
-    setSelectedCode((prev) => {
-      if (prev === code) return prev;
-      return code;
-    });
+    setSelectedCode((prev) => (prev === code ? prev : code));
     setIsOpen(true);
   }, []);
 
   const onNodeClick = useCallback((_: unknown, node: { id: string; data: unknown }) => {
-    const data = node.data as Discipline;
-    if (!data.code.startsWith('ОК') && !data.code.startsWith('ВК')) return;
-
-    setSelectedCode((prev) => {
-      if (prev === data.code) return prev;
-      return data.code;
-    });
+    const code = (node.data as Record<string, unknown>).code as string;
+    if (!code.startsWith('ОК') && !code.startsWith('ВК')) return;
+    setSelectedCode((prev) => (prev === code ? prev : code));
     setIsOpen(true);
   }, []);
 
@@ -118,9 +130,6 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick={false}
-        /*
-        onlyRenderVisibleElements={true}
-        */
         onNodeClick={onNodeClick}
       >
         <Controls showInteractive={false} />
@@ -138,7 +147,7 @@ export default function FlowCanvas({ initialNodes }: { initialNodes: Node<Discip
       {isOpen && selectedNode && (
         <DisciplineModal
           node={selectedNode}
-          allNodes={disciplines}
+          allNodes={allDisciplines}
           isOpen={isOpen}
           onFocusNode={onFocusNode}
           onClose={onClose}

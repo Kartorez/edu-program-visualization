@@ -4,13 +4,25 @@ import { useMemo } from 'react';
 import { Panel } from '@xyflow/react';
 import RequisiteList from '@/components/DisciplineModal/RequisiteList';
 import ElectiveList from '@/components/DisciplineModal/ElectiveList';
-import { getElectiveGroup, Discipline, Disciplines } from '@/schemas/discipline.schema';
 import './DisciplineModal.scss';
 import Button from '@/components/ui/Button/Button';
+import type { Discipline } from '@/payload-types';
 
-const buildLabelMap = (allNodes: Disciplines) =>
-  new Map(allNodes.map((n) => [n.code, `${n.code} ${n.name}`]));
+type Disciplines = Discipline[];
 
+const getElectiveGroup = (code: string): string | null => {
+  if (!code?.startsWith('ВК')) return null;
+  return code.split('.')[0].trim();
+};
+
+const buildLabelMap = (allNodes: Disciplines): Map<string, string> =>
+  new Map(allNodes.map((n) => [n.code, `${n.code} ${n.name}`] as [string, string]));
+
+const resolveCode = (p: string | number | Discipline, allNodes: Discipline[]): string => {
+  if (typeof p === 'object') return p.code;
+  const found = allNodes.find((n) => String(n.id) === String(p));
+  return found?.code ?? String(p);
+};
 export default function DisciplineModal({
   node,
   allNodes,
@@ -26,21 +38,28 @@ export default function DisciplineModal({
 }) {
   const labelMap = useMemo(() => buildLabelMap(allNodes), [allNodes]);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const electiveVariants = useMemo(() => {
     if (!node?.code.startsWith('ВК')) return [];
-    return allNodes.filter((n) => getElectiveGroup(n.code) === node.code);
+    const baseGroup = node.code.split('.')[0].trim();
+    return allNodes
+      .filter((n) => n.code.startsWith('ВК') && n.code.split('.')[0].trim() === baseGroup)
+      .sort((a, b) => {
+        const subA = parseInt(a.code.split('.')[1] ?? '0');
+        const subB = parseInt(b.code.split('.')[1] ?? '0');
+        return subA - subB;
+      });
   }, [node?.code, allNodes]);
 
   const prerequisites = useMemo(
-    () => [...new Set(node?.prerequisites ?? [])],
-    [node?.prerequisites]
+    () => [...new Set((node?.prerequisites ?? []).map((p) => resolveCode(p, allNodes)))],
+    [node?.prerequisites, allNodes]
   );
 
   const postrequisites = useMemo(
-    () => [...new Set(node?.postrequisites ?? [])],
-    [node?.postrequisites]
+    () => [...new Set((node?.postrequisites ?? []).map((p) => resolveCode(p, allNodes)))],
+    [node?.postrequisites, allNodes]
   );
+
   if (!node) return null;
 
   const isElective = electiveVariants.length > 0;
