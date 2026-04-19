@@ -1,7 +1,6 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import { sortByCode } from '@/utils/sortByCode';
-import Navbar from '@/components/ui/Navbar/Navbar';
 import Hero from '@/components/ui/Hero/Hero';
 import Marquee from '@/components/ui/Marquee/Marquee';
 import About from '@/components/ui/About/About';
@@ -25,7 +24,6 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar />
       <Hero
         countDiscipline={countDiscipline}
         countElective={countElective}

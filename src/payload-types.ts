@@ -176,9 +176,22 @@ export interface Media {
 export interface Discipline {
   id: number;
   code: string;
+  type: 'required' | 'elective';
   name: string;
   shortName?: string | null;
-  type: 'required' | 'elective';
+  description?: string | null;
+  credits?: number | null;
+  hours?: number | null;
+  /**
+   * Форма контролю (залік / іспит)
+   */
+  assessment?: string | null;
+  topics?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   semesters: {
     semester?: number | null;
     id?: string | null;
@@ -186,14 +199,6 @@ export interface Discipline {
   prerequisites?: (number | Discipline)[] | null;
   postrequisites?: (number | Discipline)[] | null;
   electiveGroup?: (number | null) | ElectiveGroup;
-  credits?: number | null;
-  hours?: number | null;
-  topics?:
-    | {
-        title?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   competencies?: (number | Competency)[] | null;
   learningOutcomes?: (number | LearningOutcome)[] | null;
   updatedAt: string;
@@ -369,9 +374,19 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface DisciplinesSelect<T extends boolean = true> {
   code?: T;
+  type?: T;
   name?: T;
   shortName?: T;
-  type?: T;
+  description?: T;
+  credits?: T;
+  hours?: T;
+  assessment?: T;
+  topics?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
   semesters?:
     | T
     | {
@@ -381,14 +396,6 @@ export interface DisciplinesSelect<T extends boolean = true> {
   prerequisites?: T;
   postrequisites?: T;
   electiveGroup?: T;
-  credits?: T;
-  hours?: T;
-  topics?:
-    | T
-    | {
-        title?: T;
-        id?: T;
-      };
   competencies?: T;
   learningOutcomes?: T;
   updatedAt?: T;

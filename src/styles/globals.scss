@@ -1,4 +1,5 @@
 @use 'variables.scss';
+@use 'sidebar.scss';
 
 html {
   scroll-behavior: smooth;
@@ -10,13 +11,14 @@ body {
   overflow-x: hidden;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle, #a8b8c8 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
-
 a {
   color: inherit;
   text-decoration: none;
@@ -28,4 +30,8 @@ button {
   border: none;
   padding: 0;
   cursor: pointer;
+}
+.topbar:has(~ .export-page),
+body:has(.export-page) .topbar {
+  display: none !important;
 }

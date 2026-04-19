@@ -8,6 +8,8 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
     (d) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
   );
 
+  const countDisciplines = disciplines.filter((d) => d.code?.startsWith('ОК')).length;
+
   const electiveTags = disciplines
     .filter((d) => d.code?.match(/^ВК \d+\.1$/))
     .map((d) => d.shortName ?? d.name);
@@ -84,8 +86,8 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
         </div>
         <div className="card card--5">
           <div className="card__eyebrow">Обовязкові дисципліни</div>
-          <div className="big-num">40</div>
-          <div className="card__body">предмети формують базу знань компютерного інженера</div>
+          <div className="big-num">{countDisciplines}</div>
+          <div className="card__body">предмети формують базу знань фахівця з комп'ютерних наук</div>
         </div>
         <div className="card card--4">
           <div className="card__eyebrow">Семестри</div>

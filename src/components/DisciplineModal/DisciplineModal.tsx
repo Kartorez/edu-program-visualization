@@ -113,7 +113,12 @@ export default function DisciplineModal({
                 onFocusNode={onFocusNode}
               />
             </div>
-            <Button className="discipline-modal__details-button button--lg">Детальніше</Button>
+            <Button
+              href={`/plan/disciplines/${encodeURIComponent(node.code)}`}
+              className="discipline-modal__details-button button--lg"
+            >
+              Детальніше
+            </Button>
           </>
         )}
       </div>

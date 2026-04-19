@@ -54,10 +54,23 @@ export const Disciplines: CollectionConfig = {
     ],
 
     afterChange: [
-      async ({ doc, req }) => {
+      async ({ doc, previousDoc, context, req }) => {
+        if (context?.skipHooks) return;
+
         const payload = req.payload;
 
-        for (const postId of doc.postrequisites || []) {
+        const currentPost = (doc.postrequisites || []).map((p: any) =>
+          typeof p === 'string' ? p : p.id
+        );
+
+        const previousPost = (previousDoc?.postrequisites || []).map((p: any) =>
+          typeof p === 'string' ? p : p.id
+        );
+
+        const added = currentPost.filter((id: string) => !previousPost.includes(id));
+        const removed = previousPost.filter((id: string) => !currentPost.includes(id));
+
+        for (const postId of added) {
           if (typeof postId !== 'string') continue;
 
           const post = await payload.findByID({
@@ -73,9 +86,30 @@ export const Disciplines: CollectionConfig = {
             await payload.update({
               collection: 'disciplines',
               id: postId,
-              data: {
-                prerequisites: [...existing, doc.id],
-              },
+              data: { prerequisites: [...existing, doc.id] },
+              context: { skipHooks: true },
+            });
+          }
+        }
+
+        for (const postId of removed) {
+          if (typeof postId !== 'string') continue;
+
+          const post = await payload.findByID({
+            collection: 'disciplines',
+            id: postId,
+          });
+
+          const existing = (post.prerequisites || []).map((p: any) =>
+            typeof p === 'string' ? p : p.id
+          );
+
+          if (existing.includes(doc.id)) {
+            await payload.update({
+              collection: 'disciplines',
+              id: postId,
+              data: { prerequisites: [...existing, doc.id] },
+              context: { skipHooks: true },
             });
           }
         }
@@ -85,12 +119,29 @@ export const Disciplines: CollectionConfig = {
 
   fields: [
     {
+      name: 'parseButton',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/ParseButton#default',
+        },
+      },
+    },
+    {
       name: 'code',
       type: 'text',
       required: true,
       unique: true,
     },
-
+    {
+      name: 'type',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Обовʼязкова', value: 'required' },
+        { label: 'Вибіркова', value: 'elective' },
+      ],
+    },
     {
       name: 'name',
       type: 'text',
@@ -101,14 +152,35 @@ export const Disciplines: CollectionConfig = {
       name: 'shortName',
       type: 'text',
     },
+    {
+      name: 'description',
+      type: 'textarea',
+    },
+    {
+      name: 'credits',
+      type: 'number',
+    },
 
     {
-      name: 'type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Обовʼязкова', value: 'required' },
-        { label: 'Вибіркова', value: 'elective' },
+      name: 'hours',
+      type: 'number',
+    },
+    {
+      name: 'assessment',
+      type: 'text',
+      admin: {
+        description: 'Форма контролю (залік / іспит)',
+      },
+    },
+
+    {
+      name: 'topics',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
       ],
     },
 
@@ -142,27 +214,6 @@ export const Disciplines: CollectionConfig = {
       name: 'electiveGroup',
       type: 'relationship',
       relationTo: 'elective-groups',
-    },
-
-    {
-      name: 'credits',
-      type: 'number',
-    },
-
-    {
-      name: 'hours',
-      type: 'number',
-    },
-
-    {
-      name: 'topics',
-      type: 'array',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
     },
 
     {

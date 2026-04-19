@@ -1,3 +1,7 @@
 export default function PlanLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <div className="plan-layout">
+      <main className="plan-main">{children}</main>
+    </div>
+  );
 }

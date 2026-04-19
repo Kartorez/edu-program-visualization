@@ -1,0 +1,50 @@
+.parse {
+  margin-bottom: 24px;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #635bff;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.2s;
+
+    &:hover {
+      background: #554ee0;
+    }
+
+    &.is-loading {
+      opacity: 0.7;
+      cursor: wait;
+    }
+  }
+
+  &__ok {
+    margin-left: 12px;
+    color: #0ea47a;
+    font-size: 13px;
+  }
+
+  &__error {
+    margin-left: 12px;
+    color: #e24b4a;
+    font-size: 13px;
+  }
+
+  &__warn {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #ba7517;
+  }
+
+  &__info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #526477;
+  }
+}

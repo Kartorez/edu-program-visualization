@@ -19,6 +19,7 @@ export default function FlowCanvas({
   allDisciplines: Discipline[];
 }) {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [typeFilters, setTypeFilters] = useState<FilterType[]>([]);
   const [semesterFilters, setSemesterFilters] = useState<number[]>([]);
@@ -93,29 +94,33 @@ export default function FlowCanvas({
   const onClose = () => {
     setIsOpen(false);
     setSelectedCode(null);
+    setSelectedNodeId(null);
   };
 
   useEffect(() => {
-    if (!selectedCode) return;
-    const node = getNodes().find((n) => {
-      const nodeCode = n.id.replace(/-\d+$/, '');
-      return nodeCode === selectedCode;
-    });
+    if (!selectedNodeId) return;
+    fitView({ nodes: [{ id: selectedNodeId }], duration: 600, padding: 5 });
+  }, [selectedNodeId, fitView]);
 
-    if (!node) return;
+  const onFocusNode = useCallback(
+    (code: string) => {
+      setSelectedCode(code);
+      setIsOpen(true);
 
-    fitView({ nodes: [{ id: node.id }], duration: 600, padding: 5 });
-  }, [selectedCode, fitView, getNodes]);
-
-  const onFocusNode = useCallback((code: string) => {
-    setSelectedCode((prev) => (prev === code ? prev : code));
-    setIsOpen(true);
-  }, []);
+      const node = getNodes().find((n) => {
+        const nodeCode = n.id.replace(/-\d+$/, '');
+        return nodeCode === code;
+      });
+      if (node) setSelectedNodeId(node.id);
+    },
+    [getNodes]
+  );
 
   const onNodeClick = useCallback((_: unknown, node: { id: string; data: unknown }) => {
     const code = (node.data as Record<string, unknown>).code as string;
     if (!code.startsWith('ОК') && !code.startsWith('ВК')) return;
-    setSelectedCode((prev) => (prev === code ? prev : code));
+    setSelectedCode(code);
+    setSelectedNodeId(node.id);
     setIsOpen(true);
   }, []);
 

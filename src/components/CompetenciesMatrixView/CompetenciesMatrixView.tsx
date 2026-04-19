@@ -19,6 +19,10 @@ export default function CompetencyMatrixView({
         <div className="matrix-page__header-left">
           <div className="matrix-page__code">ОПП · Компютерні науки · Бакалавр</div>
           <h1 className="matrix-page__title">Матриця компетентностей</h1>
+          <p className="matrix-page__subtitle">
+            Відображає які загальні (ЗК) та спеціальні (СК) компетентності формує кожна дисципліна
+            програми.
+          </p>
         </div>
 
         <div className="matrix-page__header-right">
