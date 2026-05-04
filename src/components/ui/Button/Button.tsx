@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import './Button.scss';
+import styles from './Button.module.scss';
 
 type ButtonProps = {
   href?: string;
@@ -12,7 +12,7 @@ type ButtonProps = {
 };
 
 export default function Button({ href, onClick, children, className, disabled }: ButtonProps) {
-  const cn = `button ${className ?? ''}`.trim();
+  const cn = `${styles.button} ${className ?? ''}`.trim();
 
   if (href) {
     return (

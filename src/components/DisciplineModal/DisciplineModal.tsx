@@ -10,10 +10,7 @@ import type { Discipline } from '@/payload-types';
 
 type Disciplines = Discipline[];
 
-const getElectiveGroup = (code: string): string | null => {
-  if (!code?.startsWith('ВК')) return null;
-  return code.split('.')[0].trim();
-};
+import { getElectiveGroupCode } from '@/utils/elective';
 
 const buildLabelMap = (allNodes: Disciplines): Map<string, string> =>
   new Map(allNodes.map((n) => [n.code, `${n.code} ${n.name}`] as [string, string]));
@@ -39,16 +36,17 @@ export default function DisciplineModal({
   const labelMap = useMemo(() => buildLabelMap(allNodes), [allNodes]);
 
   const electiveVariants = useMemo(() => {
-    if (!node?.code.startsWith('ВК')) return [];
-    const baseGroup = node.code.split('.')[0].trim();
+    if (!node) return [];
+    const baseGroup = getElectiveGroupCode(node);
+    if (!baseGroup) return [];
     return allNodes
-      .filter((n) => n.code.startsWith('ВК') && n.code.split('.')[0].trim() === baseGroup)
+      .filter((n) => getElectiveGroupCode(n) === baseGroup)
       .sort((a, b) => {
         const subA = parseInt(a.code.split('.')[1] ?? '0');
         const subB = parseInt(b.code.split('.')[1] ?? '0');
         return subA - subB;
       });
-  }, [node?.code, allNodes]);
+  }, [node, allNodes]);
 
   const prerequisites = useMemo(
     () => [...new Set((node?.prerequisites ?? []).map((p) => resolveCode(p, allNodes)))],

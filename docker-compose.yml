@@ -2,18 +2,25 @@ version: '3.9'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '3000:3000'
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgres://edu_user:1111@postgres:5432/edu_program
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./media:/app/media
+      - ./public/media:/app/public/media
     restart: always
 
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_USER: edu_user
@@ -24,7 +31,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U edu_user -d edu_program']
+      test: ["CMD-SHELL", "pg_isready -U edu_user -d edu_program"]
       interval: 5s
       timeout: 5s
       retries: 5

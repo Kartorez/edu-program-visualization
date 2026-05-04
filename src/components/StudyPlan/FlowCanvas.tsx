@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { ReactFlow, Controls, Background, useReactFlow, Node } from '@xyflow/react';
+import { ReactFlow, Controls, useReactFlow, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import DisciplineNode from '../DisciplineNode';
 import DownloadButton from './DownloadButton';
 import DisciplineModal from '../DisciplineModal';
 import FilterPanel, { FilterType } from '@/components/StudyPlan/FilterPanel';
 import type { Discipline } from '@/payload-types';
+import './StudyPlan.scss';
 
 const nodeTypes = { disciplineNode: DisciplineNode };
 
@@ -138,7 +139,6 @@ export default function FlowCanvas({
         onNodeClick={onNodeClick}
       >
         <Controls showInteractive={false} />
-        <Background color="rgba(10, 37, 64, 0.5)" />
         <DownloadButton />
         <FilterPanel
           typeFilters={typeFilters}

@@ -107,7 +107,8 @@ export default function ParseButton() {
 
       const findId = (p: any) => {
         const text = p.fullName || p.shortName || '';
-        return fuse.search(text)[0]?.item?.id;
+        const results = fuse.search(text);
+        return (results[0]?.item as any)?.id;
       };
 
       const missingPrereqs: string[] = [];
@@ -128,7 +129,19 @@ export default function ParseButton() {
         else missingPostreqs.push(p.fullName);
       }
 
-      // --- базові поля ---
+      const statusText = (data.status || data.type || data.disciplineType || data.disciplineStatus || '').toString().toLowerCase();
+      const isElective = statusText.includes('вибір');
+      const disciplineType = isElective ? 'elective' : 'required';
+      const prefix = isElective ? 'ВК ' : 'ОК ';
+      const rawCode = (data.disciplineCode || data.code || '').toString().trim();
+
+      const formattedCode = rawCode.match(/^(ОК|ВК)/i) ? rawCode : `${prefix}${rawCode}`.trim();
+
+      dispatchFields({ type: 'UPDATE', path: 'type', value: disciplineType });
+      if (formattedCode) {
+        dispatchFields({ type: 'UPDATE', path: 'code', value: formattedCode });
+      }
+
       dispatchFields({ type: 'UPDATE', path: 'name', value: data.disciplineName ?? '' });
       dispatchFields({ type: 'UPDATE', path: 'shortName', value: data.disciplineShortName ?? '' });
       dispatchFields({ type: 'UPDATE', path: 'credits', value: data.ectsCredits ?? 0 });
@@ -157,36 +170,29 @@ export default function ParseButton() {
           ? [data.semester]
           : [];
 
-      const wait = () => new Promise((r) => setTimeout(r, 0));
+      const wait = (ms = 0) => new Promise((r) => setTimeout(r, ms));
 
-      semesters.forEach(() => {
+      for (let i = 0; i < semesters.length; i++) {
         dispatchFields({ type: 'ADD_ROW', path: 'semesters' });
-      });
-
-      await wait();
-
-      semesters.forEach((s, i) => {
+        await wait(10);
         dispatchFields({
           type: 'UPDATE',
           path: `semesters.${i}.semester`,
-          value: s,
+          value: semesters[i],
         });
-      });
+      }
+
       const topics = data.courseTopics ?? [];
 
-      topics.forEach(() => {
+      for (let i = 0; i < topics.length; i++) {
         dispatchFields({ type: 'ADD_ROW', path: 'topics' });
-      });
-
-      await wait();
-
-      topics.forEach((t, i) => {
+        await wait(10);
         dispatchFields({
           type: 'UPDATE',
           path: `topics.${i}.title`,
-          value: t,
+          value: topics[i],
         });
-      });
+      }
 
       setNotFoundPrereqs(missingPrereqs);
       setNotFoundPostreqs(missingPostreqs);

@@ -34,9 +34,9 @@
 .marquee-item {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  font-size: 13px;
+  gap: 0.625rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.8125rem;
   color: var(--color-muted);
   border-right: 1px solid var(--color-border);
   transition:
@@ -52,28 +52,28 @@
 }
 
 .chip {
-  padding: 2px 7px;
-  border-radius: 4px;
+  padding: 0.125rem 0.4375rem;
+  border-radius: 0.25rem;
   letter-spacing: 0.04em;
   flex-shrink: 0;
 
   &-code--ok {
-    padding: 5px;
-    border-radius: 5px;
+    padding: 0.3125rem;
+    border-radius: 0.3125rem;
     border: 1px solid var(--color-accent);
     background: var(--color-accent-s);
     color: var(--color-accent);
   }
 
   &-code--vk {
-    padding: 5px;
-    border-radius: 5px;
+    padding: 0.3125rem;
+    border-radius: 0.3125rem;
     border: 1px solid var(--color-vk);
     background: var(--color-vk-s);
     color: var(--color-vk);
   }
   &-name {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 }
 

@@ -1,3 +1,4 @@
+import ScrollReveal from '@/components/ui/ScrollReveal/ScrollReveal';
 import './About.scss';
 import '@/components/DisciplineNode/DisciplineNode.scss';
 import ReqList from '@/components/DisciplineNode/ReqList';
@@ -47,11 +48,13 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
 
   return (
     <section className="about-section" id="about">
-      <div className="about-section__eyebrow">Як це працює</div>
-      <h2 className="about-section__title">Зрозумій структуру свого навчання</h2>
+      <ScrollReveal>
+        <div className="about-section__eyebrow">Як це працює</div>
+        <h2 className="about-section__title">Зрозумій структуру свого навчання</h2>
+      </ScrollReveal>
 
       <div className="bento">
-        <div className="card card--7">
+        <ScrollReveal className="card card--7" delay={100} direction="right">
           <div className="card__eyebrow">Звязки між предметами</div>
           <div className="card__title">Передумови та наступники</div>
           <div className="card__body">
@@ -83,13 +86,15 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
               </div>
             </div>
           )}
-        </div>
-        <div className="card card--5">
+        </ScrollReveal>
+
+        <ScrollReveal className="card card--5" delay={200} direction="left">
           <div className="card__eyebrow">Обовязкові дисципліни</div>
           <div className="big-num">{countDisciplines}</div>
           <div className="card__body">предмети формують базу знань фахівця з комп'ютерних наук</div>
-        </div>
-        <div className="card card--4">
+        </ScrollReveal>
+
+        <ScrollReveal className="card card--4" delay={300} direction="right">
           <div className="card__eyebrow">Семестри</div>
           <div className="sem-list">
             {semesterLabels.map(({ sem, count }) => (
@@ -99,8 +104,9 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
               </div>
             ))}
           </div>
-        </div>
-        <div className="card card--8">
+        </ScrollReveal>
+
+        <ScrollReveal className="card card--8" delay={400} direction="left">
           <div className="card__eyebrow">Вибіркові дисципліни</div>
           <div className="card__title">Обери свій напрямок</div>
           <div className="card__body">
@@ -114,7 +120,7 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
               </span>
             ))}
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

@@ -4,9 +4,12 @@
 .about-section__title,
 .card__title,
 .chip,
+.hero__title,
 .flow-node {
   font-family: var(--font-display);
 }
+
+.topbar:has(~ .export-page),
 body:has(.export-page) .topbar {
-  display: none;
+  display: none !important;
 }

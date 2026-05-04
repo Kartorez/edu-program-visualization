@@ -1,8 +1,9 @@
+import Link from 'next/link';
+
 export default function RequisiteList({
   title,
   ids,
   labelMap,
-  onFocusNode,
   variant = 'pre',
 }: {
   title: string;
@@ -20,9 +21,10 @@ export default function RequisiteList({
             <li
               key={id}
               className={`requisite-list__item requisite-list__item--${variant}`}
-              onClick={() => onFocusNode(id)}
             >
-              {labelMap.get(id) ?? id}
+              <Link href={`/plan/disciplines/${encodeURIComponent(id)}`} className="requisite-list__link">
+                {labelMap.get(id) ?? id}
+              </Link>
             </li>
           ))}
         </ul>

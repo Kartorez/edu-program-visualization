@@ -1,5 +1,6 @@
 import Badge from '@/components/ui/Badge';
-import './Hero.scss';
+import ScrollReveal from '@/components/ui/ScrollReveal';
+import styles from './Hero.module.scss';
 
 type HeroProps = {
   countDiscipline: number;
@@ -22,34 +23,42 @@ export default function Hero({
   ];
 
   return (
-    <section className="hero">
-      <div className="hero__grid" />
+    <section className={styles.hero}>
+      <div className={styles.hero__grid} />
 
-      <div className="hero__inner">
-        <Badge shape="pill" className="hero__badge">
-          <span className="hero__badge-dot" />
-          {'Комп`ютерні науки · Бакалавр · 2024'}
-        </Badge>
+      <div className={styles.hero__inner}>
+        <ScrollReveal delay={0}>
+          <Badge shape="pill" className={styles.hero__badge}>
+            <span className={styles.hero__badge_dot} />
+            {'Комп`ютерні науки · Бакалавр · 2024'}
+          </Badge>
+        </ScrollReveal>
 
-        <h1 className="hero__title">
-          Освітня програма
-          <br />
-          <em>кафедри КН</em>
-        </h1>
+        <ScrollReveal delay={200}>
+          <h1 className={styles.hero__title}>
+            Освітня програма
+            <br />
+            <em>кафедри КН</em>
+          </h1>
+        </ScrollReveal>
 
-        <p className="hero__subtitle">
-          Інтерактивна візуалізація навчального плану — дисципліни, звязки між предметами та шлях
-          від першого до восьмого семестру.
-        </p>
+        <ScrollReveal delay={400}>
+          <p className={styles.hero__subtitle}>
+            Інтерактивна візуалізація навчального плану — дисципліни, звязки між предметами та шлях
+            від першого до восьмого семестру.
+          </p>
+        </ScrollReveal>
 
-        <div className="hero__stats">
-          {stats.map((stat) => (
-            <div key={stat.label} className="stat">
-              <div className="stat__num">{stat.value}</div>
-              <div className="stat__label">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+        <ScrollReveal delay={600} direction="up" threshold={0}>
+          <div className={styles.hero__stats}>
+            {stats.map((stat) => (
+              <div key={stat.label} className={styles.stat}>
+                <div className={styles.stat__num}>{stat.value}</div>
+                <div className={styles.stat__label}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

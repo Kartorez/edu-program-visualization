@@ -67,10 +67,10 @@ export const Disciplines: CollectionConfig = {
           typeof p === 'string' ? p : p.id
         );
 
-        const added = currentPost.filter((id: string) => !previousPost.includes(id));
-        const removed = previousPost.filter((id: string) => !currentPost.includes(id));
+        const addedPost = currentPost.filter((id: string) => !previousPost.includes(id));
+        const removedPost = previousPost.filter((id: string) => !currentPost.includes(id));
 
-        for (const postId of added) {
+        for (const postId of addedPost) {
           if (typeof postId !== 'string') continue;
 
           const post = await payload.findByID({
@@ -92,7 +92,7 @@ export const Disciplines: CollectionConfig = {
           }
         }
 
-        for (const postId of removed) {
+        for (const postId of removedPost) {
           if (typeof postId !== 'string') continue;
 
           const post = await payload.findByID({
@@ -108,7 +108,62 @@ export const Disciplines: CollectionConfig = {
             await payload.update({
               collection: 'disciplines',
               id: postId,
-              data: { prerequisites: [...existing, doc.id] },
+              data: { prerequisites: existing.filter((id: string) => id !== doc.id) },
+              context: { skipHooks: true },
+            });
+          }
+        }
+
+        const currentPre = (doc.prerequisites || []).map((p: any) =>
+          typeof p === 'string' ? p : p.id
+        );
+
+        const previousPre = (previousDoc?.prerequisites || []).map((p: any) =>
+          typeof p === 'string' ? p : p.id
+        );
+
+        const addedPre = currentPre.filter((id: string) => !previousPre.includes(id));
+        const removedPre = previousPre.filter((id: string) => !currentPre.includes(id));
+
+        for (const preId of addedPre) {
+          if (typeof preId !== 'string') continue;
+
+          const pre = await payload.findByID({
+            collection: 'disciplines',
+            id: preId,
+          });
+
+          const existing = (pre.postrequisites || []).map((p: any) =>
+            typeof p === 'string' ? p : p.id
+          );
+
+          if (!existing.includes(doc.id)) {
+            await payload.update({
+              collection: 'disciplines',
+              id: preId,
+              data: { postrequisites: [...existing, doc.id] },
+              context: { skipHooks: true },
+            });
+          }
+        }
+
+        for (const preId of removedPre) {
+          if (typeof preId !== 'string') continue;
+
+          const pre = await payload.findByID({
+            collection: 'disciplines',
+            id: preId,
+          });
+
+          const existing = (pre.postrequisites || []).map((p: any) =>
+            typeof p === 'string' ? p : p.id
+          );
+
+          if (existing.includes(doc.id)) {
+            await payload.update({
+              collection: 'disciplines',
+              id: preId,
+              data: { postrequisites: existing.filter((id: string) => id !== doc.id) },
               context: { skipHooks: true },
             });
           }

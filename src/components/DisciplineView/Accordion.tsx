@@ -1,12 +1,14 @@
 'use client';
-import { useState } from 'react';
+import Link from 'next/link';
 import Badge, { BadgeVariant } from '@/components/ui/Badge';
+import { useState } from 'react';
 import './Accordion.scss';
 
 type AccordionItem = {
   badge: string;
   text: string;
   variant?: BadgeVariant;
+  link?: string;
 };
 
 type AccordionProps = {
@@ -14,6 +16,7 @@ type AccordionProps = {
   variant: BadgeVariant;
   items: AccordionItem[];
 };
+
 export default function Accordion({ title, variant, items }: AccordionProps) {
   const [open, setOpen] = useState(false);
 
@@ -37,24 +40,45 @@ export default function Accordion({ title, variant, items }: AccordionProps) {
           />
         </svg>
       </button>
+
       {!open && (
         <div className="accordion__preview">
           {items.map((item) => (
-            <Badge key={item.badge} variant={item.variant ?? variant} shape="rect">
-              {item.badge}
-            </Badge>
+            item.link ? (
+              <Link key={item.badge} href={item.link}>
+                <Badge variant={item.variant ?? variant} shape="rect">
+                  {item.badge}
+                </Badge>
+              </Link>
+            ) : (
+              <Badge key={item.badge} variant={item.variant ?? variant} shape="rect">
+                {item.badge}
+              </Badge>
+            )
           ))}
         </div>
       )}
+
       <div className={`accordion__body${open ? ' accordion__body--open' : ''}`}>
         <div className="accordion__body-inner">
           <ul className={`accordion__list ${open ? 'opened' : 'close'}`} key={String(open)}>
             {items.map((item) => (
               <li key={item.badge} className="accordion__item">
-                <Badge variant={item.variant ?? variant} shape="rect">
-                  {item.badge}
-                </Badge>
-                <p className="accordion__text">{item.text}</p>
+                {item.link ? (
+                  <Link href={item.link} className="accordion__item-link">
+                    <Badge variant={item.variant ?? variant} shape="rect">
+                      {item.badge}
+                    </Badge>
+                    <p className="accordion__text">{item.text}</p>
+                  </Link>
+                ) : (
+                  <div className="accordion__item-content">
+                    <Badge variant={item.variant ?? variant} shape="rect">
+                      {item.badge}
+                    </Badge>
+                    <p className="accordion__text">{item.text}</p>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

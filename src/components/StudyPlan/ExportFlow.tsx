@@ -3,35 +3,30 @@ import { useEffect, useRef, useState } from 'react';
 import { ReactFlow, ReactFlowProvider, Node, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import DisciplineNode from '@/components/DisciplineNode';
-import { Discipline } from '@/schemas/discipline.schema';
+import { Discipline } from '@/payload-types';
 
 const nodeTypes = { disciplineNode: DisciplineNode };
 
-// Розміри A4 landscape в пікселях при 96 dpi
 const PAGE_W = 1123;
 const PAGE_H = 794;
 
-function Flow({ initialNodes }: { initialNodes: Node<Discipline>[] }) {
+function Flow({ initialNodes }: { initialNodes: Node<any>[] }) {
   const flowWrapper = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();
   const [ready, setReady] = useState(false);
 
-  // Крок 1 — підганяємо граф під вьюпорт після першого рендеру
   useEffect(() => {
-    fitView({ padding: 0.05 });
-
-    // Крок 2 — після fitView чекаємо один кадр, щоб DOM оновився
-    const raf = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
+      if (fitView) fitView({ padding: 0.05 });
       setReady(true);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [fitView]);
+    }, 500);
 
-  // Крок 3 — виставляємо прапорець тільки коли стан "ready"
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     if (!ready) return;
-    // Puppeteer слухає саме це
-    (window as unknown as Record<string, unknown>)['__EXPORT_READY__'] = true;
+    (window as any)['__EXPORT_READY__'] = true;
   }, [ready]);
 
   return (
@@ -55,7 +50,7 @@ function Flow({ initialNodes }: { initialNodes: Node<Discipline>[] }) {
   );
 }
 
-export default function ExportFlow({ initialNodes }: { initialNodes: Node<Discipline>[] }) {
+export default function ExportFlow({ initialNodes }: { initialNodes: Node<any>[] }) {
   return (
     <ReactFlowProvider>
       <Flow initialNodes={initialNodes} />

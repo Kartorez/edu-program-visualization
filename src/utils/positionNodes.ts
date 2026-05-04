@@ -1,6 +1,6 @@
 import type { Node } from '@xyflow/react';
 import type { Discipline } from '@/payload-types';
-import { getElectiveGroup } from '@/utils/elective';
+import { getElectiveGroupCode } from '@/utils/elective';
 import { sortByCode } from '@/utils/sortByCode';
 import { ROW_HEIGHT, YEAR_GAP, COL_WIDTH, GRAPH_PADDING } from '@/constants/nodeLayout';
 
@@ -24,13 +24,13 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
   const result: Node<Record<string, unknown>>[] = [];
   const semesterCounters: Record<number, number> = {};
 
-  const okNodes = sortByCode(rawNodes.filter((n) => !n.code?.startsWith('ВК')));
-  const vkNodes = sortByCode(rawNodes.filter((n) => n.code?.startsWith('ВК')));
+  const okNodes = sortByCode(rawNodes.filter((n) => !getElectiveGroupCode(n)));
+  const vkNodes = sortByCode(rawNodes.filter((n) => getElectiveGroupCode(n)));
   const ordered = [...okNodes, ...vkNodes];
 
   const seenGroups = new Set<string>();
   const displayNodes = ordered.filter((node) => {
-    const group = getElectiveGroup(node.code);
+    const group = getElectiveGroupCode(node);
     if (!group) return true;
     if (seenGroups.has(group)) return false;
     seenGroups.add(group);
@@ -105,7 +105,8 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
       }
 
       const columnIndex = 1 + semesterCounters[semester]++;
-      const group = getElectiveGroup(node.code);
+      const group = getElectiveGroupCode(node);
+      const groupName = group && typeof node.electiveGroup === 'object' && 'name' in node.electiveGroup ? node.electiveGroup.name : 'Вибіркова дисципліна';
 
       result.push({
         id: `${group ?? node.code}-${semester}`,
@@ -115,7 +116,7 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
         position: { x: columnIndex * COL_WIDTH - 20, y: 0 },
         data: {
           code: group ?? node.code,
-          name: group ? 'Вибіркова дисципліна' : node.name,
+          name: group ? groupName : node.name,
           shortName: group ?? node.shortName,
           semesters: [semester],
           prerequisites: resolveIds(node.prerequisites ?? [], rawNodes),

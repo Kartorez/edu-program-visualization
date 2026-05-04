@@ -56,16 +56,19 @@
 }
 
 .previous {
-  padding: 3px 10px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 4px 10px;
   border-radius: var(--radius-sm);
   font-weight: 500;
-  background: var(--color-bg2);
-  color: var(--color-muted);
-  border: 1px solid var(--color-border);
 }
 
 .next {
-  background: var(--color-accent-s);
-  color: var(--color-accent);
-  border: 1px solid var(--color-primary-light);
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
 }

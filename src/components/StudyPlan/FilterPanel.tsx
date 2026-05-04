@@ -25,35 +25,78 @@ export default function FilterPanel({
   onReset,
 }: FilterPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const hasFilters = typeFilters.length > 0 || semesterFilters.length > 0;
+
+  const handleDownload = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/export-pdf');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      Object.assign(document.createElement('a'), {
+        href: url,
+        download: 'study-plan.pdf',
+      }).click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Panel position="top-left">
       <div className="filter-panel">
-        <Button
-          className={`button--ghost button--sm filter-toggle ${hasFilters ? 'filter-toggle--active' : ''}`}
-          onClick={() => setIsOpen((prev) => !prev)}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
+        <div className="filter-panel__header">
+          <Button
+            className={`button--ghost button--sm filter-toggle ${hasFilters ? 'filter-toggle--active' : ''}`}
+            onClick={() => setIsOpen((prev) => !prev)}
           >
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="7" y1="12" x2="17" y2="12" />
-            <line x1="10" y1="18" x2="14" y2="18" />
-          </svg>
-          Фільтри
-          {hasFilters && (
-            <span className="filter-toggle__count">
-              {typeFilters.length + semesterFilters.length}
-            </span>
-          )}
-        </Button>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="7" y1="12" x2="17" y2="12" />
+              <line x1="10" y1="18" x2="14" y2="18" />
+            </svg>
+            <span className="filter-toggle__text">Фільтри</span>
+            {hasFilters && (
+              <span className="filter-toggle__count">
+                {typeFilters.length + semesterFilters.length}
+              </span>
+            )}
+          </Button>
+
+          <Button 
+            className="button--primary button--sm filter-download filter-download--mobile" 
+            disabled={loading} 
+            onClick={handleDownload}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span className="filter-download__text">{loading ? '...' : 'PDF'}</span>
+          </Button>
+        </div>
 
         <div className={`filter-body ${isOpen ? 'filter-body--open' : ''}`}>
           <div className="filter-section">

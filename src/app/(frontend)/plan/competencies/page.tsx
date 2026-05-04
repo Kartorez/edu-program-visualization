@@ -5,7 +5,7 @@ import { sortByCode } from '@/utils/sortByCode';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CompetenciesPage() {
+export default async function Competencies() {
   const payload = await getPayload({ config });
 
   const { docs: disciplinesRaw } = await payload.find({

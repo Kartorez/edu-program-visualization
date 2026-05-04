@@ -1,6 +1,11 @@
 import Badge from '@/components/ui/Badge';
+import PageHeader from '@/components/ui/PageHeader';
+import Stat from '@/components/ui/Stat';
 import Accordion from './Accordion';
 import './DisciplineView.scss';
+import { BadgeVariant } from '@/components/ui/Badge';
+
+import Link from 'next/link';
 
 export default function DisciplineView({ discipline }: { discipline: any }) {
   const competencies = discipline.competencies || [];
@@ -14,39 +19,21 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
 
   return (
     <div className="discipline-view">
-      <div className="discipline-view__card discipline-view__header">
-        <div className="discipline-view__header-left">
-          <div className="discipline-view__code">
-            {discipline.code} · {discipline.type === 'elective' ? 'Вибіркова' : 'Обовʼязкова'}
-          </div>
-          <h1 className="discipline-view__name">{discipline.name}</h1>
-          <p className="discipline-view__description">{discipline.description}</p>
-        </div>
-        <div className="discipline-view__header-right">
-          <div className="discipline-view__stat">
-            <span className="discipline-view__stat-label">Кредити</span>
-            <span className="discipline-view__stat-value discipline-view__stat-value--accent">
-              {discipline.credits} ЄКТС
-            </span>
-          </div>
-          <div className="discipline-view__stat">
-            <span className="discipline-view__stat-label">Семестр</span>
-            <span className="discipline-view__stat-value">
-              {(discipline.semesters || []).map((s: any) => s.semester).join(', ')} з 8
-            </span>
-          </div>
-          {discipline.control && (
-            <div className="discipline-view__stat">
-              <span className="discipline-view__stat-label">Контроль</span>
-              <span className="discipline-view__stat-value">{discipline.control}</span>
-            </div>
-          )}
-          <div className="discipline-view__stat">
-            <span className="discipline-view__stat-label">Компетентності</span>
-            <span className="discipline-view__stat-value">{competencies.length}</span>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        code={`${discipline.code} · ${discipline.type === 'elective' ? 'Вибіркова' : 'Обовʼязкова'}`}
+        title={discipline.name}
+        description={discipline.description}
+        stats={
+          <>
+            <Stat label="Кредити" value={`${discipline.credits} ЄКТС`} variant="card" isAccent />
+            <Stat label="Семестр" value={`${(discipline.semesters || []).map((s: any) => s.semester).join(', ')} з 8`} variant="card" />
+            {discipline.assessment && (
+              <Stat label="Контроль" value={discipline.assessment} variant="card" />
+            )}
+            <Stat label="Компетентності" value={competencies.length} variant="card" />
+          </>
+        }
+      />
 
       <div className="discipline-view__grid">
         <div className="discipline-view__card">
@@ -67,9 +54,11 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
               <span className="discipline-view__requisites-label">Пререквізити</span>
               <div className="discipline-view__requisites-row">
                 {prerequisites.map((p: any) => (
-                  <Badge key={p.id} variant="previous">
-                    {p.code} {p.shortName ?? p.name}
-                  </Badge>
+                  <Link key={p.id} href={`/plan/disciplines/${encodeURIComponent(p.code)}`} className="discipline-view__link">
+                    <Badge variant="previous">
+                      {p.code} {p.shortName ?? p.name}
+                    </Badge>
+                  </Link>
                 ))}
                 {prerequisites.length === 0 && <span className="discipline-view__empty">—</span>}
               </div>
@@ -79,9 +68,11 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
               <span className="discipline-view__requisites-label">Постреквізити</span>
               <div className="discipline-view__requisites-row">
                 {postrequisites.map((p: any) => (
-                  <Badge key={p.id} variant="next">
-                    {p.code} {p.shortName ?? p.name}
-                  </Badge>
+                  <Link key={p.id} href={`/plan/disciplines/${encodeURIComponent(p.code)}`} className="discipline-view__link">
+                    <Badge variant="next">
+                      {p.code} {p.shortName ?? p.name}
+                    </Badge>
+                  </Link>
                 ))}
                 {postrequisites.length === 0 && <span className="discipline-view__empty">—</span>}
               </div>
@@ -95,8 +86,18 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
           title="Компетентності"
           variant="zk"
           items={[
-            ...zk.map((c: any) => ({ badge: c.code, text: c.description, badgeVariant: 'zk' })),
-            ...sk.map((c: any) => ({ badge: c.code, text: c.description, badgeVariant: 'sk' })),
+            ...zk.map((c: any) => ({
+              badge: c.code,
+              text: c.description,
+              variant: 'zk' as BadgeVariant,
+              link: `/plan/competencies#comp-${c.code}`,
+            })),
+            ...sk.map((c: any) => ({
+              badge: c.code,
+              text: c.description,
+              variant: 'sk' as BadgeVariant,
+              link: `/plan/competencies#comp-${c.code}`,
+            })),
           ]}
         />
       </div>
@@ -105,7 +106,11 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
         <Accordion
           title="Результати навчання"
           variant="rn"
-          items={results.map((r: any) => ({ badge: r.code, text: r.description }))}
+          items={results.map((r: any) => ({ 
+            badge: r.code, 
+            text: r.description,
+            link: `/plan/results#res-${r.code}`,
+          }))}
         />
       </div>
     </div>
