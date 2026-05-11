@@ -1,0 +1,64 @@
+.container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.20;
+  animation: floatGlow 12s infinite ease-in-out alternate;
+
+  &--1 {
+    top: -10%;
+    left: -5%;
+    width: 55vw;
+    height: 55vw;
+    max-width: 700px;
+    max-height: 700px;
+    background: rgba(79, 70, 229, 0.7);
+    animation-delay: 0s;
+  }
+
+  &--2 {
+    bottom: -5%;
+    right: -5%;
+    width: 65vw;
+    height: 65vw;
+    max-width: 800px;
+    max-height: 800px;
+    background: rgba(147, 51, 234, 0.6);
+    animation-delay: -4s;
+    animation-direction: alternate-reverse;
+  }
+
+  &--3 {
+    top: 25%;
+    left: 45%;
+    transform: translateX(-50%);
+    width: 45vw;
+    height: 45vw;
+    max-width: 600px;
+    max-height: 600px;
+    background: rgba(14, 165, 233, 0.6);
+    animation-delay: -8s;
+  }
+}
+
+@keyframes floatGlow {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(3%, 6%) scale(1.05);
+  }
+
+  100% {
+    transform: translate(-3%, -2%) scale(0.95);
+  }
+}

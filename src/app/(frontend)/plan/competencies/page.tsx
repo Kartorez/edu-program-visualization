@@ -5,6 +5,13 @@ import { sortByCode } from '@/utils/sortByCode';
 
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Матриця компетентностей',
+  description: 'Таблиця зв\'язків між дисциплінами та компетентностями, що формуються в процесі навчання.',
+};
+
 export default async function Competencies() {
   const payload = await getPayload({ config });
 

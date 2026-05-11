@@ -6,8 +6,12 @@ import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
 import { Users } from './collections/Users';
-import { Media } from './collections/Media';
+import { Departments } from './collections/Departments';
+import { Specialties } from './collections/Specialties';
+import { EducationalPrograms } from './collections/EducationalPrograms';
+import { ProgramVersions } from './collections/ProgramVersions';
 import { Disciplines } from './collections/Disciplines';
+import { DisciplineInstances } from './collections/DisciplineInstances';
 import { ElectiveGroups } from './collections/ElectiveGroups';
 import { Competencies } from './collections/Competencies';
 import { LearningOutcomes } from './collections/LearningOutcomes';
@@ -21,8 +25,32 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterDashboard: ['./components/admin/OnboardingGuide'],
+    },
+    meta: {
+      icons: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          url: '/favicon.png',
+        },
+      ],
+      titleSuffix: '- КН ВНАУ',
+    },
   },
-  collections: [Users, Media, Disciplines, ElectiveGroups, Competencies, LearningOutcomes],
+  collections: [
+    Users,
+    Departments,
+    Specialties,
+    EducationalPrograms,
+    ProgramVersions,
+    Disciplines,
+    DisciplineInstances,
+    ElectiveGroups,
+    Competencies,
+    LearningOutcomes,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useDisciplines } from '@/context/DisciplinesContext';
+import { ArrowLeft } from 'lucide-react';
 
 export function DisciplineSidebar() {
   const pathname = usePathname();
@@ -19,8 +20,8 @@ export function DisciplineSidebar() {
 
   return (
     <nav className="sidebar__nav">
-      <Link href="/plan" className="sidebar__back">
-        ← Навчальний план
+      <Link href="/plan/graph" className="sidebar__back">
+        <ArrowLeft size={16} /> Навчальний план
       </Link>
 
       <div className="sidebar__section-label">Семестри</div>

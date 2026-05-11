@@ -5,6 +5,13 @@ import { sortByCode } from '@/utils/sortByCode';
 
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Результати навчання',
+  description: 'Таблиця зв\'язків між дисциплінами та очікуваними програмними результатами навчання.',
+};
+
 export default async function Results() {
   const payload = await getPayload({ config });
 

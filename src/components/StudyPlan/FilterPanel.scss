@@ -208,3 +208,21 @@
     overflow: visible;
   }
 }
+
+.filter-reset {
+  background: transparent !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(220, 38, 38, 0.3) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: 0.4375rem !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+  width: 100%;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.05) !important;
+    border-color: rgba(220, 38, 38, 0.5) !important;
+  }
+}

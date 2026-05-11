@@ -32,6 +32,9 @@ export default function FilterPanel({
     setLoading(true);
     try {
       const res = await fetch('/api/export-pdf');
+      if (!res.ok) {
+        throw new Error(`Export API failed with status ${res.status}`);
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       Object.assign(document.createElement('a'), {
@@ -41,6 +44,7 @@ export default function FilterPanel({
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Export failed:', err);
+      alert('Не вдалося згенерувати PDF. Спробуйте пізніше.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +55,9 @@ export default function FilterPanel({
       <div className="filter-panel">
         <div className="filter-panel__header">
           <Button
-            className={`button--ghost button--sm filter-toggle ${hasFilters ? 'filter-toggle--active' : ''}`}
+            variant="ghost"
+            size="sm"
+            className={`filter-toggle ${hasFilters ? 'filter-toggle--active' : ''}`}
             onClick={() => setIsOpen((prev) => !prev)}
           >
             <svg
@@ -76,7 +82,9 @@ export default function FilterPanel({
           </Button>
 
           <Button 
-            className="button--primary button--sm filter-download filter-download--mobile" 
+            variant="primary"
+            size="sm"
+            className="filter-download filter-download--mobile" 
             disabled={loading} 
             onClick={handleDownload}
           >

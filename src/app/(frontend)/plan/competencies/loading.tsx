@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
-import styles from '@/components/ui/PageHeader.module.scss';
+import styles from '@/components/ui/PageHeader/PageHeader.module.scss';
 import './loading.scss';
 
 export default function Loading() {
@@ -12,9 +12,9 @@ export default function Loading() {
           <Skeleton width="100%" height={20} className="mt-4" />
         </div>
         <div className={styles.right} style={{ display: 'flex', gap: '10px' }}>
-           <Skeleton width="140px" height="80px" borderRadius="12px" />
-           <Skeleton width="80px" height="80px" borderRadius="12px" />
-           <Skeleton width="80px" height="80px" borderRadius="12px" />
+          <Skeleton width="140px" height="80px" borderRadius="12px" />
+          <Skeleton width="80px" height="80px" borderRadius="12px" />
+          <Skeleton width="80px" height="80px" borderRadius="12px" />
         </div>
       </div>
 

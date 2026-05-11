@@ -100,7 +100,12 @@ export default function FlowCanvas({
 
   useEffect(() => {
     if (!selectedNodeId) return;
-    fitView({ nodes: [{ id: selectedNodeId }], duration: 600, padding: 5 });
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    fitView({ 
+      nodes: [{ id: selectedNodeId }], 
+      duration: 600, 
+      padding: isMobile ? 0.5 : 2 
+    });
   }, [selectedNodeId, fitView]);
 
   const onFocusNode = useCallback(
@@ -137,6 +142,11 @@ export default function FlowCanvas({
         zoomOnPinch
         zoomOnDoubleClick={false}
         onNodeClick={onNodeClick}
+        fitView
+        fitViewOptions={{
+          padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0.02 : 0.1,
+          includeHiddenNodes: false,
+        }}
       >
         <Controls showInteractive={false} />
         <DownloadButton />

@@ -13,16 +13,17 @@ function getSemesterY(semester: number): number {
   return (semester - 1) * ROW_HEIGHT + year * YEAR_GAP;
 }
 
-const resolveIds = (items: (string | number | Discipline)[], allNodes: Discipline[]): string[] =>
+const resolveIds = (items: (string | number | Discipline)[], idToCode: Map<string, string>): string[] =>
   items.map((p) => {
     if (typeof p === 'object') return p.code;
-    const found = allNodes.find((n) => String(n.id) === String(p));
-    return found?.code ?? String(p);
+    return idToCode.get(String(p)) ?? String(p);
   });
 
 export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unknown>>[] {
   const result: Node<Record<string, unknown>>[] = [];
   const semesterCounters: Record<number, number> = {};
+  
+  const idToCode = new Map<string, string>(rawNodes.map(n => [String(n.id), n.code]));
 
   const okNodes = sortByCode(rawNodes.filter((n) => !getElectiveGroupCode(n)));
   const vkNodes = sortByCode(rawNodes.filter((n) => getElectiveGroupCode(n)));
@@ -106,7 +107,9 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
 
       const columnIndex = 1 + semesterCounters[semester]++;
       const group = getElectiveGroupCode(node);
-      const groupName = group && typeof node.electiveGroup === 'object' && 'name' in node.electiveGroup ? node.electiveGroup.name : 'Вибіркова дисципліна';
+      const groupName = group && node.electiveGroup && typeof node.electiveGroup === 'object' && 'name' in node.electiveGroup 
+        ? node.electiveGroup.name 
+        : 'Вибіркова дисципліна';
 
       result.push({
         id: `${group ?? node.code}-${semester}`,
@@ -119,8 +122,8 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
           name: group ? groupName : node.name,
           shortName: group ?? node.shortName,
           semesters: [semester],
-          prerequisites: resolveIds(node.prerequisites ?? [], rawNodes),
-          postrequisites: resolveIds(node.postrequisites ?? [], rawNodes),
+          prerequisites: resolveIds(node.prerequisites ?? [], idToCode),
+          postrequisites: resolveIds(node.postrequisites ?? [], idToCode),
         } as Record<string, unknown>,
       });
     });

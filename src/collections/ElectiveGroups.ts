@@ -4,7 +4,10 @@ export const ElectiveGroups: CollectionConfig = {
   slug: 'elective-groups',
 
   admin: {
-    useAsTitle: 'code',
+    useAsTitle: 'name',
+    group: 'Структура',
+    description: 'Групування вибіркових дисциплін (Блоки)',
+    defaultColumns: ['name', 'code'],
   },
 
   fields: [

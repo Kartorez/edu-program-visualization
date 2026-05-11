@@ -41,3 +41,25 @@ button {
     transform: translateY(0);
   }
 }
+
+#nprogress .bar {
+  height: 3px !important;
+  background: var(--color-primary) !important;
+  box-shadow: 0 0 10px var(--color-primary), 0 0 5px var(--color-primary);
+  animation: nprogress-pulse 2s infinite ease-in-out;
+}
+
+@keyframes nprogress-pulse {
+  0% {
+    box-shadow: 0 0 8px var(--color-primary), 0 0 2px var(--color-primary);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 18px var(--color-primary), 0 0 10px var(--color-primary);
+    opacity: 0.7;
+  }
+  100% {
+    box-shadow: 0 0 8px var(--color-primary), 0 0 2px var(--color-primary);
+    opacity: 1;
+  }
+}

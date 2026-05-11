@@ -5,6 +5,9 @@ export const Competencies: CollectionConfig = {
 
   admin: {
     useAsTitle: 'code',
+    description: 'ЗК і СК компетентності програми',
+    defaultColumns: ['code', 'type', 'description'],
+    group: 'Наповнення',
   },
 
   fields: [

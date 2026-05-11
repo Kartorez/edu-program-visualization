@@ -10,6 +10,9 @@ export const Disciplines: CollectionConfig = {
 
   admin: {
     useAsTitle: 'name',
+    description: 'Крок 5: паспорт дисципліни — назва, кафедра, викладачі',
+    defaultColumns: ['name', 'code', 'department'],
+    group: 'Структура',
   },
 
   hooks: {

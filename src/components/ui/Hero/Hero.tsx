@@ -1,4 +1,4 @@
-import Badge from '@/components/ui/Badge';
+import ProgramSelector, { type ProgramOption } from './ProgramSelector';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import styles from './Hero.module.scss';
 
@@ -7,6 +7,10 @@ type HeroProps = {
   countSemester: number;
   countCredits: number;
   countElective: number;
+  title?: string;
+  subtitle?: string;
+  currentProgram?: string;
+  programOptions?: ProgramOption[];
 };
 
 export default function Hero({
@@ -14,6 +18,10 @@ export default function Hero({
   countSemester,
   countCredits,
   countElective,
+  title = 'Освітня програма',
+  subtitle = 'кафедри КН',
+  currentProgram = 'Оберіть програму',
+  programOptions = [],
 }: HeroProps) {
   const stats = [
     { value: countDiscipline, label: 'дисципліни' },
@@ -27,18 +35,15 @@ export default function Hero({
       <div className={styles.hero__grid} />
 
       <div className={styles.hero__inner}>
-        <ScrollReveal delay={0}>
-          <Badge shape="pill" className={styles.hero__badge}>
-            <span className={styles.hero__badge_dot} />
-            {'Комп`ютерні науки · Бакалавр · 2024'}
-          </Badge>
+        <ScrollReveal delay={0} className={styles.hero__selectorReveal}>
+          <ProgramSelector currentLabel={currentProgram} options={programOptions} />
         </ScrollReveal>
 
         <ScrollReveal delay={200}>
           <h1 className={styles.hero__title}>
-            Освітня програма
+            {title}
             <br />
-            <em>кафедри КН</em>
+            <em>{subtitle}</em>
           </h1>
         </ScrollReveal>
 

@@ -1,5 +1,4 @@
-'use client';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import Link from 'next/link';
 
 interface MatrixRowProps {
@@ -8,9 +7,10 @@ interface MatrixRowProps {
   itemsKey: string;
   dotClass: string | ((item: any) => string);
   isSelected: boolean;
-  selectedCols: Set<string>;
+  selectedColsArray: string[];
   highlightedCol: string | null;
   onToggleRow: (id: string, e: React.MouseEvent) => void;
+  onCellClick?: (disciplineId: string, colCode: string) => void;
 }
 
 const MatrixRow = memo(({ 
@@ -19,10 +19,12 @@ const MatrixRow = memo(({
   itemsKey,
   dotClass,
   isSelected, 
-  selectedCols, 
+  selectedColsArray, 
   highlightedCol, 
-  onToggleRow 
+  onToggleRow,
+  onCellClick
 }: MatrixRowProps) => {
+  const selectedColsSet = useMemo(() => new Set(selectedColsArray), [selectedColsArray]);
   const disciplineItems = discipline[itemsKey] || [];
   const url = `/plan/disciplines/${encodeURIComponent(discipline.code)}`;
 
@@ -47,7 +49,7 @@ const MatrixRow = memo(({
         const has = disciplineItems.some((item: any) =>
           typeof item === 'string' ? item === col.id : item.id === col.id
         );
-        const isColSelected = selectedCols.has(col.code);
+        const isColSelected = selectedColsSet.has(col.code);
         const isHighlighted = highlightedCol === col.code;
         
         const dotClassName = typeof dotClass === 'function' ? dotClass(col) : dotClass;
@@ -55,8 +57,12 @@ const MatrixRow = memo(({
         return (
           <td 
             key={col.id} 
+            onClick={(e) => {
+              e.stopPropagation();
+              onCellClick?.(discipline.id, col.code);
+            }}
             className={`matrix__cell ${isColSelected || isHighlighted ? 'matrix__cell--highlight' : ''} ${
-              isSelected && isColSelected ? 'matrix__cell--intersection' : ''
+              isSelected && (isColSelected || isHighlighted) ? 'matrix__cell--intersection' : ''
             }`}
           >
             {has && <span className={dotClassName} />}

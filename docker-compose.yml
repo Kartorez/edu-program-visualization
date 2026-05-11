@@ -1,40 +1,38 @@
-version: '3.9'
-
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgres://edu_user:1111@postgres:5432/edu_program
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./media:/app/media
-      - ./public/media:/app/public/media
-    restart: always
-
   postgres:
     image: postgres:16-alpine
     restart: always
-    environment:
-      POSTGRES_USER: edu_user
-      POSTGRES_PASSWORD: 1111
-      POSTGRES_DB: edu_program
+    env_file: .env
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U edu_user -d edu_program"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 5
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+    ports:
+      - '3000:3000'
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - media:/app/media
+    restart: always
+
 volumes:
   pgdata:
+  media:

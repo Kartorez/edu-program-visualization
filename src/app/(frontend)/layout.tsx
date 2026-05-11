@@ -9,6 +9,7 @@ import { NODE_H, NODE_W, SEMESTER_W } from '@/constants/nodeLayout';
 import '@/styles/globals.scss';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
 import NextTopLoader from 'nextjs-toploader';
+import { BackgroundGlow } from '@/components/ui/BackgroundGlow/BackgroundGlow';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,22 +26,55 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Освітня програма',
-  description: 'Інтерактивна візуалізація освітньої програми, матриць компетентностей та результатів навчання.',
+  title: {
+    template: '%s | КН ВНАУ',
+    default: 'Освітня програма | КН ВНАУ',
+  },
+  description: 'Інтерактивна візуалізація освітньої програми, матриць компетентностей та результатів навчання кафедри Комп\'ютерних наук ВНАУ.',
+  keywords: ['ВНАУ', 'Освітня програма', 'Комп\'ютерні науки', 'Навчальний план', 'Матриця компетентностей'],
+  openGraph: {
+    title: 'Освітня програма | КН ВНАУ',
+    description: 'Інтерактивна візуалізація освітньої програми, матриць компетентностей та результатів навчання.',
+    url: 'https://kn-vnau.edu.ua',
+    siteName: 'КН ВНАУ',
+    locale: 'uk_UA',
+    type: 'website',
+  },
   icons: {
-    icon: '@/public/assets/favicon.ico',
-    shortcut: '@/public/assets/favicon.ico',
-    apple: '@/public/assets/favicon.ico',
+    icon: '/favicon.png',
   },
 };
 
+import { cookies } from 'next/headers';
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const programVersionId = cookieStore.get('programVersionId')?.value;
   const payload = await getPayload({ config });
-  const { docs } = await payload.find({
-    collection: 'disciplines',
-    limit: 1000,
-    depth: 0,
-  });
+
+  let docs: any[] = [];
+
+  if (programVersionId) {
+    const { docs: instances } = await payload.find({
+      collection: 'discipline-instances',
+      where: {
+        programVersion: { equals: programVersionId },
+      },
+      limit: 1000,
+      depth: 2,
+    });
+    docs = instances.map((inst) => inst.discipline).filter(Boolean);
+  }
+
+  // Fallback to all disciplines if instances aren't mapped yet or no version is selected
+  if (docs.length === 0) {
+    const all = await payload.find({
+      collection: 'disciplines',
+      limit: 1000,
+      depth: 0,
+    });
+    docs = all.docs;
+  }
 
   return (
     <html
@@ -66,6 +100,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           speed={200}
           shadow="0 0 10px var(--color-primary),0 0 5px var(--color-primary)"
         />
+        <BackgroundGlow />
         <SidebarProvider>
           <DisciplinesProvider disciplines={docs}>
             <Topbar />

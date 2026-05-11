@@ -1,11 +1,11 @@
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
-import styles from '@/components/ui/PageHeader.module.scss';
+import styles from '@/components/ui/PageHeader/PageHeader.module.scss';
 import './loading.scss';
 
 export default function Loading() {
   return (
     <div className="discipline-view loading">
-      {}
+      { }
       <div className={styles.header}>
         <div className={styles.left}>
           <Skeleton width={150} height={20} className={styles.code} />
@@ -18,9 +18,9 @@ export default function Loading() {
         </div>
         <div className={styles.right}>
           <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-             {[...Array(4)].map((_, i) => (
-               <Skeleton key={i} width="220px" height="60px" borderRadius="12px" />
-             ))}
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} width="220px" height="60px" borderRadius="12px" />
+            ))}
           </div>
         </div>
       </div>
@@ -38,20 +38,20 @@ export default function Loading() {
         <div className="discipline-view__card">
           <Skeleton width="220px" height={24} className="mb-6" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-             <div>
-                <Skeleton width="100px" height={16} className="mb-3" />
-                <div style={{ display: 'flex', gap: '8px' }}>
-                   <Skeleton width={120} height={30} borderRadius="20px" />
-                   <Skeleton width={120} height={30} borderRadius="20px" />
-                </div>
-             </div>
-             <div style={{ height: '1px', background: '#f0f0f0' }} />
-             <div>
-                <Skeleton width="100px" height={16} className="mb-3" />
-                <div style={{ display: 'flex', gap: '8px' }}>
-                   <Skeleton width={120} height={30} borderRadius="20px" />
-                </div>
-             </div>
+            <div>
+              <Skeleton width="100px" height={16} className="mb-3" />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Skeleton width={120} height={30} borderRadius="20px" />
+                <Skeleton width={120} height={30} borderRadius="20px" />
+              </div>
+            </div>
+            <div style={{ height: '1px', background: '#f0f0f0' }} />
+            <div>
+              <Skeleton width="100px" height={16} className="mb-3" />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Skeleton width={120} height={30} borderRadius="20px" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

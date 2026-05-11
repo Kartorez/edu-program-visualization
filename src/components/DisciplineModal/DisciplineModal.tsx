@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Panel } from '@xyflow/react';
 import RequisiteList from '@/components/DisciplineModal/RequisiteList';
 import ElectiveList from '@/components/DisciplineModal/ElectiveList';
 import './DisciplineModal.scss';
@@ -63,7 +62,8 @@ export default function DisciplineModal({
   const isElective = electiveVariants.length > 0;
 
   return (
-    <Panel position="center-right" className="discipline-modal">
+    <div className={`discipline-modal ${isOpen ? 'is-open' : ''}`}>
+      <div className="discipline-modal__backdrop" onClick={onClose} />
       <div className="discipline-modal__content">
         <button className="discipline-modal__close" onClick={onClose} aria-label="Close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -120,6 +120,6 @@ export default function DisciplineModal({
           </>
         )}
       </div>
-    </Panel>
+    </div>
   );
 }

@@ -68,8 +68,12 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
-    media: Media;
+    departments: Department;
+    specialties: Specialty;
+    'educational-programs': EducationalProgram;
+    'program-versions': ProgramVersion;
     disciplines: Discipline;
+    'discipline-instances': DisciplineInstance;
     'elective-groups': ElectiveGroup;
     competencies: Competency;
     'learning-outcomes': LearningOutcome;
@@ -81,8 +85,12 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    specialties: SpecialtiesSelect<false> | SpecialtiesSelect<true>;
+    'educational-programs': EducationalProgramsSelect<false> | EducationalProgramsSelect<true>;
+    'program-versions': ProgramVersionsSelect<false> | ProgramVersionsSelect<true>;
     disciplines: DisciplinesSelect<false> | DisciplinesSelect<true>;
+    'discipline-instances': DisciplineInstancesSelect<false> | DisciplineInstancesSelect<true>;
     'elective-groups': ElectiveGroupsSelect<false> | ElectiveGroupsSelect<true>;
     competencies: CompetenciesSelect<false> | CompetenciesSelect<true>;
     'learning-outcomes': LearningOutcomesSelect<false> | LearningOutcomesSelect<true>;
@@ -126,6 +134,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Користувачі з доступом до системи
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -151,25 +161,69 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Створюйте першими — всі інші записи залежать від кафедри
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "departments".
  */
-export interface Media {
+export interface Department {
   id: number;
-  alt: string;
+  code: string;
+  title: string;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
+ * Крок 2: після кафедр. Прив'язується до кафедри
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "specialties".
+ */
+export interface Specialty {
+  id: number;
+  /**
+   * Наприклад: 122
+   */
+  code: string;
+  title: string;
+  department: number | Department;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Крок 3: Бакалавр або Магістр для спеціальності
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "educational-programs".
+ */
+export interface EducationalProgram {
+  id: number;
+  title: string;
+  degree: 'bachelor' | 'master';
+  specialty: number | Specialty;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Крок 4: версія програми по року набору
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "program-versions".
+ */
+export interface ProgramVersion {
+  id: number;
+  /**
+   * Наприклад: 2024
+   */
+  year: number;
+  program: number | EducationalProgram;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Крок 5: паспорт дисципліни — назва, кафедра, викладачі
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disciplines".
  */
@@ -205,6 +259,8 @@ export interface Discipline {
   createdAt: string;
 }
 /**
+ * Групування вибіркових дисциплін (Блоки)
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "elective-groups".
  */
@@ -216,6 +272,8 @@ export interface ElectiveGroup {
   createdAt: string;
 }
 /**
+ * ЗК і СК компетентності програми
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "competencies".
  */
@@ -228,6 +286,8 @@ export interface Competency {
   createdAt: string;
 }
 /**
+ * Програмні результати навчання
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "learning-outcomes".
  */
@@ -235,6 +295,19 @@ export interface LearningOutcome {
   id: number;
   code: string;
   description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Крок 6: дисципліна у конкретній версії програми — кредити, силабус, компетентності
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discipline-instances".
+ */
+export interface DisciplineInstance {
+  id: number;
+  discipline: number | Discipline;
+  programVersion: number | ProgramVersion;
   updatedAt: string;
   createdAt: string;
 }
@@ -267,12 +340,28 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'departments';
+        value: number | Department;
+      } | null)
+    | ({
+        relationTo: 'specialties';
+        value: number | Specialty;
+      } | null)
+    | ({
+        relationTo: 'educational-programs';
+        value: number | EducationalProgram;
+      } | null)
+    | ({
+        relationTo: 'program-versions';
+        value: number | ProgramVersion;
       } | null)
     | ({
         relationTo: 'disciplines';
         value: number | Discipline;
+      } | null)
+    | ({
+        relationTo: 'discipline-instances';
+        value: number | DisciplineInstance;
       } | null)
     | ({
         relationTo: 'elective-groups';
@@ -352,21 +441,46 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "departments_select".
  */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
+export interface DepartmentsSelect<T extends boolean = true> {
+  code?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "specialties_select".
+ */
+export interface SpecialtiesSelect<T extends boolean = true> {
+  code?: T;
+  title?: T;
+  department?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "educational-programs_select".
+ */
+export interface EducationalProgramsSelect<T extends boolean = true> {
+  title?: T;
+  degree?: T;
+  specialty?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "program-versions_select".
+ */
+export interface ProgramVersionsSelect<T extends boolean = true> {
+  year?: T;
+  program?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -398,6 +512,16 @@ export interface DisciplinesSelect<T extends boolean = true> {
   electiveGroup?: T;
   competencies?: T;
   learningOutcomes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discipline-instances_select".
+ */
+export interface DisciplineInstancesSelect<T extends boolean = true> {
+  discipline?: T;
+  programVersion?: T;
   updatedAt?: T;
   createdAt?: T;
 }

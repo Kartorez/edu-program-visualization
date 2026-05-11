@@ -2,7 +2,6 @@ import { getPayload } from 'payload';
 import config from '@payload-config';
 import { positionNodes } from '@/utils/positionNodes';
 import ExportFlow from '@/components/StudyPlan/ExportFlow';
-import NoBackground from '@/components/ui/NoBackground';
 import '@/styles/globals.scss';
 
 export default async function ExportPage() {

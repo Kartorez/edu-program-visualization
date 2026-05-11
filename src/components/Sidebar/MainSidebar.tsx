@@ -4,9 +4,11 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useDisciplines } from '@/context/DisciplinesContext';
 import { sortByCode } from '@/utils/sortByCode';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const SECTIONS = [
-  { href: '/plan', label: 'Навчальний план' },
+  { href: '/plan', label: 'Освітня програма' },
+  { href: '/plan/graph', label: 'Навчальний план' },
   { href: '/plan/competencies', label: 'Матриця компетентн.' },
   { href: '/plan/results', label: 'Результати навчання' },
 ];
@@ -57,7 +59,9 @@ export function MainSidebar() {
               <span className="sidebar__semester-number">{n}</span>
               <span className="sidebar__semester-label">Семестр {n}</span>
               <span className="sidebar__semester-count">{items.length}</span>
-              <span className="sidebar__semester-chevron">{isOpen ? '▴' : '▾'}</span>
+              <span className="sidebar__semester-chevron">
+                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </span>
             </button>
 
             {isOpen && (

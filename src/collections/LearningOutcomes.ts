@@ -5,6 +5,9 @@ export const LearningOutcomes: CollectionConfig = {
 
   admin: {
     useAsTitle: 'code',
+    description: 'Програмні результати навчання',
+    defaultColumns: ['code', 'description'],
+    group: 'Наповнення',
   },
 
   fields: [

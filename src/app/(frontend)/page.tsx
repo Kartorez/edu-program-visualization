@@ -1,37 +1,70 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import { sortByCode } from '@/utils/sortByCode';
-import Hero from '@/components/ui/Hero/Hero';
-import Marquee from '@/components/ui/Marquee/Marquee';
-import About from '@/components/ui/About/About';
+import ProgramWizard from '@/components/ProgramWizard/ProgramWizard';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const payload = await getPayload({ config });
 
-  const { docs: disciplines } = await payload.find({
-    collection: 'disciplines',
-    limit: 1000,
+  const { docs: specialties } = await payload.find({
+    collection: 'specialties',
+    limit: 100,
     depth: 1,
   });
 
-  const sorted = sortByCode(disciplines);
+  const { docs: programs } = await payload.find({
+    collection: 'educational-programs',
+    limit: 200,
+    depth: 1,
+  });
 
-  const countDiscipline = sorted.filter((d) => d.code?.startsWith('ОК')).length;
-  const countElective = sorted.filter((d) => d.code?.startsWith('ВК')).length / 3;
-  const countSemester = Math.max(
-    ...sorted.flatMap((d) => d.semesters?.map((s) => s.semester ?? 0) ?? [])
-  );
+  const { docs: versions } = await payload.find({
+    collection: 'program-versions',
+    limit: 500,
+    depth: 1,
+  });
+
+
+
+  const departmentTitle =
+    specialties[0]?.department && typeof specialties[0].department === 'object'
+      ? (specialties[0].department as any).title ?? ''
+      : '';
+
+  const serializedSpecialties = specialties.map((s) => ({
+    id: s.id,
+    code: s.code,
+    title: s.title,
+    department: s.department,
+  }));
+
+  const serializedPrograms = programs.map((p) => ({
+    id: p.id,
+    title: p.title,
+    degree: p.degree as 'bachelor' | 'master',
+    specialty: p.specialty,
+  }));
+
+  const serializedVersions = versions.map((v) => ({
+    id: v.id,
+    year: v.year,
+    isActive: v.isActive ?? false,
+    program: v.program,
+  }));
 
   return (
-    <>
-      <Hero
-        countDiscipline={countDiscipline}
-        countElective={countElective}
-        countSemester={countSemester}
-        countCredits={240}
-      />
-      <Marquee disciplines={sorted} />
-      <About disciplines={sorted} />
-    </>
+    <ProgramWizard
+      specialties={serializedSpecialties}
+      programs={serializedPrograms}
+      versions={serializedVersions}
+      departmentTitle={departmentTitle}
+      stats={{
+        countDiscipline: 0,
+        countElective: 0,
+        countSemester: 0,
+        countCredits: 240,
+      }}
+    />
   );
 }

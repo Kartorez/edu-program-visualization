@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useTransition, useDeferredValue, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import PageHeader from '@/components/ui/PageHeader';
 import Stat from '@/components/ui/Stat';
@@ -16,10 +15,14 @@ export default function LearningOutcomesMatrixView({
   outcomes: any[];
 }) {
   const [highlightedRes, setHighlightedRes] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [isPending, startTransition] = useTransition();
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectedCols, setSelectedCols] = useState<Set<string>>(new Set());
+  const selectedColsArray = useMemo(() => Array.from(selectedCols), [selectedCols]);
 
   const router = useRouter();
 
@@ -42,19 +45,22 @@ export default function LearningOutcomesMatrixView({
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  const handleSearchChange = (val: string) => {
-    setSearchQuery(val);
-  };
+  const handleSearchChange = useCallback((val: string) => {
+    setInputValue(val);
+    startTransition(() => {
+      setSearchQuery(val);
+    });
+  }, []);
 
   const filteredDisciplines = useMemo(() => {
     return disciplines.filter(d =>
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (d.shortName && d.shortName.toLowerCase().includes(searchQuery.toLowerCase()))
+      d.name.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+      d.code.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+      (d.shortName && d.shortName.toLowerCase().includes(deferredSearchQuery.toLowerCase()))
     );
-  }, [disciplines, searchQuery]);
+  }, [disciplines, deferredSearchQuery]);
 
-  const toggleRow = (id: string, e: React.MouseEvent) => {
+  const toggleRow = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedRows(prev => {
       const next = new Set(prev);
@@ -62,9 +68,9 @@ export default function LearningOutcomesMatrixView({
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
-  const toggleCol = (code: string) => {
+  const toggleCol = useCallback((code: string) => {
     let wasChanged = false;
 
     if (highlightedRes === code) {
@@ -84,7 +90,20 @@ export default function LearningOutcomesMatrixView({
       }
       return next;
     });
-  };
+  }, [highlightedRes]);
+
+  const handleCellClick = useCallback((disciplineId: string, colCode: string) => {
+    setSelectedRows(prev => {
+      const next = new Set(prev);
+      next.add(disciplineId);
+      return next;
+    });
+    setSelectedCols(prev => {
+      const next = new Set(prev);
+      next.add(colCode);
+      return next;
+    });
+  }, []);
 
   return (
     <div className="matrix-page">
@@ -94,7 +113,18 @@ export default function LearningOutcomesMatrixView({
         description="Відображає які програмні результати навчання (РН) забезпечує кожна дисципліна програми."
         stats={
           <>
-            <Stat label="Дисциплін" value={disciplines.length} isAccent />
+            <Stat
+              label="Дисциплін"
+              value={
+                deferredSearchQuery
+                  ? `${filteredDisciplines.length} з ${disciplines.length}`
+                  : disciplines.length
+              }
+              isAccent
+              onClick={() => router.push('/plan/graph')}
+              className="stat--disciplines"
+              title="Переглянути візуальну структуру (граф)"
+            />
             <Stat label="РН" value={outcomes.length} />
           </>
         }
@@ -102,9 +132,9 @@ export default function LearningOutcomesMatrixView({
 
       <div className="matrix-controls">
         <MatrixSearch
-          value={searchQuery}
+          value={inputValue}
           onChange={handleSearchChange}
-          isPending={false}
+          isPending={isPending}
         />
 
         {(selectedRows.size > 0 || selectedCols.size > 0) && (
@@ -144,9 +174,10 @@ export default function LearningOutcomesMatrixView({
                 itemsKey="learningOutcomes"
                 dotClass="dot-rn"
                 isSelected={selectedRows.has(d.id)}
-                selectedCols={selectedCols}
+                selectedColsArray={selectedColsArray}
                 highlightedCol={highlightedRes}
                 onToggleRow={toggleRow}
+                onCellClick={handleCellClick}
               />
             ))}
           </tbody>
