@@ -8,7 +8,5 @@ export const Users: CollectionConfig = {
     description: 'Користувачі з доступом до системи',
   },
   auth: true,
-  fields: [
-
-  ],
+  fields: [],
 }

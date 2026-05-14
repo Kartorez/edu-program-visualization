@@ -45,36 +45,10 @@ export const metadata: Metadata = {
   },
 };
 
-import { cookies } from 'next/headers';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const programVersionId = cookieStore.get('programVersionId')?.value;
-  const payload = await getPayload({ config });
-
-  let docs: any[] = [];
-
-  if (programVersionId) {
-    const { docs: instances } = await payload.find({
-      collection: 'discipline-instances',
-      where: {
-        programVersion: { equals: programVersionId },
-      },
-      limit: 1000,
-      depth: 2,
-    });
-    docs = instances.map((inst) => inst.discipline).filter(Boolean);
-  }
-
-  // Fallback to all disciplines if instances aren't mapped yet or no version is selected
-  if (docs.length === 0) {
-    const all = await payload.find({
-      collection: 'disciplines',
-      limit: 1000,
-      depth: 0,
-    });
-    docs = all.docs;
-  }
+  const { disciplines: docs } = await getProgramDisciplines();
 
   return (
     <html
@@ -104,8 +78,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SidebarProvider>
           <DisciplinesProvider disciplines={docs}>
             <Topbar />
-            <Sidebar />
-            {children}
+            <div className="app-container">
+              <Sidebar />
+              <main className="main-content">
+                {children}
+              </main>
+            </div>
           </DisciplinesProvider>
         </SidebarProvider>
       </body>

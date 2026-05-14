@@ -1,291 +1,242 @@
-import { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload';
 
-const getGroupCode = (code: string) => {
-  if (!code?.startsWith('ВК')) return null;
-  return code.split('.')[0].trim();
+const toId = (val: any): any => {
+  if (!val) return null;
+  if (typeof val === 'object' && 'id' in val) return val.id;
+  return val;
+};
+
+const normalizeIds = (arr: any[] = []): any[] => {
+  if (!Array.isArray(arr)) return [];
+  return Array.from(new Set(arr.map(toId).filter(Boolean)));
 };
 
 export const Disciplines: CollectionConfig = {
   slug: 'disciplines',
-
   admin: {
     useAsTitle: 'name',
-    description: 'Крок 5: паспорт дисципліни — назва, кафедра, викладачі',
-    defaultColumns: ['name', 'code', 'department'],
     group: 'Структура',
+    defaultColumns: ['code', 'name', 'type'],
   },
-
   hooks: {
-    beforeChange: [
-      async ({ data, req }) => {
-        const payload = req.payload;
+    afterRead: [
+      async ({ doc, req, context }) => {
+        if (context?._internalSync) return doc;
+        try {
+          const sid = doc.id;
+          
+          if (!(req as any)._relationsCache) {
+            const { docs } = await req.payload.find({
+              collection: 'discipline-relations' as any,
+              limit: 5000,
+              depth: 0,
+            });
+            (req as any)._relationsCache = docs;
+          }
+          
+          const relations = (req as any)._relationsCache;
 
-        const groupCode = getGroupCode(data.code);
+          doc.prerequisites = relations
+            .filter((r: any) => String(r.subject) === String(sid))
+            .map((r: any) => r.dependsOn);
 
-        if (!groupCode) {
-          data.electiveGroup = null;
-          return data;
+          doc.postrequisites = relations
+            .filter((r: any) => String(r.dependsOn) === String(sid))
+            .map((r: any) => r.subject);
+
+          return doc;
+        } catch (e) {
+          return doc;
         }
-
-        const existing = await payload.find({
-          collection: 'elective-groups',
-          where: {
-            code: { equals: groupCode },
-          },
-        });
-
-        let groupId;
-
-        if (existing.totalDocs > 0) {
-          groupId = existing.docs[0].id;
-        } else {
-          const created = await payload.create({
-            collection: 'elective-groups',
-            data: {
-              code: groupCode,
-              name: `Група ${groupCode}`,
-            },
-          });
-
-          groupId = created.id;
-        }
-
-        data.electiveGroup = groupId;
-
-        return data;
-      },
+      }
     ],
-
     afterChange: [
-      async ({ doc, previousDoc, context, req }) => {
-        if (context?.skipHooks) return;
-
+      async ({ doc, previousDoc, req, operation }) => {
         const payload = req.payload;
+        const sid = doc.id;
+        const reqData = (req as any).data ?? {};
 
-        const currentPost = (doc.postrequisites || []).map((p: any) =>
-          typeof p === 'string' ? p : p.id
-        );
-
-        const previousPost = (previousDoc?.postrequisites || []).map((p: any) =>
-          typeof p === 'string' ? p : p.id
-        );
-
-        const addedPost = currentPost.filter((id: string) => !previousPost.includes(id));
-        const removedPost = previousPost.filter((id: string) => !currentPost.includes(id));
-
-        for (const postId of addedPost) {
-          if (typeof postId !== 'string') continue;
-
-          const post = await payload.findByID({
-            collection: 'disciplines',
-            id: postId,
+        const updateRelations = async (
+          fieldName: string,
+          dbSubjectField: string,
+          dbDependsOnField: string,
+        ) => {
+          const newIds = normalizeIds(reqData[fieldName] ?? []);
+          const existing = await payload.find({
+            req,
+            collection: 'discipline-relations' as any,
+            where: { [dbSubjectField]: { equals: sid } },
+            limit: 1000,
+            depth: 0,
           });
+          const oldIds = existing.docs.map((r: any) => String(r[dbDependsOnField]));
 
-          const existing = (post.prerequisites || []).map((p: any) =>
-            typeof p === 'string' ? p : p.id
-          );
+          const added = newIds.filter(id => !oldIds.includes(String(id)));
+          const removed = oldIds.filter(id => !newIds.map(String).includes(id));
 
-          if (!existing.includes(doc.id)) {
-            await payload.update({
-              collection: 'disciplines',
-              id: postId,
-              data: { prerequisites: [...existing, doc.id] },
-              context: { skipHooks: true },
-            });
-          }
+          await Promise.all([
+            ...added.map(id =>
+              payload.create({
+                req,
+                collection: 'discipline-relations' as any,
+                data: { [dbSubjectField]: sid, [dbDependsOnField]: id },
+                context: { _internalSync: true },
+              })
+            ),
+            ...removed.map(async id => {
+              const toDelete = await payload.find({
+                req,
+                collection: 'discipline-relations' as any,
+                where: {
+                  and: [
+                    { [dbSubjectField]: { equals: sid } },
+                    { [dbDependsOnField]: { equals: id } },
+                  ],
+                },
+                depth: 0,
+              });
+              return Promise.all(
+                toDelete.docs.map(r =>
+                  payload.delete({ 
+                    req,
+                    collection: 'discipline-relations' as any, 
+                    id: r.id,
+                    context: { _internalSync: true },
+                  })
+                )
+              );
+            }),
+          ]);
+        };
+
+        await updateRelations('prerequisites', 'subject', 'dependsOn');
+        await updateRelations('postrequisites', 'dependsOn', 'subject');
+
+        if ((req as any)._relationsCache) {
+          delete (req as any)._relationsCache;
         }
-
-        for (const postId of removedPost) {
-          if (typeof postId !== 'string') continue;
-
-          const post = await payload.findByID({
-            collection: 'disciplines',
-            id: postId,
-          });
-
-          const existing = (post.prerequisites || []).map((p: any) =>
-            typeof p === 'string' ? p : p.id
-          );
-
-          if (existing.includes(doc.id)) {
-            await payload.update({
-              collection: 'disciplines',
-              id: postId,
-              data: { prerequisites: existing.filter((id: string) => id !== doc.id) },
-              context: { skipHooks: true },
-            });
-          }
-        }
-
-        const currentPre = (doc.prerequisites || []).map((p: any) =>
-          typeof p === 'string' ? p : p.id
-        );
-
-        const previousPre = (previousDoc?.prerequisites || []).map((p: any) =>
-          typeof p === 'string' ? p : p.id
-        );
-
-        const addedPre = currentPre.filter((id: string) => !previousPre.includes(id));
-        const removedPre = previousPre.filter((id: string) => !currentPre.includes(id));
-
-        for (const preId of addedPre) {
-          if (typeof preId !== 'string') continue;
-
-          const pre = await payload.findByID({
-            collection: 'disciplines',
-            id: preId,
-          });
-
-          const existing = (pre.postrequisites || []).map((p: any) =>
-            typeof p === 'string' ? p : p.id
-          );
-
-          if (!existing.includes(doc.id)) {
-            await payload.update({
-              collection: 'disciplines',
-              id: preId,
-              data: { postrequisites: [...existing, doc.id] },
-              context: { skipHooks: true },
-            });
-          }
-        }
-
-        for (const preId of removedPre) {
-          if (typeof preId !== 'string') continue;
-
-          const pre = await payload.findByID({
-            collection: 'disciplines',
-            id: preId,
-          });
-
-          const existing = (pre.postrequisites || []).map((p: any) =>
-            typeof p === 'string' ? p : p.id
-          );
-
-          if (existing.includes(doc.id)) {
-            await payload.update({
-              collection: 'disciplines',
-              id: preId,
-              data: { postrequisites: existing.filter((id: string) => id !== doc.id) },
-              context: { skipHooks: true },
-            });
-          }
-        }
-      },
-    ],
+      }
+    ]
   },
-
   fields: [
     {
-      name: 'parseButton',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '@/components/admin/ParseButton#default',
-        },
-      },
-    },
-    {
-      name: 'code',
-      type: 'text',
-      required: true,
-      unique: true,
-    },
-    {
-      name: 'type',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Обовʼязкова', value: 'required' },
-        { label: 'Вибіркова', value: 'elective' },
-      ],
-    },
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-
-    {
-      name: 'shortName',
-      type: 'text',
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-    },
-    {
-      name: 'credits',
-      type: 'number',
-    },
-
-    {
-      name: 'hours',
-      type: 'number',
-    },
-    {
-      name: 'assessment',
-      type: 'text',
-      admin: {
-        description: 'Форма контролю (залік / іспит)',
-      },
-    },
-
-    {
-      name: 'topics',
-      type: 'array',
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'title',
-          type: 'text',
+          label: 'Основне',
+          fields: [
+            {
+              name: 'parseButton',
+              type: 'ui',
+              admin: { components: { Field: '@/components/admin/ParseButton#default' } },
+            },
+            {
+              type: 'row',
+              fields: [
+                { name: 'code', label: 'Код', type: 'text', required: true, unique: true, admin: { width: '30%' } },
+                { name: 'name', label: 'Назва', type: 'text', required: true, admin: { width: '70%' } },
+              ],
+            },
+            { name: 'shortName', label: 'Коротка назва (для графа)', type: 'text' },
+            { name: 'description', label: 'Опис', type: 'textarea' },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'type',
+                  label: 'Тип дисципліни',
+                  type: 'select',
+                  required: true,
+                  options: [{ label: 'ОК (Обовʼязкова)', value: 'required' }, { label: 'ВК (Вибіркова)', value: 'elective' }],
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'electiveGroup',
+                  label: 'Група вибору',
+                  type: 'relationship',
+                  relationTo: 'elective-groups',
+                  admin: { width: '50%', condition: (data) => data.type === 'elective' },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                { name: 'credits', label: 'Кредити', type: 'number', admin: { width: '33%' } },
+                { name: 'hours', label: 'Години', type: 'number', admin: { width: '33%' } },
+                {
+                  name: 'assessment',
+                  label: 'Форма контролю',
+                  type: 'select',
+                  options: [
+                    { label: 'Іспит', value: 'exam' },
+                    { label: 'Залік', value: 'credit' },
+                    { label: 'Іспит / Залік', value: 'exam_credit' },
+                  ],
+                  admin: { width: '34%' },
+                },
+              ],
+            },
+            {
+              name: 'semesters',
+              label: 'Семестри (за замовчуванням)',
+              type: 'array',
+              fields: [{ name: 'semester', type: 'number' }],
+              admin: {
+                description: 'Семестри, в яких зазвичай викладається ця дисципліна',
+              }
+            },
+            {
+              name: 'topics',
+              label: 'Теми занять',
+              type: 'array',
+              admin: {
+                components: {
+                  Field: '@/components/admin/TopicEditor#default',
+                },
+                description: 'Список тем, розбитих за семестрами (якщо передбачено)',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'title', label: 'Тема', type: 'text', required: true, admin: { width: '80%' } },
+                    { name: 'semester', label: 'Сем.', type: 'number', admin: { width: '20%' } },
+                  ]
+                }
+              ],
+            },
+          ],
         },
-      ],
-    },
-
-    {
-      name: 'semesters',
-      type: 'array',
-      required: true,
-      fields: [
         {
-          name: 'semester',
-          type: 'number',
+          label: 'Звʼязки',
+          fields: [
+            {
+              name: 'prerequisites',
+              label: 'Пререквізити (ДО)',
+              type: 'relationship',
+              relationTo: 'disciplines',
+              hasMany: true,
+              admin: { isSortable: true },
+            },
+            {
+              name: 'postrequisites',
+              label: 'Постреквізити (ПІСЛЯ)',
+              type: 'relationship',
+              relationTo: 'disciplines',
+              hasMany: true,
+              admin: { isSortable: true },
+            },
+          ],
+        },
+        {
+          label: 'Матриці',
+          fields: [
+            { name: 'competencies', label: 'Компетентності', type: 'relationship', relationTo: 'competencies', hasMany: true },
+            { name: 'learningOutcomes', label: 'Результати навчання', type: 'relationship', relationTo: 'learning-outcomes', hasMany: true },
+          ],
         },
       ],
-    },
-
-    {
-      name: 'prerequisites',
-      type: 'relationship',
-      relationTo: 'disciplines',
-      hasMany: true,
-    },
-
-    {
-      name: 'postrequisites',
-      type: 'relationship',
-      relationTo: 'disciplines',
-      hasMany: true,
-    },
-
-    {
-      name: 'electiveGroup',
-      type: 'relationship',
-      relationTo: 'elective-groups',
-    },
-
-    {
-      name: 'competencies',
-      type: 'relationship',
-      relationTo: 'competencies',
-      hasMany: true,
-    },
-
-    {
-      name: 'learningOutcomes',
-      type: 'relationship',
-      relationTo: 'learning-outcomes',
-      hasMany: true,
     },
   ],
 };

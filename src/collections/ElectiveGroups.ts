@@ -13,6 +13,7 @@ export const ElectiveGroups: CollectionConfig = {
   fields: [
     {
       name: 'code',
+      label: 'Код групи (ВК)',
       type: 'text',
       required: true,
       unique: true,
@@ -20,6 +21,7 @@ export const ElectiveGroups: CollectionConfig = {
 
     {
       name: 'name',
+      label: 'Назва групи',
       type: 'text',
     },
   ],

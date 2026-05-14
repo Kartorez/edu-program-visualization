@@ -3,16 +3,22 @@ import PageHeader from '@/components/ui/PageHeader';
 import Stat from '@/components/ui/Stat';
 import Accordion from './Accordion';
 import './DisciplineView.scss';
-import { BadgeVariant } from '@/components/ui/Badge';
+import type { BadgeVariant } from '@/components/ui/Badge';
 
 import Link from 'next/link';
 
 export default function DisciplineView({ discipline }: { discipline: any }) {
   const competencies = discipline.competencies || [];
-  const prerequisites = discipline.prerequisites || [];
-  const postrequisites = discipline.postrequisites || [];
   const topics = discipline.topics || [];
   const results = discipline.learningOutcomes || [];
+
+  const prerequisites = (discipline.prerequisites || [])
+    .map((r: any) => r.dependsOn)
+    .filter((d: any) => d && typeof d === 'object');
+
+  const postrequisites = (discipline.postrequisites || [])
+    .map((r: any) => r.subject)
+    .filter((d: any) => d && typeof d === 'object');
 
   const zk = competencies.filter((c: any) => c.type === 'zk');
   const sk = competencies.filter((c: any) => c.type === 'sk');
@@ -28,7 +34,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
             <Stat label="Кредити" value={`${discipline.credits} ЄКТС`} variant="card" isAccent />
             <Stat label="Семестр" value={`${(discipline.semesters || []).map((s: any) => s.semester).join(', ')} з 8`} variant="card" />
             {discipline.assessment && (
-              <Stat label="Контроль" value={discipline.assessment} variant="card" />
+              <Stat label="Контроль" value={discipline.assessment === 'exam' ? 'Іспит' : discipline.assessment === 'credit' ? 'Залік' : 'Іспит/Залік'} variant="card" />
             )}
             <Stat label="Компетентності" value={competencies.length} variant="card" />
           </>
@@ -38,13 +44,38 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
       <div className="discipline-view__grid">
         <div className="discipline-view__card">
           <div className="discipline-view__section-title">Теми курсу</div>
-          <ol className="discipline-view__topics-list">
-            {topics.map((t: any, i: number) => (
-              <li key={i} className="discipline-view__topics-item">
-                {t.title}
-              </li>
-            ))}
-          </ol>
+          {Object.keys(
+            topics.reduce((acc: any, t: any) => {
+              const s = t.semester || 'Загальні';
+              if (!acc[s]) acc[s] = [];
+              acc[s].push(t);
+              return acc;
+            }, {})
+          ).length > 0 ? (
+            Object.entries(
+              topics.reduce((acc: any, t: any) => {
+                const s = t.semester || 'Загальні';
+                if (!acc[s]) acc[s] = [];
+                acc[s].push(t);
+                return acc;
+              }, {})
+            )
+              .sort(([a], [b]) => (a === 'Загальні' ? 1 : b === 'Загальні' ? -1 : Number(a) - Number(b)))
+              .map(([sem, semTopics]: [string, any]) => (
+                <div key={sem} className="discipline-view__semester-group">
+                  {sem !== 'Загальні' && <div className="discipline-view__semester-label">Семестр {sem}</div>}
+                  <ol className="discipline-view__topics-list">
+                    {semTopics.map((t: any, i: number) => (
+                      <li key={i} className="discipline-view__topics-item">
+                        {t.title}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))
+          ) : (
+            <span className="discipline-view__empty">Теми не вказані</span>
+          )}
         </div>
 
         <div className="discipline-view__card">
@@ -106,8 +137,8 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
         <Accordion
           title="Результати навчання"
           variant="rn"
-          items={results.map((r: any) => ({ 
-            badge: r.code, 
+          items={results.map((r: any) => ({
+            badge: r.code,
             text: r.description,
             link: `/plan/results#res-${r.code}`,
           }))}

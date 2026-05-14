@@ -1,5 +1,4 @@
-import { getPayload } from 'payload';
-import config from '@payload-config';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 import DisciplineView from '@/components/DisciplineView/DisciplineView';
 
 export const dynamic = 'force-dynamic';
@@ -9,16 +8,10 @@ import type { Metadata } from 'next';
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }): Promise<Metadata> {
   const { code } = await params;
   const decodedCode = decodeURIComponent(code);
-  const payload = await getPayload({ config });
-  const result = await payload.find({
-    collection: 'disciplines',
-    where: { code: { equals: decodedCode } },
-    depth: 0,
-    limit: 1,
-  });
+  const { disciplines } = await getProgramDisciplines();
+  const discipline = disciplines.find(d => d.code === decodedCode);
   
-  if (result.docs.length > 0) {
-    const discipline = result.docs[0];
+  if (discipline) {
     return {
       title: `${discipline.name} (${discipline.code})`,
       description: `Детальна інформація про дисципліну ${discipline.name}, кредити, семестри та пов'язані компетентності.`,
@@ -29,18 +22,10 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
 }
 
 export default async function DisciplinePage({ params }: { params: Promise<{ code: string, planId: string }> }) {
-  const { code, planId } = await params;
-  const payload = await getPayload({ config });
+  const { code } = await params;
+  const { disciplines } = await getProgramDisciplines();
 
-  const result = await payload.find({
-    collection: 'disciplines',
-    where: { 
-      code: { equals: decodeURIComponent(code) }
-    },
-    depth: 2,
-  });
-
-  const discipline = result.docs[0] ?? null;
+  const discipline = disciplines.find(d => d.code === decodeURIComponent(code)) ?? null;
 
   if (!discipline) return <div>Дисципліну не знайдено</div>;
 

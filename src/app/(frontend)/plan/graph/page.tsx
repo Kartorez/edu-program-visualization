@@ -1,7 +1,6 @@
-import { getPayload } from 'payload';
-import config from '@payload-config';
 import { positionNodes } from '@/utils/positionNodes';
 import StudyPlanCanvas from '@/components/StudyPlan/StudyPlanCanvas';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,13 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GraphPage() {
-  const payload = await getPayload({ config });
-
-  const { docs } = await payload.find({
-    collection: 'disciplines',
-    limit: 1000,
-    depth: 0,
-  });
+  const { disciplines: docs } = await getProgramDisciplines();
 
   const initialNodes = positionNodes(docs);
   return (

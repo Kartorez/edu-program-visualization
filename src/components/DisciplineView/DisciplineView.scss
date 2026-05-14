@@ -72,6 +72,23 @@
     counter-reset: topics;
   }
 
+  &__semester-group {
+    &:not(:last-child) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__semester-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--color-border);
+  }
+
   &__topics-item {
     display: flex;
     align-items: baseline;

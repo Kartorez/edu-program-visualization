@@ -7,14 +7,12 @@ import sharp from 'sharp';
 
 import { Users } from './collections/Users';
 import { Departments } from './collections/Departments';
-import { Specialties } from './collections/Specialties';
 import { EducationalPrograms } from './collections/EducationalPrograms';
-import { ProgramVersions } from './collections/ProgramVersions';
 import { Disciplines } from './collections/Disciplines';
-import { DisciplineInstances } from './collections/DisciplineInstances';
 import { ElectiveGroups } from './collections/ElectiveGroups';
 import { Competencies } from './collections/Competencies';
 import { LearningOutcomes } from './collections/LearningOutcomes';
+import { DisciplineRelations } from './collections/DisciplineRelations';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -27,6 +25,7 @@ export default buildConfig({
     },
     components: {
       afterDashboard: ['./components/admin/OnboardingGuide'],
+      Nav: './components/admin/Nav',
     },
     meta: {
       icons: [
@@ -42,11 +41,9 @@ export default buildConfig({
   collections: [
     Users,
     Departments,
-    Specialties,
     EducationalPrograms,
-    ProgramVersions,
     Disciplines,
-    DisciplineInstances,
+    DisciplineRelations,
     ElectiveGroups,
     Competencies,
     LearningOutcomes,

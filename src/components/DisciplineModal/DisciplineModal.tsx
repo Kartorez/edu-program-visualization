@@ -14,11 +14,11 @@ import { getElectiveGroupCode } from '@/utils/elective';
 const buildLabelMap = (allNodes: Disciplines): Map<string, string> =>
   new Map(allNodes.map((n) => [n.code, `${n.code} ${n.name}`] as [string, string]));
 
-const resolveCode = (p: string | number | Discipline, allNodes: Discipline[]): string => {
-  if (typeof p === 'object') return p.code;
-  const found = allNodes.find((n) => String(n.id) === String(p));
-  return found?.code ?? String(p);
+const resolveCode = (p: any): string => {
+  if (p && typeof p === 'object' && 'code' in p) return p.code as string;
+  return String(p);
 };
+
 export default function DisciplineModal({
   node,
   allNodes,
@@ -48,13 +48,13 @@ export default function DisciplineModal({
   }, [node, allNodes]);
 
   const prerequisites = useMemo(
-    () => [...new Set((node?.prerequisites ?? []).map((p) => resolveCode(p, allNodes)))],
-    [node?.prerequisites, allNodes]
+    () => [...new Set(((node as any)?.prerequisites || []).map(resolveCode) as string[])],
+    [node]
   );
 
   const postrequisites = useMemo(
-    () => [...new Set((node?.postrequisites ?? []).map((p) => resolveCode(p, allNodes)))],
-    [node?.postrequisites, allNodes]
+    () => [...new Set(((node as any)?.postrequisites || []).map(resolveCode) as string[])],
+    [node]
   );
 
   if (!node) return null;

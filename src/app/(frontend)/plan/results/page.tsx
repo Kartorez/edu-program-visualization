@@ -2,6 +2,7 @@ import { getPayload } from 'payload';
 import config from '@payload-config';
 import LearningOutcomesMatrixView from '@/components/LearningOutcomesMatrixView';
 import { sortByCode } from '@/utils/sortByCode';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,11 +16,7 @@ export const metadata: Metadata = {
 export default async function Results() {
   const payload = await getPayload({ config });
 
-  const { docs: disciplinesRaw } = await payload.find({
-    collection: 'disciplines',
-    limit: 1000,
-    depth: 1,
-  });
+  const { disciplines: disciplinesRaw } = await getProgramDisciplines();
 
   const { docs: outcomesRaw } = await payload.find({
     collection: 'learning-outcomes',
@@ -27,7 +24,7 @@ export default async function Results() {
   });
 
   const disciplines = sortByCode(
-    disciplinesRaw.filter((d) => {
+    disciplinesRaw.filter((d: any) => {
       const name = d.name?.toLowerCase() || '';
       const code = d.code?.toLowerCase() || '';
       return !name.includes('вк') && !code.includes('вк');

@@ -98,18 +98,17 @@ export default function CompetencyMatrixView({
         const isRowSelected = prevRows.has(disciplineId);
         const isColSelected = prevCols.has(colCode);
 
-        // This is a bit tricky with nested updates, let's use a cleaner approach
         return prevCols;
       });
       return prevRows;
     });
 
-    // Better logic:
     setSelectedRows(prev => {
       const next = new Set(prev);
       next.add(disciplineId);
       return next;
     });
+
     setSelectedCols(prev => {
       const next = new Set(prev);
       next.add(colCode);

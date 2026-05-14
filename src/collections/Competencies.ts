@@ -13,6 +13,7 @@ export const Competencies: CollectionConfig = {
   fields: [
     {
       name: 'code',
+      label: 'Код компетентності',
       type: 'text',
       required: true,
       unique: true,
@@ -20,16 +21,18 @@ export const Competencies: CollectionConfig = {
 
     {
       name: 'type',
+      label: 'Тип',
       type: 'select',
       options: [
-        { label: 'ЗК', value: 'zk' },
-        { label: 'СК', value: 'sk' },
+        { label: 'ЗК (Загальна)', value: 'zk' },
+        { label: 'СК (Спеціальна)', value: 'sk' },
       ],
       required: true,
     },
 
     {
       name: 'description',
+      label: 'Опис',
       type: 'textarea',
     },
   ],

@@ -4,35 +4,125 @@ export const EducationalPrograms: CollectionConfig = {
   slug: 'educational-programs',
 
   admin: {
-    useAsTitle: 'title',
-    description: 'Крок 3: Бакалавр або Магістр для спеціальності',
-    defaultColumns: ['title', 'degree', 'specialty'],
+    useAsTitle: 'fullTitle',
+    description: 'Освітня програма (версія за роком набору)',
+    defaultColumns: ['specialtyCode', 'title', 'year', 'degree', 'isActive'],
     group: 'Структура',
   },
 
   fields: [
     {
-      name: 'title',
-      label: 'Назва освітньої програми',
+      name: 'fullTitle',
       type: 'text',
-      required: true,
+      admin: {
+        hidden: true,
+      },
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            if (data) {
+              return `${data.specialtyCode || ''} ${data.title || ''} (${data.year || ''})`;
+            }
+          },
+        ],
+      },
     },
     {
-      name: 'degree',
-      label: 'Рівень вищої освіти',
-      type: 'select',
-      required: true,
-      options: [
-        { label: 'Бакалавр', value: 'bachelor' },
-        { label: 'Магістр', value: 'master' },
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Основна інформація',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'specialtyCode',
+                  label: 'Код спеціальності',
+                  type: 'text',
+                  required: true,
+                  admin: { width: '30%' },
+                },
+                {
+                  name: 'title',
+                  label: 'Назва програми',
+                  type: 'text',
+                  required: true,
+                  admin: { width: '70%' },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'degree',
+                  label: 'Рівень освіти',
+                  type: 'select',
+                  required: true,
+                  options: [
+                    { label: 'Бакалавр', value: 'bachelor' },
+                    { label: 'Магістр', value: 'master' },
+                  ],
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'year',
+                  label: 'Рік набору',
+                  type: 'number',
+                  required: true,
+                  admin: { width: '50%' },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'department',
+                  label: 'Кафедра',
+                  type: 'relationship',
+                  relationTo: 'departments',
+                  required: true,
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'totalCredits',
+                  label: 'Загальна кількість кредитів',
+                  type: 'number',
+                  defaultValue: 240,
+                  admin: { width: '30%' },
+                },
+                {
+                  name: 'isActive',
+                  label: 'Діюча версія',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  admin: { width: '20%' },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Навчальний план',
+          fields: [
+            {
+              name: 'disciplines',
+              label: 'Дисципліни програми',
+              type: 'relationship',
+              relationTo: 'disciplines',
+              hasMany: true,
+              admin: {
+                description: 'Виберіть усі дисципліни, що входять до цієї програми. Семестри будуть взяті з налаштувань самих дисциплін.',
+                components: {
+                  Field: '@/components/admin/DisciplineSelector#default',
+                },
+              },
+            },
+          ],
+        },
       ],
-    },
-    {
-      name: 'specialty',
-      label: 'Спеціальність',
-      type: 'relationship',
-      relationTo: 'specialties',
-      required: true,
     },
   ],
 };

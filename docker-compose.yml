@@ -20,6 +20,8 @@ services:
       args:
         DATABASE_URL: ${DATABASE_URL}
         PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+    stdin_open: true
+    tty: true
     ports:
       - '3000:3000'
     env_file: .env

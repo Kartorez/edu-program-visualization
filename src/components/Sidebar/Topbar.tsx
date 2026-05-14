@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useDisciplines } from '@/context/DisciplinesContext';
@@ -12,40 +13,40 @@ const ROUTE_MAP = [
   { match: '/plan/graph', label: 'Навчальний план' },
   { match: '/plan/competencies', label: 'Матриця компетентностей' },
   { match: '/plan/results', label: 'Результати навчання' },
-  { match: '/plan', label: 'Освітня програма' },
+  { match: '/', label: 'Освітня програма' },
 ];
 
 function useBreadcrumbs(): Crumb[] {
   const pathname = usePathname();
   const disciplines = useDisciplines();
 
-  const base: Crumb[] = [{ href: '/', label: 'Головна' }];
+  const base: Crumb[] = [{ href: '/', label: 'Освітня програма' }];
+
+  if (pathname === '/') return [];
 
   if (pathname.startsWith('/plan/disciplines/')) {
     const code = decodeURIComponent(pathname.split('/').pop() ?? '');
     const discipline = disciplines.find((d) => d.code === code);
     return [
       ...base,
-      { href: '/plan', label: 'Освітня програма' },
       { href: pathname, label: discipline?.shortName ?? discipline?.name ?? code },
     ];
   }
 
   const matched = ROUTE_MAP.find((r) => pathname.startsWith(r.match));
-  if (!matched) return base;
+  if (!matched || matched.match === '/') return base;
 
-  const extra: Crumb[] = matched.match !== '/plan'
-    ? [{ href: '/plan', label: 'Освітня програма' }, { href: matched.match, label: matched.label }]
-    : [{ href: '/plan', label: 'Освітня програма' }];
-
-  return [...base, ...extra];
+  return [
+    ...base,
+    { href: matched.match, label: matched.label }
+  ];
 }
 
 function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
   return (
     <nav className="breadcrumb">
       {crumbs.map((crumb, i) => (
-        <span key={crumb.href} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span key={crumb.href + i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {i > 0 && <span>/</span>}
           {i === crumbs.length - 1
             ? <span className="breadcrumb__current">{crumb.label}</span>
@@ -63,6 +64,11 @@ export function Topbar() {
   const crumbs = useBreadcrumbs();
 
   const isLanding = pathname === '/';
+
+  const [hasProgram, setHasProgram] = useState(false);
+  useEffect(() => {
+    setHasProgram(document.cookie.includes('programVersionId='));
+  }, [pathname]);
 
   return (
     <header className="topbar">
@@ -85,7 +91,7 @@ export function Topbar() {
       </div>
 
       <div className="topbar__right">
-        {pathname === '/plan' && (
+        {isLanding && hasProgram && (
           <Button href="/plan/graph" className="topbar__btn">
             <span className="topbar__btn-text">Навчальний план</span>
             <ArrowRight size={16} />

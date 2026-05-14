@@ -5,7 +5,7 @@ export const Departments: CollectionConfig = {
 
   admin: {
     useAsTitle: 'title',
-    description: 'Створюйте першими — всі інші записи залежать від кафедри',
+    description: 'Кафедра (факультет)',
     defaultColumns: ['title', 'code'],
     group: 'Структура',
   },

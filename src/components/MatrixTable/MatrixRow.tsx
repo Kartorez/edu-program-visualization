@@ -13,14 +13,14 @@ interface MatrixRowProps {
   onCellClick?: (disciplineId: string, colCode: string) => void;
 }
 
-const MatrixRow = memo(({ 
-  discipline, 
-  columns, 
+const MatrixRow = memo(({
+  discipline,
+  columns,
   itemsKey,
   dotClass,
-  isSelected, 
-  selectedColsArray, 
-  highlightedCol, 
+  isSelected,
+  selectedColsArray,
+  highlightedCol,
   onToggleRow,
   onCellClick
 }: MatrixRowProps) => {
@@ -29,7 +29,7 @@ const MatrixRow = memo(({
   const url = `/plan/disciplines/${encodeURIComponent(discipline.code)}`;
 
   return (
-    <tr 
+    <tr
       onClick={(e) => onToggleRow(discipline.id, e)}
       className={`matrix__row ${isSelected ? 'matrix__row--selected' : ''}`}
     >
@@ -42,7 +42,9 @@ const MatrixRow = memo(({
               <line x1="10" y1="14" x2="21" y2="3" />
             </svg>
           </Link>
-          <span className="discipline-label">{discipline.code} {discipline.shortName}</span>
+          <span className="discipline-label">
+            {discipline.code} {discipline.shortName || (discipline.name.length > 30 ? discipline.name.substring(0, 27) + '...' : discipline.name)}
+          </span>
         </div>
       </td>
       {columns.map((col: any) => {
@@ -51,19 +53,18 @@ const MatrixRow = memo(({
         );
         const isColSelected = selectedColsSet.has(col.code);
         const isHighlighted = highlightedCol === col.code;
-        
+
         const dotClassName = typeof dotClass === 'function' ? dotClass(col) : dotClass;
 
         return (
-          <td 
-            key={col.id} 
+          <td
+            key={col.id}
             onClick={(e) => {
               e.stopPropagation();
               onCellClick?.(discipline.id, col.code);
             }}
-            className={`matrix__cell ${isColSelected || isHighlighted ? 'matrix__cell--highlight' : ''} ${
-              isSelected && (isColSelected || isHighlighted) ? 'matrix__cell--intersection' : ''
-            }`}
+            className={`matrix__cell ${isColSelected || isHighlighted ? 'matrix__cell--highlight' : ''} ${isSelected && (isColSelected || isHighlighted) ? 'matrix__cell--intersection' : ''
+              }`}
           >
             {has && <span className={dotClassName} />}
           </td>

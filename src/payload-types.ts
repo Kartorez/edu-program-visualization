@@ -69,11 +69,9 @@ export interface Config {
   collections: {
     users: User;
     departments: Department;
-    specialties: Specialty;
     'educational-programs': EducationalProgram;
-    'program-versions': ProgramVersion;
     disciplines: Discipline;
-    'discipline-instances': DisciplineInstance;
+    'discipline-relations': DisciplineRelation;
     'elective-groups': ElectiveGroup;
     competencies: Competency;
     'learning-outcomes': LearningOutcome;
@@ -86,11 +84,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
-    specialties: SpecialtiesSelect<false> | SpecialtiesSelect<true>;
     'educational-programs': EducationalProgramsSelect<false> | EducationalProgramsSelect<true>;
-    'program-versions': ProgramVersionsSelect<false> | ProgramVersionsSelect<true>;
     disciplines: DisciplinesSelect<false> | DisciplinesSelect<true>;
-    'discipline-instances': DisciplineInstancesSelect<false> | DisciplineInstancesSelect<true>;
+    'discipline-relations': DisciplineRelationsSelect<false> | DisciplineRelationsSelect<true>;
     'elective-groups': ElectiveGroupsSelect<false> | ElectiveGroupsSelect<true>;
     competencies: CompetenciesSelect<false> | CompetenciesSelect<true>;
     'learning-outcomes': LearningOutcomesSelect<false> | LearningOutcomesSelect<true>;
@@ -161,7 +157,7 @@ export interface User {
   collection: 'users';
 }
 /**
- * Створюйте першими — всі інші записи залежать від кафедри
+ * Кафедра (факультет)
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "departments".
@@ -174,85 +170,64 @@ export interface Department {
   createdAt: string;
 }
 /**
- * Крок 2: після кафедр. Прив'язується до кафедри
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "specialties".
- */
-export interface Specialty {
-  id: number;
-  /**
-   * Наприклад: 122
-   */
-  code: string;
-  title: string;
-  department: number | Department;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Крок 3: Бакалавр або Магістр для спеціальності
+ * Освітня програма (версія за роком набору)
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "educational-programs".
  */
 export interface EducationalProgram {
   id: number;
+  fullTitle?: string | null;
+  specialtyCode: string;
   title: string;
   degree: 'bachelor' | 'master';
-  specialty: number | Specialty;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Крок 4: версія програми по року набору
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "program-versions".
- */
-export interface ProgramVersion {
-  id: number;
-  /**
-   * Наприклад: 2024
-   */
   year: number;
-  program: number | EducationalProgram;
+  department: number | Department;
+  totalCredits?: number | null;
   isActive?: boolean | null;
+  /**
+   * Виберіть усі дисципліни, що входять до цієї програми. Семестри будуть взяті з налаштувань самих дисциплін.
+   */
+  disciplines?: (number | Discipline)[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Крок 5: паспорт дисципліни — назва, кафедра, викладачі
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disciplines".
  */
 export interface Discipline {
   id: number;
   code: string;
-  type: 'required' | 'elective';
   name: string;
   shortName?: string | null;
   description?: string | null;
+  type: 'required' | 'elective';
+  electiveGroup?: (number | null) | ElectiveGroup;
   credits?: number | null;
   hours?: number | null;
+  assessment?: ('exam' | 'credit' | 'exam_credit') | null;
   /**
-   * Форма контролю (залік / іспит)
+   * Семестри, в яких зазвичай викладається ця дисципліна
    */
-  assessment?: string | null;
-  topics?:
+  semesters?:
     | {
-        title?: string | null;
+        semester?: number | null;
         id?: string | null;
       }[]
     | null;
-  semesters: {
-    semester?: number | null;
-    id?: string | null;
-  }[];
+  /**
+   * Список тем, розбитих за семестрами (якщо передбачено)
+   */
+  topics?:
+    | {
+        title: string;
+        semester?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   prerequisites?: (number | Discipline)[] | null;
   postrequisites?: (number | Discipline)[] | null;
-  electiveGroup?: (number | null) | ElectiveGroup;
   competencies?: (number | Competency)[] | null;
   learningOutcomes?: (number | LearningOutcome)[] | null;
   updatedAt: string;
@@ -299,15 +274,19 @@ export interface LearningOutcome {
   createdAt: string;
 }
 /**
- * Крок 6: дисципліна у конкретній версії програми — кредити, силабус, компетентності
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "discipline-instances".
+ * via the `definition` "discipline-relations".
  */
-export interface DisciplineInstance {
+export interface DisciplineRelation {
   id: number;
-  discipline: number | Discipline;
-  programVersion: number | ProgramVersion;
+  /**
+   * Субʼєкт звʼязку
+   */
+  subject: number | Discipline;
+  /**
+   * Дисципліна, від якої залежимо
+   */
+  dependsOn: number | Discipline;
   updatedAt: string;
   createdAt: string;
 }
@@ -344,24 +323,16 @@ export interface PayloadLockedDocument {
         value: number | Department;
       } | null)
     | ({
-        relationTo: 'specialties';
-        value: number | Specialty;
-      } | null)
-    | ({
         relationTo: 'educational-programs';
         value: number | EducationalProgram;
-      } | null)
-    | ({
-        relationTo: 'program-versions';
-        value: number | ProgramVersion;
       } | null)
     | ({
         relationTo: 'disciplines';
         value: number | Discipline;
       } | null)
     | ({
-        relationTo: 'discipline-instances';
-        value: number | DisciplineInstance;
+        relationTo: 'discipline-relations';
+        value: number | DisciplineRelation;
       } | null)
     | ({
         relationTo: 'elective-groups';
@@ -451,34 +422,18 @@ export interface DepartmentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "specialties_select".
- */
-export interface SpecialtiesSelect<T extends boolean = true> {
-  code?: T;
-  title?: T;
-  department?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "educational-programs_select".
  */
 export interface EducationalProgramsSelect<T extends boolean = true> {
+  fullTitle?: T;
+  specialtyCode?: T;
   title?: T;
   degree?: T;
-  specialty?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "program-versions_select".
- */
-export interface ProgramVersionsSelect<T extends boolean = true> {
   year?: T;
-  program?: T;
+  department?: T;
+  totalCredits?: T;
   isActive?: T;
+  disciplines?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -488,28 +443,29 @@ export interface ProgramVersionsSelect<T extends boolean = true> {
  */
 export interface DisciplinesSelect<T extends boolean = true> {
   code?: T;
-  type?: T;
   name?: T;
   shortName?: T;
   description?: T;
+  type?: T;
+  electiveGroup?: T;
   credits?: T;
   hours?: T;
   assessment?: T;
-  topics?:
-    | T
-    | {
-        title?: T;
-        id?: T;
-      };
   semesters?:
     | T
     | {
         semester?: T;
         id?: T;
       };
+  topics?:
+    | T
+    | {
+        title?: T;
+        semester?: T;
+        id?: T;
+      };
   prerequisites?: T;
   postrequisites?: T;
-  electiveGroup?: T;
   competencies?: T;
   learningOutcomes?: T;
   updatedAt?: T;
@@ -517,11 +473,11 @@ export interface DisciplinesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "discipline-instances_select".
+ * via the `definition` "discipline-relations_select".
  */
-export interface DisciplineInstancesSelect<T extends boolean = true> {
-  discipline?: T;
-  programVersion?: T;
+export interface DisciplineRelationsSelect<T extends boolean = true> {
+  subject?: T;
+  dependsOn?: T;
   updatedAt?: T;
   createdAt?: T;
 }

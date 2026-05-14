@@ -1,70 +1,101 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import ProgramWizard from '@/components/ProgramWizard/ProgramWizard';
+import { cookies } from 'next/headers';
+import ProgramWizard, { EducationalProgram } from '@/components/ProgramWizard/ProgramWizard';
+import { sortByCode } from '@/utils/sortByCode';
+import Hero from '@/components/ui/Hero/Hero';
+import Marquee from '@/components/ui/Marquee/Marquee';
+import About from '@/components/ui/About/About';
+import type { ProgramOption } from '@/components/ui/Hero/ProgramSelector';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 
 export const dynamic = 'force-dynamic';
 
+const degreeLabels: Record<string, string> = {
+  bachelor: 'Бакалавр',
+  master: 'Магістр',
+};
+
 export default async function Home() {
+  const cookieStore = await cookies();
+  const programVersionId = cookieStore.get('programVersionId')?.value;
+
   const payload = await getPayload({ config });
 
-  const { docs: specialties } = await payload.find({
-    collection: 'specialties',
-    limit: 100,
-    depth: 1,
-  });
-
-  const { docs: programs } = await payload.find({
+  const { docs: rawPrograms } = await payload.find({
     collection: 'educational-programs',
-    limit: 200,
-    depth: 1,
-  });
-
-  const { docs: versions } = await payload.find({
-    collection: 'program-versions',
     limit: 500,
     depth: 1,
-  });
+  }) as { docs: any[] };
+
+  const activeProg = rawPrograms.find((p) => String(p.id) === String(programVersionId));
+
+  if (!programVersionId || !activeProg) {
+    const departmentTitle =
+      rawPrograms.length > 0 &&
+        rawPrograms[0]?.department &&
+        typeof rawPrograms[0].department === 'object'
+        ? (rawPrograms[0].department as any).title ?? ''
+        : '';
+
+    const programs: EducationalProgram[] = rawPrograms.map((p) => ({
+      id: String(p.id),
+      title: p.title as string,
+      specialtyCode: p.specialtyCode as string,
+      degree: p.degree as 'bachelor' | 'master',
+      year: p.year as number,
+      isActive: p.isActive as boolean,
+    }));
+
+    return (
+      <ProgramWizard
+        programs={programs}
+        departmentTitle={departmentTitle}
+      />
+    );
+  }
+
+  const { disciplines: rawDisciplines } = await getProgramDisciplines();
+  const sorted = sortByCode(rawDisciplines);
 
 
+  const countDiscipline = sorted.filter((d: any) => d.code?.startsWith('ОК')).length;
+  const countElective = sorted.filter((d: any) => d.code?.startsWith('ВК')).length / 3;
+  const countSemester = Math.max(
+    ...sorted.flatMap((d: any) => d.semesters?.map((s: any) => s.semester ?? 0) ?? []),
+    0
+  );
 
-  const departmentTitle =
-    specialties[0]?.department && typeof specialties[0].department === 'object'
-      ? (specialties[0].department as any).title ?? ''
-      : '';
-
-  const serializedSpecialties = specialties.map((s) => ({
-    id: s.id,
-    code: s.code,
-    title: s.title,
-    department: s.department,
-  }));
-
-  const serializedPrograms = programs.map((p) => ({
+  const programOptions: ProgramOption[] = rawPrograms.map((p) => ({
     id: p.id,
-    title: p.title,
-    degree: p.degree as 'bachelor' | 'master',
-    specialty: p.specialty,
+    label: `${p.specialtyCode} ${p.title} · ${degreeLabels[p.degree] ?? ''} · ${p.year}`,
+    year: p.year,
+    degree: p.degree as any,
+    isCurrent: String(p.id) === String(programVersionId),
   }));
 
-  const serializedVersions = versions.map((v) => ({
-    id: v.id,
-    year: v.year,
-    isActive: v.isActive ?? false,
-    program: v.program,
-  }));
+  const currentProgram = activeProg
+    ? `${activeProg.specialtyCode} ${activeProg.title} · ${degreeLabels[activeProg.degree] ?? ''} · ${activeProg.year}`
+    : "Оберіть програму";
+
+  const dynamicTitle = 'Освітня програма';
+  const dynamicSubtitle = activeProg ? activeProg.title : 'кафедри КН';
+  const totalCredits = activeProg?.totalCredits ?? 240;
 
   return (
-    <ProgramWizard
-      specialties={serializedSpecialties}
-      programs={serializedPrograms}
-      versions={serializedVersions}
-      departmentTitle={departmentTitle}
-      stats={{
-        countDiscipline: 0,
-        countElective: 0,
-        countSemester: 0,
-        countCredits: 240,
-      }}
-    />
+    <>
+      <Hero
+        countDiscipline={countDiscipline}
+        countElective={Math.round(countElective)}
+        countSemester={countSemester}
+        countCredits={totalCredits}
+        title={dynamicTitle}
+        subtitle={dynamicSubtitle}
+        currentProgram={currentProgram}
+        programOptions={programOptions}
+      />
+      <Marquee disciplines={sorted} />
+      <About disciplines={sorted} />
+    </>
   );
 }

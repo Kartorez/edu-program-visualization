@@ -4,38 +4,18 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import styles from './ProgramWizard.module.scss';
 
-type Specialty = {
-  id: number;
-  code: string;
+export type EducationalProgram = {
+  id: string;
   title: string;
-  department?: { title: string } | number;
-};
-
-type Program = {
-  id: number;
-  title: string;
+  specialtyCode: string;
   degree: 'bachelor' | 'master';
-  specialty: { id: number } | number;
-};
-
-type Version = {
-  id: number;
   year: number;
   isActive: boolean;
-  program: { id: number } | number;
 };
 
 interface ProgramWizardProps {
-  specialties: Specialty[];
-  programs: Program[];
-  versions: Version[];
+  programs: EducationalProgram[];
   departmentTitle: string;
-  stats: {
-    countDiscipline: number;
-    countElective: number;
-    countSemester: number;
-    countCredits: number;
-  };
 }
 
 type Step = 'specialties' | 'programs';
@@ -50,24 +30,12 @@ const degreeDuration: Record<string, string> = {
   master: '2 роки навчання',
 };
 
-function getProgramId(v: Version) {
-  return typeof v.program === 'number' ? v.program : v.program?.id;
-}
-
-function getSpecialtyId(p: Program) {
-  return typeof p.specialty === 'number' ? p.specialty : p.specialty?.id;
-}
-
 export default function ProgramWizard({
-  specialties,
   programs,
-  versions,
   departmentTitle,
-  stats,
 }: ProgramWizardProps) {
   const [step, setStep] = useState<Step>('specialties');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
+  const [selectedSpecialtyCode, setSelectedSpecialtyCode] = useState<string | null>(null);
   const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward');
 
   const goTo = (next: Step, dir: 'forward' | 'back' = 'forward') => {
@@ -75,13 +43,14 @@ export default function ProgramWizard({
     setStep(next);
   };
 
-  const handleSelectSpecialty = (s: Specialty) => {
-    setSelectedSpecialty(s);
+  const handleSelectSpecialty = (code: string) => {
+    setSelectedSpecialtyCode(code);
     goTo('programs', 'forward');
   };
 
-  const handleSelectVersion = (v: Version) => {
-    setSelectedVersion(v);
+  const handleSelectVersion = (id: string) => {
+    document.cookie = `programVersionId=${id}; path=/; max-age=31536000`;
+    window.location.href = '/';
   };
 
   const handleBack = () => {
@@ -90,31 +59,27 @@ export default function ProgramWizard({
     }
   };
 
-  const filteredPrograms = selectedSpecialty
-    ? programs.filter((p) => getSpecialtyId(p) === selectedSpecialty.id)
+  const specialtyMap = new Map<string, { code: string; title: string; count: number }>();
+  programs.forEach((p) => {
+    if (!specialtyMap.has(p.specialtyCode)) {
+      specialtyMap.set(p.specialtyCode, { code: p.specialtyCode, title: p.title, count: 0 });
+    }
+    specialtyMap.get(p.specialtyCode)!.count += 1;
+  });
+  const specialtiesWithCount = Array.from(specialtyMap.values());
+
+  const selectedSpecialty = selectedSpecialtyCode ? specialtyMap.get(selectedSpecialtyCode) : null;
+  const filteredPrograms = selectedSpecialtyCode
+    ? programs.filter((p) => p.specialtyCode === selectedSpecialtyCode)
     : [];
 
   const grouped = (['bachelor', 'master'] as const)
     .map((degree) => {
       const degreeProg = filteredPrograms.filter((p) => p.degree === degree);
-      const degreVersions = degreeProg.flatMap((prog) =>
-        versions
-          .filter((v) => getProgramId(v) === prog.id)
-          .map((v) => ({ ...v, programTitle: prog.title }))
-      );
-      degreVersions.sort((a, b) => b.year - a.year);
-      return { degree, programs: degreeProg, versions: degreVersions };
+      degreeProg.sort((a, b) => b.year - a.year);
+      return { degree, versions: degreeProg };
     })
     .filter((g) => g.versions.length > 0);
-
-  const selectedProgram = selectedVersion
-    ? programs.find((p) => p.id === getProgramId(selectedVersion))
-    : null;
-
-  const specialtiesWithCount = specialties.map((s) => ({
-    ...s,
-    programCount: programs.filter((p) => getSpecialtyId(p) === s.id).length,
-  }));
 
   return (
     <div className={styles.page}>
@@ -146,19 +111,19 @@ export default function ProgramWizard({
             <div className={styles.list}>
               {specialtiesWithCount.map((s, i) => (
                 <button
-                  key={s.id}
+                  key={s.code}
                   className={styles.card}
                   style={{ animationDelay: `${i * 60}ms` }}
-                  onClick={() => handleSelectSpecialty(s)}
+                  onClick={() => handleSelectSpecialty(s.code)}
                 >
                   <span className={styles.cardCode}>{s.code}</span>
                   <div className={styles.cardBody}>
                     <span className={styles.cardTitle}>{s.title}</span>
                     <span className={styles.cardMeta}>
-                      {departmentTitle || 'Кафедра'} · {s.programCount}{' '}
-                      {s.programCount === 1
+                      {departmentTitle || 'Кафедра'} · {s.count}{' '}
+                      {s.count === 1
                         ? 'програма'
-                        : s.programCount < 5
+                        : s.count < 5
                           ? 'програми'
                           : 'програм'}
                     </span>
@@ -204,19 +169,18 @@ export default function ProgramWizard({
 
                   <div className={styles.versionList}>
                     {group.versions.map((v, i) => (
-                      <Link
-                        href="/plan"
+                      <button
                         key={v.id}
                         className={styles.versionCard}
-                        style={{ animationDelay: `${i * 50}ms`, textDecoration: 'none' }}
-                        onClick={() => handleSelectVersion(v)}
+                        style={{ animationDelay: `${i * 50}ms`, border: 'none', background: 'none', textAlign: 'left', width: '100%', cursor: 'pointer' }}
+                        onClick={() => handleSelectVersion(v.id)}
                       >
                         <span
                           className={`${styles.versionYear} ${v.isActive ? styles.versionYearActive : ''}`}
                         >
                           {v.year}
                         </span>
-                        <span className={styles.versionTitle}>{v.programTitle}</span>
+                        <span className={styles.versionTitle}>{v.title}</span>
                         <span
                           className={`${styles.versionStatus} ${v.isActive ? styles.versionStatusActive : ''}`}
                         >
@@ -225,7 +189,7 @@ export default function ProgramWizard({
                         <span className={styles.cardArrow}>
                           <ArrowRight size={18} strokeWidth={2.5} />
                         </span>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>

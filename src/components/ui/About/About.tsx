@@ -6,7 +6,7 @@ import type { Discipline } from '@/payload-types';
 
 export default function About({ disciplines }: { disciplines: Discipline[] }) {
   const mid = disciplines.find(
-    (d) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
+    (d: any) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
   );
 
   const countDisciplines = disciplines.filter((d) => d.code?.startsWith('ОК')).length;
@@ -40,11 +40,10 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
     return { sem, count };
   });
 
-  const midPrereqs =
-    mid?.prerequisites?.map((p) => (typeof p === 'object' ? p.code : String(p))) ?? [];
+  const getCodes = (list: any[]) => (list || []).map(p => p.code).filter(Boolean);
 
-  const midPostreqs =
-    mid?.postrequisites?.map((p) => (typeof p === 'object' ? p.code : String(p))) ?? [];
+  const midPrereqs = getCodes(mid?.prerequisites as any);
+  const midPostreqs = getCodes(mid?.postrequisites as any);
 
   return (
     <section className="about-section" id="about">
@@ -65,7 +64,7 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
           {mid && (
             <div className="flow">
               <div className="flow__node-wrap">
-                <span className="flow__label flow__label--pre">Постреквізити</span>
+                <span className="flow__label flow__label--pre">Пререквізити</span>
                 <div className="node discipline">
                   {midPrereqs.length > 0 && (
                     <div className="node__prereqs">
@@ -82,7 +81,7 @@ export default function About({ disciplines }: { disciplines: Discipline[] }) {
                     </div>
                   )}
                 </div>
-                <span className="flow__label flow__label--post">Пререквізити</span>
+                <span className="flow__label flow__label--post">Постреквізити</span>
               </div>
             </div>
           )}

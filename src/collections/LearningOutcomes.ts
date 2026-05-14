@@ -13,11 +13,13 @@ export const LearningOutcomes: CollectionConfig = {
   fields: [
     {
       name: 'code',
+      label: 'Код ПРН',
       type: 'text',
       required: true,
     },
     {
       name: 'description',
+      label: 'Опис результату',
       type: 'textarea',
     },
   ],
