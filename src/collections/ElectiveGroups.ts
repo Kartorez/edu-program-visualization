@@ -3,9 +3,14 @@ import { CollectionConfig } from 'payload';
 export const ElectiveGroups: CollectionConfig = {
   slug: 'elective-groups',
 
+  labels: {
+    singular: 'Група вибіркових',
+    plural: 'Вибіркові групи',
+  },
+
   admin: {
     useAsTitle: 'name',
-    group: 'Структура',
+    group: 'Навчальний план',
     description: 'Групування вибіркових дисциплін (Блоки)',
     defaultColumns: ['name', 'code'],
   },

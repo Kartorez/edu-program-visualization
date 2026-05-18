@@ -324,6 +324,10 @@ $transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     &--highlight {
       background: var(--color-primary);
 
+      &:hover {
+        background: var(--color-primary-hover);
+      }
+
       .sidebar__semester-label {
         color: white;
         font-weight: 600;
@@ -511,6 +515,107 @@ $transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     line-height: 1.3;
     white-space: normal;
+  }
+
+  &__elective-group {
+    overflow: hidden;
+  }
+
+  &__elective-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px 8px 48px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #d97706;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+    transition: background 0.2s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 25px;
+      top: 0;
+      bottom: 0;
+      width: 1.5px;
+      background: #f59e0b;
+      opacity: 0.5;
+    }
+
+    .sidebar__subject-indicator {
+      position: static;
+      width: 8px;
+      height: 8px;
+      border-color: #f59e0b;
+      opacity: 0.8;
+      flex-shrink: 0;
+
+      &::after {
+        background: #f59e0b;
+      }
+    }
+
+    &:hover {
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    &--active {
+      color: #b45309;
+    }
+  }
+
+  &__elective-label {
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  &__elective-chevron {
+    display: flex;
+    align-items: center;
+    color: #d97706;
+    opacity: 0.7;
+    transition: transform 0.25s ease;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__elective-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+    overflow: hidden;
+
+    &--open {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  &__elective-items {
+    overflow: hidden;
+  }
+
+  &__subject-item--elective-variant {
+    padding-left: 64px !important;
+
+    &::before {
+      left: 41px !important;
+      background: #f59e0b !important;
+      opacity: 0.4 !important;
+      border-left: 1px dashed #f59e0b;
+      width: 0 !important;
+    }
+
+    .sidebar__subject-code {
+      color: #d97706;
+    }
   }
 }
 

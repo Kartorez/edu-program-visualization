@@ -184,8 +184,8 @@
     top: 0;
     background: #ffffff;
     z-index: 12;
-    width: 280px;
-    min-width: 280px;
+    width: clamp(14rem, 20vw, 18rem);
+    min-width: clamp(14rem, 20vw, 18rem);
     text-align: left !important;
     padding: 0.75rem 1rem !important;
     font-weight: 700;
@@ -240,10 +240,8 @@
       color: var(--color-text);
       line-height: 1.3;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 0.5rem;
-      overflow: hidden;
-      white-space: nowrap;
 
       .code-tag {
         font-weight: 700;
@@ -253,11 +251,11 @@
         border-radius: 4px;
         font-size: 0.75rem;
         flex-shrink: 0;
+        margin-top: 0.125rem;
       }
 
       .name-part {
-        overflow: hidden;
-        text-overflow: ellipsis;
+        display: block;
       }
     }
   }
@@ -282,8 +280,8 @@
   }
 
   &__cell {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
 
     &--highlight {
       background: #eef2ff;
@@ -296,18 +294,20 @@
 
     .dot-zk {
       display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-sm);
       background: var(--color-primary);
+      border: 1px solid #ddd6fe;
     }
 
     .dot-sk {
       display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-sm);
       background: var(--color-vk);
+      border: 1px solid #bbf7d0;
     }
   }
 }

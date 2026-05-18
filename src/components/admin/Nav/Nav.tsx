@@ -112,7 +112,7 @@ const Nav: React.FC = () => {
     <nav className="custom-nav">
       <div className="nav-header">
         <GraduationCap size={24} className="logo-icon" />
-        <span className="logo-text">КН ВНАУ</span>
+        <span className="logo-text">ВНАУ</span>
       </div>
 
       <div className="nav-section">

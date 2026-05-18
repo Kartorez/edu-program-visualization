@@ -3,6 +3,7 @@ import { Node, NodeProps } from '@xyflow/react';
 import ReqList from './ReqList';
 import SemesterNode from './SemesterNode';
 import SelectiveNode from './SelectiveNode';
+import { sortByCode } from '@/utils/sortByCode';
 import './DisciplineNode.scss';
 
 type DisciplineData = {
@@ -30,20 +31,23 @@ export default memo(
     if (kind === 'semester') return <SemesterNode title={title} />;
     if (kind === 'selective') return <SelectiveNode code={code} />;
 
+    const prereqs = sortByCode(prerequisites.filter((c) => !c.startsWith('ВК')).map(c => ({ code: c }))).map(o => o.code!);
+    const postreqs = sortByCode(postrequisites.filter((c) => !c.startsWith('ВК')).map(c => ({ code: c }))).map(o => o.code!);
+
     return (
       <div className="node discipline">
-        {prerequisites.length > 0 && (
+        {prereqs.length > 0 && (
           <div className="node__prereqs">
-            <ReqList codes={prerequisites} />
+            <ReqList codes={prereqs} />
           </div>
         )}
         <div className="node__text">
           <div className="node__code">{code}</div>
           <div className="node__title">{title}</div>
         </div>
-        {postrequisites.length > 0 && (
+        {postreqs.length > 0 && (
           <div className="node__postreqs">
-            <ReqList codes={postrequisites} />
+            <ReqList codes={postreqs} />
           </div>
         )}
       </div>

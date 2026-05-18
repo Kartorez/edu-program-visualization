@@ -2,14 +2,17 @@ import type { CollectionConfig } from 'payload';
 
 export const EducationalPrograms: CollectionConfig = {
   slug: 'educational-programs',
-
+  labels: {
+    singular: 'Освітня програма',
+    plural: 'Освітні програми',
+  },
   admin: {
     useAsTitle: 'fullTitle',
     description: 'Освітня програма (версія за роком набору)',
     defaultColumns: ['specialtyCode', 'title', 'year', 'degree', 'isActive'],
-    group: 'Структура',
+    group: 'Установа',
   },
-
+  lockDocuments: false,
   fields: [
     {
       name: 'fullTitle',

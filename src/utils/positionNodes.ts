@@ -22,7 +22,7 @@ const resolveIds = (items: (string | number | Discipline)[], idToCode: Map<strin
 export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unknown>>[] {
   const result: Node<Record<string, unknown>>[] = [];
   const semesterCounters: Record<number, number> = {};
-  
+
   const idToCode = new Map<string, string>(rawNodes.map(n => [String(n.id), n.code]));
 
   const okNodes = sortByCode(rawNodes.filter((n) => !getElectiveGroupCode(n)));
@@ -38,9 +38,7 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
     return true;
   });
 
-  const allSemesters: number[] = displayNodes.flatMap((n) =>
-    n.semesters.map((s) => s.semester ?? 0)
-  );
+  const allSemesters: number[] = displayNodes.map((n: any) => n.currentSemester ?? 1);
 
   const uniqueSemesters = [...new Set(allSemesters)].sort((a, b) => a - b);
   const years = [...new Set(uniqueSemesters.map(getYear))];
@@ -49,12 +47,12 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
     const semester1 = year * 2 + 1;
     const semester2 = year * 2 + 2;
 
-    const s1nodes = displayNodes.filter((n) =>
-      n.semesters.some((s) => s.semester === semester1)
+    const s1nodes = displayNodes.filter((n: any) =>
+      (n.currentSemester ?? 1) === semester1
     ).length;
 
-    const s2nodes = displayNodes.filter((n) =>
-      n.semesters.some((s) => s.semester === semester2)
+    const s2nodes = displayNodes.filter((n: any) =>
+      (n.currentSemester ?? 1) === semester2
     ).length;
 
     const width = (Math.max(s1nodes, s2nodes) + 1) * COL_WIDTH + GRAPH_PADDING;
@@ -78,54 +76,52 @@ export function positionNodes(rawNodes: Discipline[]): Node<Record<string, unkno
   });
 
   displayNodes.forEach((node) => {
-    node.semesters.forEach((s) => {
-      const semester = s.semester ?? 0;
+    const semester = (node as any).currentSemester ?? 1;
 
-      if (!(semester in semesterCounters)) {
-        semesterCounters[semester] = 0;
+    if (!(semester in semesterCounters)) {
+      semesterCounters[semester] = 0;
 
-        const nodesInSemester = displayNodes.filter((n) =>
-          n.semesters.some((s2) => s2.semester === semester)
-        ).length;
+      const nodesInSemester = displayNodes.filter((n: any) =>
+        (n.currentSemester ?? 1) === semester
+      ).length;
 
-        const width = (nodesInSemester + 1) * COL_WIDTH + GRAPH_PADDING;
-
-        result.push({
-          id: `semester-${semester}`,
-          type: 'disciplineNode',
-          position: { x: GRAPH_PADDING, y: getSemesterY(semester) + GRAPH_PADDING },
-          style: { height: ROW_HEIGHT, width, zIndex: -1, pointerEvents: 'none' },
-          data: {
-            code: '',
-            name: `Семестр ${semester}`,
-            semesters: [semester],
-            prerequisites: [],
-            postrequisites: [],
-          } as Record<string, unknown>,
-        });
-      }
-
-      const columnIndex = 1 + semesterCounters[semester]++;
-      const group = getElectiveGroupCode(node);
-      const groupName = group && node.electiveGroup && typeof node.electiveGroup === 'object' && 'name' in node.electiveGroup 
-        ? node.electiveGroup.name 
-        : 'Вибіркова дисципліна';
+      const width = (nodesInSemester + 1) * COL_WIDTH + GRAPH_PADDING;
 
       result.push({
-        id: `${group ?? node.code}-${semester}`,
+        id: `semester-${semester}`,
         type: 'disciplineNode',
-        parentId: `semester-${semester}`,
-        extent: 'parent',
-        position: { x: columnIndex * COL_WIDTH - 20, y: 0 },
+        position: { x: GRAPH_PADDING, y: getSemesterY(semester) + GRAPH_PADDING },
+        style: { height: ROW_HEIGHT, width, zIndex: -1, pointerEvents: 'none' },
         data: {
-          code: group ?? node.code,
-          name: group ? groupName : node.name,
-          shortName: group ?? node.shortName,
+          code: '',
+          name: `Семестр ${semester}`,
           semesters: [semester],
-          prerequisites: resolveIds(node.prerequisites ?? [], idToCode),
-          postrequisites: resolveIds(node.postrequisites ?? [], idToCode),
+          prerequisites: [],
+          postrequisites: [],
         } as Record<string, unknown>,
       });
+    }
+
+    const columnIndex = 1 + semesterCounters[semester]++;
+    const group = getElectiveGroupCode(node);
+    const groupName = group && node.electiveGroup && typeof node.electiveGroup === 'object' && 'name' in node.electiveGroup
+      ? node.electiveGroup.name
+      : 'Вибіркова дисципліна';
+
+    result.push({
+      id: `${group ?? node.code}-${semester}`,
+      type: 'disciplineNode',
+      parentId: `semester-${semester}`,
+      extent: 'parent',
+      position: { x: columnIndex * COL_WIDTH - 20, y: 0 },
+      data: {
+        code: group ?? node.code,
+        name: group ? groupName : node.name,
+        shortName: group ?? node.shortName,
+        semesters: [semester],
+        prerequisites: resolveIds(node.prerequisites ?? [], idToCode),
+        postrequisites: resolveIds(node.postrequisites ?? [], idToCode),
+      } as Record<string, unknown>,
     });
   });
 

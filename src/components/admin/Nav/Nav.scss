@@ -13,6 +13,7 @@
   &::-webkit-scrollbar {
     width: 4px;
   }
+
   &::-webkit-scrollbar-thumb {
     background: var(--theme-elevation-200);
     border-radius: 10px;
@@ -65,7 +66,7 @@
     &.active {
       background-color: var(--theme-primary-50);
       color: var(--theme-primary-600);
-      
+
       svg {
         color: var(--theme-primary-600);
       }
@@ -179,9 +180,14 @@
         height: 6px;
         border-radius: 50%;
         flex-shrink: 0;
-        
-        &.required { background-color: var(--theme-primary-500); }
-        &.elective { background-color: #f59e0b; }
+
+        &.required {
+          background-color: var(--theme-primary-500);
+        }
+
+        &.elective {
+          background-color: #f59e0b;
+        }
       }
 
       &:hover {
@@ -223,16 +229,18 @@
   .custom-nav {
     background-color: #111;
     border-right-color: #222;
-    
+
     .curriculum-section {
       background-color: #1a1a1a;
       border-color: #222;
     }
-    
-    .nav-link:hover, .semester-header:hover, .discipline-link:hover {
+
+    .nav-link:hover,
+    .semester-header:hover,
+    .discipline-link:hover {
       background-color: #222;
     }
-    
+
     .nav-link.active {
       background-color: rgba(var(--theme-primary-500-rgb), 0.1);
     }

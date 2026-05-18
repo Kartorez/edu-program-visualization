@@ -2,12 +2,15 @@ import { CollectionConfig } from 'payload';
 
 export const LearningOutcomes: CollectionConfig = {
   slug: 'learning-outcomes',
-
+  labels: {
+    singular: 'Результат навчання',
+    plural: 'Результати навчання',
+  },
   admin: {
     useAsTitle: 'code',
-    description: 'Програмні результати навчання',
+    description: 'ПРН програми',
     defaultColumns: ['code', 'description'],
-    group: 'Наповнення',
+    group: 'Дані матриць',
   },
 
   fields: [

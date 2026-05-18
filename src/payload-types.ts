@@ -199,30 +199,28 @@ export interface EducationalProgram {
 export interface Discipline {
   id: number;
   code: string;
+  year: number;
   name: string;
   shortName?: string | null;
+  displayName?: string | null;
   description?: string | null;
   type: 'required' | 'elective';
+  category?: ('standard' | 'practice' | 'thesis') | null;
   electiveGroup?: (number | null) | ElectiveGroup;
   credits?: number | null;
   hours?: number | null;
   assessment?: ('exam' | 'credit' | 'exam_credit') | null;
   /**
-   * Семестри, в яких зазвичай викладається ця дисципліна
+   * Семестри, в яких викладається ця дисципліна
    */
-  semesters?:
-    | {
-        semester?: number | null;
-        id?: string | null;
-      }[]
-    | null;
+  semesters?: ('1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12')[] | null;
   /**
-   * Список тем, розбитих за семестрами (якщо передбачено)
+   * Список тем занять по семестрах
    */
   topics?:
     | {
+        semester: number;
         title: string;
-        semester?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -261,7 +259,7 @@ export interface Competency {
   createdAt: string;
 }
 /**
- * Програмні результати навчання
+ * ПРН програми
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "learning-outcomes".
@@ -321,18 +319,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'departments';
         value: number | Department;
-      } | null)
-    | ({
-        relationTo: 'educational-programs';
-        value: number | EducationalProgram;
-      } | null)
-    | ({
-        relationTo: 'disciplines';
-        value: number | Discipline;
-      } | null)
-    | ({
-        relationTo: 'discipline-relations';
-        value: number | DisciplineRelation;
       } | null)
     | ({
         relationTo: 'elective-groups';
@@ -443,25 +429,23 @@ export interface EducationalProgramsSelect<T extends boolean = true> {
  */
 export interface DisciplinesSelect<T extends boolean = true> {
   code?: T;
+  year?: T;
   name?: T;
   shortName?: T;
+  displayName?: T;
   description?: T;
   type?: T;
+  category?: T;
   electiveGroup?: T;
   credits?: T;
   hours?: T;
   assessment?: T;
-  semesters?:
-    | T
-    | {
-        semester?: T;
-        id?: T;
-      };
+  semesters?: T;
   topics?:
     | T
     | {
-        title?: T;
         semester?: T;
+        title?: T;
         id?: T;
       };
   prerequisites?: T;

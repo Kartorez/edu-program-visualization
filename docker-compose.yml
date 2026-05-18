@@ -25,6 +25,10 @@ services:
     ports:
       - '3000:3000'
     env_file: .env
+    environment:
+      DEBUG: "payload:*"
+      PAYLOAD_LOG_LEVEL: "debug"
+      QUERY_TIMEOUT: "30000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,9 +36,7 @@ services:
       - .:/app
       - /app/node_modules
       - /app/.next
-      - media:/app/media
     restart: always
 
 volumes:
   pgdata:
-  media:

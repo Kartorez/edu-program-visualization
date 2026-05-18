@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload';
+import { relationsCache } from './cache';
 
 const toId = (val: any): any => {
   if (!val) return null;
@@ -13,36 +14,74 @@ const normalizeIds = (arr: any[] = []): any[] => {
 
 export const Disciplines: CollectionConfig = {
   slug: 'disciplines',
-  admin: {
-    useAsTitle: 'name',
-    group: 'Структура',
-    defaultColumns: ['code', 'name', 'type'],
+  labels: {
+    singular: 'Дисципліна',
+    plural: 'Дисципліни',
   },
+  admin: {
+    useAsTitle: 'code',
+    group: 'Навчальний план',
+    defaultColumns: ['code', 'name', 'type', 'semester'],
+  },
+  lockDocuments: false,
   hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        const payload = req.payload;
+
+        // Видаляємо всі зв'язки в один запит
+        await payload.delete({
+          collection: 'discipline-relations' as any,
+          where: {
+            or: [
+              { subject: { equals: id } },
+              { dependsOn: { equals: id } },
+            ],
+          },
+          req,
+          context: { _internalSync: true },
+        });
+
+        // Очищаємо кеш
+        relationsCache.clear();
+      }
+    ],
     afterRead: [
       async ({ doc, req, context }) => {
         if (context?._internalSync) return doc;
         try {
           const sid = doc.id;
-          
-          if (!(req as any)._relationsCache) {
+
+          // Якщо глобальний кеш порожній, завантажуємо ВСІ зв'язки за один запит
+          if (relationsCache.size === 0) {
             const { docs } = await req.payload.find({
               collection: 'discipline-relations' as any,
               limit: 5000,
               depth: 0,
             });
-            (req as any)._relationsCache = docs;
+
+            for (const rel of docs) {
+              const subId = String(toId(rel.subject));
+              const depId = String(toId(rel.dependsOn));
+
+              if (!relationsCache.has(subId)) relationsCache.set(subId, []);
+              if (!relationsCache.has(depId)) relationsCache.set(depId, []);
+
+              relationsCache.get(subId)!.push(rel);
+              relationsCache.get(depId)!.push(rel);
+            }
+            relationsCache.set('__initialized__', []);
           }
-          
-          const relations = (req as any)._relationsCache;
+
+          const relations = relationsCache.get(sid) || [];
 
           doc.prerequisites = relations
-            .filter((r: any) => String(r.subject) === String(sid))
-            .map((r: any) => r.dependsOn);
+            .filter((r: any) => String(toId(r.subject)) === String(sid))
+            .map((r: any) => toId(r.dependsOn));
 
           doc.postrequisites = relations
-            .filter((r: any) => String(r.dependsOn) === String(sid))
-            .map((r: any) => r.subject);
+            .filter((r: any) => String(toId(r.dependsOn)) === String(sid))
+            .map((r: any) => toId(r.subject));
 
           return doc;
         } catch (e) {
@@ -52,6 +91,8 @@ export const Disciplines: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
+        if ((req as any).context?._internalSync) return;
+
         const payload = req.payload;
         const sid = doc.id;
         const reqData = (req as any).data ?? {};
@@ -61,18 +102,15 @@ export const Disciplines: CollectionConfig = {
           dbSubjectField: string,
           dbDependsOnField: string,
         ) => {
-          const newIds = normalizeIds(reqData[fieldName] ?? []);
-          const existing = await payload.find({
-            req,
-            collection: 'discipline-relations' as any,
-            where: { [dbSubjectField]: { equals: sid } },
-            limit: 1000,
-            depth: 0,
-          });
-          const oldIds = existing.docs.map((r: any) => String(r[dbDependsOnField]));
+          if (!(fieldName in reqData)) return;
 
-          const added = newIds.filter(id => !oldIds.includes(String(id)));
-          const removed = oldIds.filter(id => !newIds.map(String).includes(id));
+          const newIds = normalizeIds(reqData[fieldName] ?? []);
+          const oldIds = normalizeIds(previousDoc?.[fieldName] ?? []);
+
+          const added = newIds.filter(id => !oldIds.includes(id));
+          const removed = oldIds.filter(id => !newIds.includes(id));
+
+          if (added.length === 0 && removed.length === 0) return;
 
           await Promise.all([
             ...added.map(id =>
@@ -83,38 +121,32 @@ export const Disciplines: CollectionConfig = {
                 context: { _internalSync: true },
               })
             ),
-            ...removed.map(async id => {
-              const toDelete = await payload.find({
-                req,
-                collection: 'discipline-relations' as any,
-                where: {
-                  and: [
-                    { [dbSubjectField]: { equals: sid } },
-                    { [dbDependsOnField]: { equals: id } },
-                  ],
-                },
-                depth: 0,
-              });
-              return Promise.all(
-                toDelete.docs.map(r =>
-                  payload.delete({ 
-                    req,
-                    collection: 'discipline-relations' as any, 
-                    id: r.id,
-                    context: { _internalSync: true },
-                  })
-                )
-              );
-            }),
+            (async () => {
+              if (removed.length > 0) {
+                await payload.delete({
+                  req,
+                  collection: 'discipline-relations' as any,
+                  where: {
+                    and: [
+                      { [dbSubjectField]: { equals: sid } },
+                      { [dbDependsOnField]: { in: removed } },
+                    ],
+                  },
+                  context: { _internalSync: true },
+                });
+              }
+            })(),
           ]);
         };
 
-        await updateRelations('prerequisites', 'subject', 'dependsOn');
-        await updateRelations('postrequisites', 'dependsOn', 'subject');
+        // Запускаємо оновлення паралельно
+        await Promise.all([
+          updateRelations('prerequisites', 'subject', 'dependsOn'),
+          updateRelations('postrequisites', 'dependsOn', 'subject'),
+        ]);
 
-        if ((req as any)._relationsCache) {
-          delete (req as any)._relationsCache;
-        }
+        // Очищаємо кеш
+        relationsCache.clear();
       }
     ]
   },
@@ -126,19 +158,38 @@ export const Disciplines: CollectionConfig = {
           label: 'Основне',
           fields: [
             {
-              name: 'parseButton',
-              type: 'ui',
-              admin: { components: { Field: '@/components/admin/ParseButton#default' } },
-            },
-            {
               type: 'row',
               fields: [
-                { name: 'code', label: 'Код', type: 'text', required: true, unique: true, admin: { width: '30%' } },
-                { name: 'name', label: 'Назва', type: 'text', required: true, admin: { width: '70%' } },
+                { name: 'code', label: 'Код', type: 'text', required: true, admin: { width: '15%' } },
+                { name: 'year', label: 'Рік', type: 'number', defaultValue: new Date().getFullYear(), required: true, admin: { width: '15%' } },
+                { name: 'name', label: 'Назва', type: 'text', required: true, admin: { width: '40%' } },
+                { name: 'shortName', label: 'Коротка назва', type: 'text', admin: { width: '30%' } },
               ],
             },
-            { name: 'shortName', label: 'Коротка назва (для графа)', type: 'text' },
+            {
+              name: 'displayName',
+              type: 'text',
+              admin: { hidden: true },
+              hooks: {
+                beforeValidate: [
+                  ({ data, value }) => {
+                    if (data) {
+                      return `[${data.code || '?'}] ${data.name || 'Без назви'} (${data.year || '?'})`;
+                    }
+                    return value;
+                  },
+                ],
+              },
+            },
             { name: 'description', label: 'Опис', type: 'textarea' },
+            {
+              name: 'parseButton',
+              type: 'ui',
+              admin: {
+                position: 'sidebar',
+                components: { Field: '@/components/admin/ParseButton#default' }
+              },
+            },
             {
               type: 'row',
               fields: [
@@ -148,6 +199,18 @@ export const Disciplines: CollectionConfig = {
                   type: 'select',
                   required: true,
                   options: [{ label: 'ОК (Обовʼязкова)', value: 'required' }, { label: 'ВК (Вибіркова)', value: 'elective' }],
+                  admin: { width: '50%' },
+                },
+                {
+                  name: 'category',
+                  label: 'Категорія',
+                  type: 'select',
+                  defaultValue: 'standard',
+                  options: [
+                    { label: 'Стандартна', value: 'standard' },
+                    { label: 'Практика', value: 'practice' },
+                    { label: 'Кваліфікаційна робота', value: 'thesis' },
+                  ],
                   admin: { width: '50%' },
                 },
                 {
@@ -179,11 +242,12 @@ export const Disciplines: CollectionConfig = {
             },
             {
               name: 'semesters',
-              label: 'Семестри (за замовчуванням)',
-              type: 'array',
-              fields: [{ name: 'semester', type: 'number' }],
+              label: 'Семестри',
+              type: 'select',
+              hasMany: true,
+              options: Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}`, value: `${i + 1}` })),
               admin: {
-                description: 'Семестри, в яких зазвичай викладається ця дисципліна',
+                description: 'Семестри, в яких викладається ця дисципліна',
               }
             },
             {
@@ -191,19 +255,28 @@ export const Disciplines: CollectionConfig = {
               label: 'Теми занять',
               type: 'array',
               admin: {
-                components: {
-                  Field: '@/components/admin/TopicEditor#default',
-                },
-                description: 'Список тем, розбитих за семестрами (якщо передбачено)',
+                description: 'Список тем занять по семестрах',
               },
               fields: [
                 {
                   type: 'row',
                   fields: [
-                    { name: 'title', label: 'Тема', type: 'text', required: true, admin: { width: '80%' } },
-                    { name: 'semester', label: 'Сем.', type: 'number', admin: { width: '20%' } },
-                  ]
-                }
+                    { 
+                      name: 'semester', 
+                      label: 'Сем.', 
+                      type: 'number', 
+                      required: true,
+                      admin: { width: '15%' } 
+                    },
+                    { 
+                      name: 'title', 
+                      label: 'Тема', 
+                      type: 'text', 
+                      required: true, 
+                      admin: { width: '85%' } 
+                    },
+                  ],
+                },
               ],
             },
           ],

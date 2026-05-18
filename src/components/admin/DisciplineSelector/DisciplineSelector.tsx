@@ -7,6 +7,7 @@ type Discipline = {
   id: string;
   code: string;
   name: string;
+  year: number;
   type: 'required' | 'elective';
   credits?: number;
 };
@@ -20,7 +21,7 @@ export default function DisciplineSelector({ path }: { path: string }) {
   useEffect(() => {
     const fetchDisciplines = async () => {
       try {
-        const res = await fetch('/api/disciplines?limit=1000&depth=0&sort=code');
+        const res = await fetch('/api/disciplines?limit=1000&depth=0&sort=-year,code');
         const data = await res.json();
         setDisciplines(data.docs || []);
       } catch (err) {
@@ -40,7 +41,8 @@ export default function DisciplineSelector({ path }: { path: string }) {
     return disciplines.filter(
       (d) =>
         d.name.toLowerCase().includes(lowerSearch) ||
-        d.code.toLowerCase().includes(lowerSearch)
+        d.code.toLowerCase().includes(lowerSearch) ||
+        d.year?.toString().includes(lowerSearch)
     );
   }, [disciplines, search]);
 
@@ -74,7 +76,7 @@ export default function DisciplineSelector({ path }: { path: string }) {
         <input
           type="text"
           className="discipline-selector__search"
-          placeholder="🔍 Пошук за назвою або кодом..."
+          placeholder="🔍 Пошук за назвою, кодом або роком..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -105,7 +107,8 @@ export default function DisciplineSelector({ path }: { path: string }) {
           <thead>
             <tr>
               <th style={{ width: '40px' }}></th>
-              <th style={{ width: '120px' }}>Код</th>
+              <th style={{ width: '100px' }}>Рік</th>
+              <th style={{ width: '100px' }}>Код</th>
               <th>Назва дисципліни</th>
               <th style={{ width: '100px' }}>Тип</th>
               <th style={{ width: '80px', textAlign: 'center' }}>Кредити</th>
@@ -129,6 +132,9 @@ export default function DisciplineSelector({ path }: { path: string }) {
                       readOnly
                       onClick={(e) => e.stopPropagation()}
                     />
+                  </td>
+                  <td>
+                    <span className="discipline-selector__year">{d.year}</span>
                   </td>
                   <td>
                     <span className="discipline-selector__code">{d.code}</span>

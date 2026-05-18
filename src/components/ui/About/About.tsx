@@ -5,26 +5,31 @@ import ReqList from '@/components/DisciplineNode/ReqList';
 import type { Discipline } from '@/payload-types';
 
 export default function About({ disciplines }: { disciplines: Discipline[] }) {
-  const mid = disciplines.find(
-    (d: any) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
+  const unique = Array.from(new Map((disciplines as any[]).map((d) => [String(d.id), d])).values());
+
+  const mid = unique.find(
+    (d: any) => d.code?.startsWith('ОК') && (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
   );
 
-  const countDisciplines = disciplines.filter((d) => d.code?.startsWith('ОК')).length;
+  const countDisciplines = unique.filter((d: any) => d.code?.startsWith('ОК')).length;
 
-  const electiveTags = disciplines
-    .filter((d) => d.code?.match(/^ВК \d+\.1$/))
-    .map((d) => d.shortName ?? d.name);
+  const electiveGroupMap = new Map(
+    (disciplines as any[])
+      .filter((d) => d.code?.match(/^ВК\s*\d+\.1/))
+      .map((d) => [d.code?.match(/^ВК\s*\d+/)?.[0], d.shortName ?? d.name])
+  );
+  const electiveTags = [...electiveGroupMap.values()];
 
   const allSemesters = [
-    ...new Set(disciplines.flatMap((d) => d.semesters?.map((s) => s.semester ?? 0) ?? [])),
-  ].sort((a, b) => a - b);
+    ...new Set((disciplines as any[]).map((d) => d.currentSemester).filter((s) => s > 0)),
+  ].sort((a: number, b: number) => a - b);
 
   const semesterLabels = allSemesters.map((sem) => {
     const seenGroups = new Set<string>();
     let count = 0;
 
-    disciplines
-      .filter((d) => d.semesters?.some((s) => s.semester === sem))
+    (disciplines as any[])
+      .filter((d) => d.currentSemester === sem)
       .forEach((d) => {
         const group = d.code?.match(/^ВК\s*\d+/)?.[0];
         if (group) {

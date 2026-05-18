@@ -2,6 +2,8 @@ import Badge from '@/components/ui/Badge';
 import PageHeader from '@/components/ui/PageHeader';
 import Stat from '@/components/ui/Stat';
 import Accordion from './Accordion';
+import TopicsAccordion from './TopicsAccordion';
+import { sortByCode } from '@/utils/sortByCode';
 import './DisciplineView.scss';
 import type { BadgeVariant } from '@/components/ui/Badge';
 
@@ -12,13 +14,15 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
   const topics = discipline.topics || [];
   const results = discipline.learningOutcomes || [];
 
-  const prerequisites = (discipline.prerequisites || [])
-    .map((r: any) => r.dependsOn)
-    .filter((d: any) => d && typeof d === 'object');
+  const prerequisites = sortByCode(
+    (discipline.prerequisites || [])
+      .filter((d: any) => d && typeof d === 'object' && !d.code?.startsWith('ВК'))
+  );
 
-  const postrequisites = (discipline.postrequisites || [])
-    .map((r: any) => r.subject)
-    .filter((d: any) => d && typeof d === 'object');
+  const postrequisites = sortByCode(
+    (discipline.postrequisites || [])
+      .filter((d: any) => d && typeof d === 'object' && !d.code?.startsWith('ВК'))
+  );
 
   const zk = competencies.filter((c: any) => c.type === 'zk');
   const sk = competencies.filter((c: any) => c.type === 'sk');
@@ -32,7 +36,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
         stats={
           <>
             <Stat label="Кредити" value={`${discipline.credits} ЄКТС`} variant="card" isAccent />
-            <Stat label="Семестр" value={`${(discipline.semesters || []).map((s: any) => s.semester).join(', ')} з 8`} variant="card" />
+            <Stat label="Семестр" value={`${(discipline.semesters || []).join(', ')} з 8`} variant="card" />
             {discipline.assessment && (
               <Stat label="Контроль" value={discipline.assessment === 'exam' ? 'Іспит' : discipline.assessment === 'credit' ? 'Залік' : 'Іспит/Залік'} variant="card" />
             )}
@@ -43,36 +47,24 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
 
       <div className="discipline-view__grid">
         <div className="discipline-view__card">
-          <div className="discipline-view__section-title">Теми курсу</div>
-          {Object.keys(
-            topics.reduce((acc: any, t: any) => {
-              const s = t.semester || 'Загальні';
-              if (!acc[s]) acc[s] = [];
-              acc[s].push(t);
-              return acc;
-            }, {})
-          ).length > 0 ? (
-            Object.entries(
-              topics.reduce((acc: any, t: any) => {
-                const s = t.semester || 'Загальні';
-                if (!acc[s]) acc[s] = [];
-                acc[s].push(t);
-                return acc;
-              }, {})
-            )
-              .sort(([a], [b]) => (a === 'Загальні' ? 1 : b === 'Загальні' ? -1 : Number(a) - Number(b)))
-              .map(([sem, semTopics]: [string, any]) => (
-                <div key={sem} className="discipline-view__semester-group">
-                  {sem !== 'Загальні' && <div className="discipline-view__semester-label">Семестр {sem}</div>}
-                  <ol className="discipline-view__topics-list">
-                    {semTopics.map((t: any, i: number) => (
-                      <li key={i} className="discipline-view__topics-item">
-                        {t.title}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))
+          <div className="discipline-view__section-title">
+            {discipline.category === 'practice' ? 'Організація практики' :
+              discipline.category === 'thesis' ? 'Виконання роботи' :
+                'Теми курсу'}
+          </div>
+
+          {(discipline.category === 'practice' || discipline.category === 'thesis') ? (
+            <div className="discipline-view__custom-info">
+              {discipline.description ? (
+                <div className="discipline-view__description-full">{discipline.description}</div>
+              ) : (
+                <span className="discipline-view__empty">
+                  Детальна інформація міститься у відповідних методичних вказівках кафедри.
+                </span>
+              )}
+            </div>
+          ) : topics.length > 0 ? (
+            <TopicsAccordion topics={topics} semesters={discipline.semesters || []} />
           ) : (
             <span className="discipline-view__empty">Теми не вказані</span>
           )}

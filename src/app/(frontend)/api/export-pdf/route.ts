@@ -38,6 +38,16 @@ export async function GET(request: Request) {
     const protocol = request.headers.get('x-forwarded-proto') || 'http';
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? `${protocol}://${host}`;
     
+    const programId = searchParams.get('id');
+    if (programId) {
+      await page.setCookie({
+        name: 'programVersionId',
+        value: programId,
+        domain: new URL(baseUrl).hostname,
+        path: '/',
+      });
+    }
+
     page.on('console', (msg) => console.log('PDF EXPORT LOG:', msg.text()));
     page.on('pageerror', (err: any) => console.error('PDF EXPORT ERROR:', err.message));
 

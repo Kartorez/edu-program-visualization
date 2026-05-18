@@ -41,16 +41,12 @@ export default function FlowCanvas({
         const code = node.data.code as string | undefined;
         if (!code) return node;
 
-        const semesters = node.data.semesters as { semester: number }[] | number[];
+        const semesters = node.data.semesters as number[];
 
         const matchesType = typeFilters.length === 0 || typeFilters.some((f) => code.startsWith(f));
         const matchesSemester =
           semesterFilters.length === 0 ||
-          semesterFilters.some((s) =>
-            Array.isArray(semesters)
-              ? semesters.some((sem) => (typeof sem === 'number' ? sem === s : sem.semester === s))
-              : false
-          );
+          (Array.isArray(semesters) && semesterFilters.some((s) => semesters.includes(s)));
         const isVisible = matchesType && matchesSemester;
 
         return {
@@ -142,6 +138,7 @@ export default function FlowCanvas({
         zoomOnPinch
         zoomOnDoubleClick={false}
         onNodeClick={onNodeClick}
+        onPaneClick={onClose}
         fitView
         fitViewOptions={{
           padding: typeof window !== 'undefined' && window.innerWidth < 768 ? 0.02 : 0.1,

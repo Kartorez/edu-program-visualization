@@ -27,11 +27,18 @@ export default async function PlanLandingPage() {
 
   const sorted = sortByCode(rawDisciplines);
 
-  const countDiscipline = sorted.filter((d: any) => d.code?.startsWith('ОК')).length;
-  const countElective = sorted.filter((d: any) => d.code?.startsWith('ВК')).length / 3;
+  const uniqueDisciplines = Array.from(new Map(sorted.map((d: any) => [String(d.id), d])).values());
+
+  const countDiscipline = uniqueDisciplines.filter((d: any) => d.code?.startsWith('ОК')).length;
+  const countElective = new Set(
+    uniqueDisciplines
+      .filter((d: any) => d.code?.startsWith('ВК'))
+      .map((d: any) => d.code?.match(/^ВК\s*\d+/)?.[0])
+      .filter(Boolean)
+  ).size;
 
   const countSemester = Math.max(
-    ...sorted.flatMap((d: any) => d.semesters?.map((s: any) => s.semester ?? 0) ?? []),
+    ...sorted.flatMap((d: any) => (d.semesters ?? []).map((s: any) => parseInt(String(s), 10) || 0)),
     0
   );
 
@@ -57,7 +64,7 @@ export default async function PlanLandingPage() {
     <>
       <Hero
         countDiscipline={countDiscipline}
-        countElective={Math.round(countElective)}
+        countElective={countElective}
         countSemester={countSemester}
         countCredits={totalCredits}
         title={dynamicTitle}

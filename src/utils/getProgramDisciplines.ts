@@ -38,9 +38,6 @@ export async function getProgramDisciplines() {
   if (!program) {
     const { docs: activePrograms } = await payload.find({
       collection: 'educational-programs',
-      where: {
-        isActive: { equals: true },
-      },
       limit: 1,
       depth: 2,
     });
@@ -52,9 +49,25 @@ export async function getProgramDisciplines() {
   }
 
   if (program && Array.isArray(program.disciplines)) {
-    rawDisciplines = program.disciplines.filter(
+    const populated = program.disciplines.filter(
       (d: any) => d && typeof d === 'object'
     );
+    const unpopulatedIds = program.disciplines
+      .filter((d: any) => d && typeof d !== 'object')
+      .map((d: any) => String(d));
+
+    let extra: any[] = [];
+    if (unpopulatedIds.length > 0) {
+      const { docs } = await payload.find({
+        collection: 'disciplines',
+        where: { id: { in: unpopulatedIds } },
+        limit: unpopulatedIds.length,
+        depth: 1,
+      });
+      extra = docs;
+    }
+
+    rawDisciplines = [...populated, ...extra];
   }
 
   if (rawDisciplines.length === 0) {
@@ -86,14 +99,14 @@ export async function getProgramDisciplines() {
         {
           ...disc,
           currentSemester: 1,
-          semesters: [{ semester: 1 }],
+          semesters: ['1'],
         },
       ];
     }
 
     return semesters.map((s: any) => ({
       ...disc,
-      currentSemester: s.semester,
+      currentSemester: parseInt(s, 10) || 1,
     }));
   });
 
@@ -104,7 +117,7 @@ export async function getProgramDisciplines() {
       .filter(
         (r: any) =>
           String(
-            typeof r.subject === 'object'
+            r.subject && typeof r.subject === 'object'
               ? r.subject.id
               : r.subject
           ) === sid
@@ -112,7 +125,7 @@ export async function getProgramDisciplines() {
       .map((r: any) =>
         baseDiscMap.get(
           String(
-            typeof r.dependsOn === 'object'
+            r.dependsOn && typeof r.dependsOn === 'object'
               ? r.dependsOn.id
               : r.dependsOn
           )
@@ -124,7 +137,7 @@ export async function getProgramDisciplines() {
       .filter(
         (r: any) =>
           String(
-            typeof r.dependsOn === 'object'
+            r.dependsOn && typeof r.dependsOn === 'object'
               ? r.dependsOn.id
               : r.dependsOn
           ) === sid
@@ -132,7 +145,7 @@ export async function getProgramDisciplines() {
       .map((r: any) =>
         baseDiscMap.get(
           String(
-            typeof r.subject === 'object'
+            r.subject && typeof r.subject === 'object'
               ? r.subject.id
               : r.subject
           )

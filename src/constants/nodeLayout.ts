@@ -1,5 +1,5 @@
-export const NODE_W = 140;
-export const NODE_H = 90;
+export const NODE_W = 190;
+export const NODE_H = 105;
 export const SEMESTER_W = 100;
 
 export const COL_WIDTH = NODE_W + 20;

@@ -58,6 +58,25 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
+  async onInit(payload) {
+    if (process.env.FIRST_USER_EMAIL && process.env.FIRST_USER_PASSWORD) {
+      const users = await payload.find({
+        collection: 'users',
+        limit: 1,
+      });
+
+      if (users.totalDocs === 0) {
+        await payload.create({
+          collection: 'users',
+          data: {
+            email: process.env.FIRST_USER_EMAIL,
+            password: process.env.FIRST_USER_PASSWORD,
+          },
+        });
+        payload.logger.info('Created first admin user from environment variables');
+      }
+    }
+  },
   sharp,
   plugins: [],
 });

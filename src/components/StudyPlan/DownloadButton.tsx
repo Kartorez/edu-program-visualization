@@ -8,7 +8,12 @@ export default function DownloadButton() {
   const onClick = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/export-pdf');
+      const id = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('programVersionId='))
+        ?.split('=')[1];
+
+      const res = await fetch(`/api/export-pdf${id ? `?id=${id}` : ''}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       Object.assign(document.createElement('a'), {

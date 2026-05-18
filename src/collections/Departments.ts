@@ -3,11 +3,16 @@ import type { CollectionConfig } from 'payload';
 export const Departments: CollectionConfig = {
   slug: 'departments',
 
+  labels: {
+    singular: 'Кафедра',
+    plural: 'Кафедри',
+  },
+
   admin: {
     useAsTitle: 'title',
     description: 'Кафедра (факультет)',
     defaultColumns: ['title', 'code'],
-    group: 'Структура',
+    group: 'Установа',
   },
 
   fields: [

@@ -5,6 +5,7 @@ import RequisiteList from '@/components/DisciplineModal/RequisiteList';
 import ElectiveList from '@/components/DisciplineModal/ElectiveList';
 import './DisciplineModal.scss';
 import Button from '@/components/ui/Button/Button';
+import { sortByCode } from '@/utils/sortByCode';
 import type { Discipline } from '@/payload-types';
 
 type Disciplines = Discipline[];
@@ -48,12 +49,20 @@ export default function DisciplineModal({
   }, [node, allNodes]);
 
   const prerequisites = useMemo(
-    () => [...new Set(((node as any)?.prerequisites || []).map(resolveCode) as string[])],
+    () => sortByCode(
+      [...new Set(((node as any)?.prerequisites || []).map(resolveCode) as string[])]
+        .filter((c) => !c.startsWith('ВК'))
+        .map(c => ({ code: c }))
+    ).map(o => o.code!),
     [node]
   );
 
   const postrequisites = useMemo(
-    () => [...new Set(((node as any)?.postrequisites || []).map(resolveCode) as string[])],
+    () => sortByCode(
+      [...new Set(((node as any)?.postrequisites || []).map(resolveCode) as string[])]
+        .filter((c) => !c.startsWith('ВК'))
+        .map(c => ({ code: c }))
+    ).map(o => o.code!),
     [node]
   );
 

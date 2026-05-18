@@ -1,16 +1,30 @@
 import type { CollectionConfig } from 'payload';
+import { relationsCache } from './cache';
 
 export const DisciplineRelations: CollectionConfig = {
   slug: 'discipline-relations',
   admin: {
-    group: 'Службові',
+    group: 'Система',
     useAsTitle: 'id',
-    hidden: false,
+    hidden: true,
     defaultColumns: ['subject', 'dependsOn'],
   },
   labels: {
     singular: 'Звʼязок дисциплін',
     plural: 'Звʼязки дисциплін',
+  },
+  lockDocuments: false,
+  hooks: {
+    afterChange: [
+      () => {
+        relationsCache.clear();
+      }
+    ],
+    afterDelete: [
+      () => {
+        relationsCache.clear();
+      }
+    ]
   },
   fields: [
     {

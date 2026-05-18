@@ -2,12 +2,15 @@ import { CollectionConfig } from 'payload';
 
 export const Competencies: CollectionConfig = {
   slug: 'competencies',
-
+  labels: {
+    singular: 'Компетентність',
+    plural: 'Компетентності',
+  },
   admin: {
     useAsTitle: 'code',
     description: 'ЗК і СК компетентності програми',
     defaultColumns: ['code', 'type', 'description'],
-    group: 'Наповнення',
+    group: 'Дані матриць',
   },
 
   fields: [

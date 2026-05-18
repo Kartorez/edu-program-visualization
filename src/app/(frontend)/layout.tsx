@@ -17,12 +17,14 @@ const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-display',
+  preload: false,
 });
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
+  preload: false,
 });
 
 export const metadata: Metadata = {

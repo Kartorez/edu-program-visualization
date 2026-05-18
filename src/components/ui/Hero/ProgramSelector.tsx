@@ -1,6 +1,5 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
 import styles from './Hero.module.scss';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ArrowLeft, Check } from 'lucide-react';
@@ -34,7 +33,14 @@ export default function ProgramSelector({ currentLabel, options }: ProgramSelect
   const handleSelect = (id: string | number) => {
     document.cookie = `programVersionId=${id}; path=/; max-age=31536000`;
     setOpen(false);
-    router.refresh();
+    window.location.reload();
+  };
+
+  const handleBackToWizard = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.cookie = 'programVersionId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    setOpen(false);
+    window.location.href = '/';
   };
 
   return (
@@ -45,10 +51,10 @@ export default function ProgramSelector({ currentLabel, options }: ProgramSelect
       >
         <span className={styles.selector__dot} />
         <span className={styles.selector__text}>{currentLabel}</span>
-        <ChevronDown 
-          size={18} 
+        <ChevronDown
+          size={18}
           strokeWidth={2.5}
-          className={`${styles.selector__chevron} ${open ? styles['selector__chevron--open'] : ''}`} 
+          className={`${styles.selector__chevron} ${open ? styles['selector__chevron--open'] : ''}`}
         />
       </button>
 
@@ -73,10 +79,10 @@ export default function ProgramSelector({ currentLabel, options }: ProgramSelect
             </div>
           )}
           {options.length > 0 && <div className={styles.selector__divider} />}
-          <Link href="/" className={styles.selector__back} onClick={() => setOpen(false)}>
+          <a href="/" className={styles.selector__back} onClick={handleBackToWizard}>
             <ArrowLeft size={16} strokeWidth={2.5} />
             Змінити спеціальність
-          </Link>
+          </a>
         </div>
       )}
     </div>

@@ -3,15 +3,12 @@ import config from '@payload-config';
 import { positionNodes } from '@/utils/positionNodes';
 import ExportFlow from '@/components/StudyPlan/ExportFlow';
 import '@/styles/globals.scss';
+import { getProgramDisciplines } from '@/utils/getProgramDisciplines';
 
 export default async function ExportPage() {
   const payload = await getPayload({ config });
 
-  const { docs } = await payload.find({
-    collection: 'disciplines',
-    limit: 1000,
-    depth: 0,
-  });
+  const { disciplines: docs } = await getProgramDisciplines();
 
   const initialNodes = positionNodes(docs);
 
