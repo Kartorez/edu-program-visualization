@@ -1,9 +1,23 @@
 const parseCodeIndex = (code: string | undefined): [string, number, number] => {
   if (!code) return ['', 0, 0];
-  const match = code.trim().match(/^([А-ЯҐЄІЇа-яґєії]+)\s*(\d+)(?:\.(\d+))?/);
-  const prefix = match?.[1] ?? '';
-  const main = Number(match?.[2] ?? 0);
-  const sub = Number(match?.[3] ?? 0);
+  const trimmed = code.trim();
+
+  const prefixMatch = trimmed.match(/^([А-ЯҐЄІЇа-яґєії]+)/);
+  const prefix = prefixMatch?.[1] ?? '';
+
+  const rest = trimmed.slice(prefix.length).trim();
+
+  const digitMatch = rest.match(/^(\d+)(?:\.(\d+))?/);
+  let main = 0;
+  let sub = 0;
+
+  if (digitMatch) {
+    main = Number(digitMatch[1]);
+    sub = Number(digitMatch[2] ?? 0);
+  } else if (rest.length > 0) {
+    main = 9000 + rest.length;
+  }
+
   return [prefix, main, sub];
 };
 

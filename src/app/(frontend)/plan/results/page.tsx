@@ -26,11 +26,7 @@ export default async function Results() {
   const unique = Array.from(new Map(disciplinesRaw.map((d: any) => [String(d.id), d])).values());
 
   const disciplines = sortByCode(
-    unique.filter((d: any) => {
-      const name = d.name?.toLowerCase() || '';
-      const code = d.code?.toLowerCase() || '';
-      return !name.includes('вк') && !code.includes('вк') && !code.startsWith('ВК');
-    })
+    unique.filter((d: any) => d.type === 'required')
   );
 
   const outcomes = sortByCode(outcomesRaw);
