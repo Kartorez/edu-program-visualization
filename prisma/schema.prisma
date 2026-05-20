@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//
+// ENUMS
+//
+
+enum DegreeType {
+  BACHELOR
+  MASTER
+}
+
+enum AssessmentType {
+  EXAM
+  CREDIT
+  EXAM_CREDIT
+}
+
+enum DisciplineType {
+  REQUIRED
+  ELECTIVE
+}
+
+enum DisciplineCategory {
+  STANDARD
+  PRACTICE
+  THESIS
+}
+
+enum CompetencyType {
+  ZK
+  SK
+}
+
+enum RelationType {
+  PRE
+  POST
+}
+
+//
+// CORE STRUCTURE
+//
+
+model Department {
+  id        String @id @default(cuid())
+  code      String @unique
+  title     String
+
+  specialties Specialty[]
+  programs    EducationalProgram[]
+  disciplines Discipline[]
+}
+
+model Specialty {
+  id            String @id @default(cuid())
+  code          String
+  name          String
+  shortName     String?
+  degreeType    DegreeType
+
+  departmentId  String
+  department    Department @relation(fields: [departmentId], references: [id])
+
+  programs      EducationalProgram[]
+  disciplines   Discipline[]
+
+  @@unique([code, degreeType])
+}
+
+model EducationalProgram {
+  id            String @id @default(cuid())
+
+  specialtyCode String?
+  specialtyId   String?
+  specialty     Specialty? @relation(fields: [specialtyId], references: [id])
+  title         String
+  year          Int
+
+  degree        DegreeType
+  totalCredits  Int        @default(240)
+  isActive      Boolean    @default(true)
+
+  departmentId  String
+  department    Department @relation(fields: [departmentId], references: [id])
+
+  disciplines   ProgramDiscipline[]
+}
+
+//
+// DISCIPLINES
+//
+
+model Discipline {
+  id          String @id @default(cuid())
+
+  code        String? @unique
+  name        String
+  shortName   String?
+
+  year        Int
+
+  description String?
+
+  credits     Int?
+  hours       Int?
+
+  assessment  AssessmentType
+  type        DisciplineType
+  category    DisciplineCategory @default(STANDARD)
+
+  electiveGroupId String?
+  electiveGroup   ElectiveGroup? @relation(fields: [electiveGroupId], references: [id])
+
+  specialtyId String?
+  specialty   Specialty? @relation(fields: [specialtyId], references: [id])
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  semesters   DisciplineSemester[]
+  topics      CourseTopic[]
+
+  competencies DisciplineCompetency[]
+  outcomes     DisciplineOutcome[]
+
+  relationsFrom DisciplineRelation[] @relation("RelationSource")
+  relationsTo   DisciplineRelation[] @relation("RelationTarget")
+
+  programLinks ProgramDiscipline[]
+}
+
+//
+// PROGRAM <-> DISCIPLINE (M:N)
+//
+
+model ProgramDiscipline {
+  programId    String
+  disciplineId  String
+
+  program      EducationalProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+
+  @@id([programId, disciplineId])
+}
+
+//
+// SEMESTERS (CRITICAL NORMALIZATION POINT)
+//
+
+model DisciplineSemester {
+  id            String @id @default(cuid())
+
+  disciplineId  String
+  discipline    Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+
+  studyYear     Int
+  semester      Int
+
+  lectures      Int?
+  practical     Int?
+  laboratory    Int?
+  selfStudy     Int?
+  totalHours    Int?
+
+  assessment    AssessmentType?
+
+  topics        CourseTopic[]
+
+  @@unique([disciplineId, semester])
+}
+
+//
+// TOPICS
+//
+
+model CourseTopic {
+  id            String @id @default(cuid())
+
+  disciplineId  String
+  discipline    Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+
+  semester      Int?
+  disciplineSemesterId String?
+  disciplineSemester   DisciplineSemester? @relation(fields: [disciplineSemesterId], references: [id])
+
+  title         String
+  order         Int
+}
+
+//
+// ELECTIVES
+//
+
+model ElectiveGroup {
+  id      String @id @default(cuid())
+
+  code    String @unique
+  name    String?
+
+  disciplines Discipline[]
+}
+
+//
+// COMPETENCIES
+//
+
+model Competency {
+  id          String @id @default(cuid())
+
+  code        String @unique
+  type        CompetencyType
+  description String
+
+  disciplines DisciplineCompetency[]
+}
+
+model DisciplineCompetency {
+  disciplineId String
+  competencyId String
+
+  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  competency Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@id([disciplineId, competencyId])
+}
+
+//
+// LEARNING OUTCOMES (PRN)
+//
+
+model LearningOutcome {
+  id          String @id @default(cuid())
+
+  code        String
+  description String
+
+  disciplines DisciplineOutcome[]
+}
+
+model DisciplineOutcome {
+  disciplineId String
+  outcomeId    String
+
+  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  outcome    LearningOutcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+
+  @@id([disciplineId, outcomeId])
+}
+
+//
+// DISCIPLINES RELATION GRAPH
+//
+
+model DisciplineRelation {
+  sourceId String
+  targetId String
+
+  type RelationType
+
+  source Discipline @relation("RelationSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  target Discipline @relation("RelationTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([sourceId, targetId, type])
+}
