@@ -6,222 +6,168 @@ datasource db {
   provider = "postgresql"
 }
 
-//
+// ─────────────────────────────────────────────
 // ENUMS
-//
+// Відповідають значенням Payload select-полів
+// ─────────────────────────────────────────────
 
-enum DegreeType {
-  BACHELOR
-  MASTER
-}
-
-enum AssessmentType {
-  EXAM
-  CREDIT
-  EXAM_CREDIT
-}
-
+// disciplines.type: 'required' | 'elective'
 enum DisciplineType {
   REQUIRED
   ELECTIVE
 }
 
+// disciplines.category: 'standard' | 'practice' | 'thesis'
 enum DisciplineCategory {
   STANDARD
   PRACTICE
   THESIS
 }
 
+// disciplines.assessment: 'exam' | 'credit' | 'exam_credit'
+enum AssessmentType {
+  EXAM
+  CREDIT
+  EXAM_CREDIT
+}
+
+// competencies.type: 'zk' | 'sk'
 enum CompetencyType {
   ZK
   SK
 }
 
-enum RelationType {
-  PRE
-  POST
-}
-
-//
-// CORE STRUCTURE
-//
-
-model Department {
-  id        String @id @default(cuid())
-  code      String @unique
-  title     String
-
-  specialties Specialty[]
-  programs    EducationalProgram[]
-  disciplines Discipline[]
-}
-
-model Specialty {
-  id            String @id @default(cuid())
-  code          String
-  name          String
-  shortName     String?
-  degreeType    DegreeType
-
-  departmentId  String
-  department    Department @relation(fields: [departmentId], references: [id])
-
-  programs      EducationalProgram[]
-  disciplines   Discipline[]
-
-  @@unique([code, degreeType])
-}
-
-model EducationalProgram {
-  id            String @id @default(cuid())
-
-  specialtyCode String?
-  specialtyId   String?
-  specialty     Specialty? @relation(fields: [specialtyId], references: [id])
-  title         String
-  year          Int
-
-  degree        DegreeType
-  totalCredits  Int        @default(240)
-  isActive      Boolean    @default(true)
-
-  departmentId  String
-  department    Department @relation(fields: [departmentId], references: [id])
-
-  disciplines   ProgramDiscipline[]
-}
-
-//
-// DISCIPLINES
-//
+// ─────────────────────────────────────────────
+// disciplines (Payload slug: 'disciplines')
+// ─────────────────────────────────────────────
 
 model Discipline {
   id          String @id @default(cuid())
 
-  code        String? @unique
-  name        String
+  // Основне
+  code        String  @unique               // required: true
+  year        Int                           // required: true, defaultValue: new Date().getFullYear()
+  name        String                        // required: true
   shortName   String?
 
-  year        Int
+  displayName String?                       // hidden, computed: "[code] name (year)"
 
   description String?
 
-  credits     Int?
-  hours       Int?
-
-  assessment  AssessmentType
-  type        DisciplineType
+  // Тип і категорія
+  type        DisciplineType                // required: true
   category    DisciplineCategory @default(STANDARD)
 
+  // Група вибіркових — relationship to 'elective-groups'
   electiveGroupId String?
   electiveGroup   ElectiveGroup? @relation(fields: [electiveGroupId], references: [id])
 
-  specialtyId String?
-  specialty   Specialty? @relation(fields: [specialtyId], references: [id])
+  // Навантаження
+  credits     Int?
+  hours       Int?
 
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
+  // Форма контролю — не required
+  assessment  AssessmentType?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  // semesters: select hasMany, значення "1".."12"
+  // Зберігається як окрема таблиця (Payload: disciplines_rels або окрема pivot)
   semesters   DisciplineSemester[]
+
+  // topics: array { semester: number, title: string }
   topics      CourseTopic[]
 
+  // prerequisites / postrequisites — обчислюються через DisciplineRelation
+  asSubject    DisciplineRelation[] @relation("RelationSubject")   // ця дисципліна залежить від dependsOn
+  asDependency DisciplineRelation[] @relation("RelationDependsOn") // інші дисципліни залежать від цієї
+
+  // Матриці
+  // competencies: relationship to 'competencies', hasMany
   competencies DisciplineCompetency[]
+  // learningOutcomes: relationship to 'learning-outcomes', hasMany
   outcomes     DisciplineOutcome[]
 
-  relationsFrom DisciplineRelation[] @relation("RelationSource")
-  relationsTo   DisciplineRelation[] @relation("RelationTarget")
-
-  programLinks ProgramDiscipline[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-//
-// PROGRAM <-> DISCIPLINE (M:N)
-//
-
-model ProgramDiscipline {
-  programId    String
-  disciplineId  String
-
-  program      EducationalProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
-  discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
-
-  @@id([programId, disciplineId])
-}
-
-//
-// SEMESTERS (CRITICAL NORMALIZATION POINT)
-//
+// ─────────────────────────────────────────────
+// semesters (поле disciplines.semesters)
+// Payload: select hasMany, options: "1".."12"
+// Pivot-таблиця: disciplineId + semester (Int 1-12)
+// ─────────────────────────────────────────────
 
 model DisciplineSemester {
-  id            String @id @default(cuid())
+  id           String     @id @default(cuid())
 
-  disciplineId  String
-  discipline    Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  disciplineId String
+  discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
 
-  studyYear     Int
-  semester      Int
-
-  lectures      Int?
-  practical     Int?
-  laboratory    Int?
-  selfStudy     Int?
-  totalHours    Int?
-
-  assessment    AssessmentType?
-
-  topics        CourseTopic[]
+  semester     Int        // 1–12, відповідає значенням Payload select
 
   @@unique([disciplineId, semester])
 }
 
-//
-// TOPICS
-//
+// ─────────────────────────────────────────────
+// topics (поле disciplines.topics)
+// Payload: array, fields: { semester: number, title: string }
+// order зберігає порядок елементів масиву Payload
+// ─────────────────────────────────────────────
 
 model CourseTopic {
-  id            String @id @default(cuid())
+  id           String     @id @default(cuid())
 
-  disciplineId  String
-  discipline    Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  disciplineId String
+  discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
 
-  semester      Int?
-  disciplineSemesterId String?
-  disciplineSemester   DisciplineSemester? @relation(fields: [disciplineSemesterId], references: [id])
-
-  title         String
-  order         Int
+  semester     Int        // Сем. (required: true)
+  title        String     // Тема (required: true)
+  order        Int        // порядок елементу в масиві
 }
 
-//
-// ELECTIVES
-//
+// ─────────────────────────────────────────────
+// discipline-relations (Payload slug: 'discipline-relations')
+// subject залежить від dependsOn
+// (dependsOn є пререквізитом для subject)
+// ─────────────────────────────────────────────
+
+model DisciplineRelation {
+  subjectId   String
+  dependsOnId String
+
+  subject    Discipline @relation("RelationSubject",   fields: [subjectId],   references: [id], onDelete: Cascade)
+  dependsOn  Discipline @relation("RelationDependsOn", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@id([subjectId, dependsOnId])
+}
+
+// ─────────────────────────────────────────────
+// elective-groups (Payload slug: 'elective-groups')
+// ─────────────────────────────────────────────
 
 model ElectiveGroup {
-  id      String @id @default(cuid())
+  id   String  @id @default(cuid())
 
-  code    String @unique
-  name    String?
+  code String  @unique   // required: true, unique: true
+  name String?           // не required
 
   disciplines Discipline[]
 }
 
-//
-// COMPETENCIES
-//
+// ─────────────────────────────────────────────
+// competencies (Payload slug: 'competencies')
+// ─────────────────────────────────────────────
 
 model Competency {
-  id          String @id @default(cuid())
+  id          String         @id @default(cuid())
 
-  code        String @unique
-  type        CompetencyType
-  description String
+  code        String         @unique  // required: true, unique: true
+  type        CompetencyType          // required: true
+  description String?                 // textarea, не required
 
   disciplines DisciplineCompetency[]
 }
 
+// M:N: disciplines <-> competencies
 model DisciplineCompetency {
   disciplineId String
   competencyId String
@@ -232,41 +178,26 @@ model DisciplineCompetency {
   @@id([disciplineId, competencyId])
 }
 
-//
-// LEARNING OUTCOMES (PRN)
-//
+// ─────────────────────────────────────────────
+// learning-outcomes (Payload slug: 'learning-outcomes')
+// ─────────────────────────────────────────────
 
 model LearningOutcome {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
 
-  code        String
-  description String
+  code        String          // required: true (не unique в Payload)
+  description String?         // textarea, не required
 
   disciplines DisciplineOutcome[]
 }
 
+// M:N: disciplines <-> learning-outcomes
 model DisciplineOutcome {
   disciplineId String
   outcomeId    String
 
-  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
-  outcome    LearningOutcome @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  discipline Discipline      @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  outcome    LearningOutcome @relation(fields: [outcomeId],    references: [id], onDelete: Cascade)
 
   @@id([disciplineId, outcomeId])
-}
-
-//
-// DISCIPLINES RELATION GRAPH
-//
-
-model DisciplineRelation {
-  sourceId String
-  targetId String
-
-  type RelationType
-
-  source Discipline @relation("RelationSource", fields: [sourceId], references: [id], onDelete: Cascade)
-  target Discipline @relation("RelationTarget", fields: [targetId], references: [id], onDelete: Cascade)
-
-  @@id([sourceId, targetId, type])
 }
