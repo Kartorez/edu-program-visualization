@@ -1,4 +1,6 @@
 import { CompetencyMatrixView } from '@/features/competency-matrix';
+import { getDisciplinesForMatrix } from '@/server/actions/discipline.actions';
+import { getCompetencies } from '@/server/actions/competency.actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,9 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Competencies() {
-    // TODO: Implement actual data fetching without Payload
-    const disciplines: any[] = [];
-    const competencies: any[] = [];
+    const [disciplines, competencies] = await Promise.all([
+        getDisciplinesForMatrix(),
+        getCompetencies(),
+    ]);
 
     return <CompetencyMatrixView disciplines={disciplines} competencies={competencies} />;
 }

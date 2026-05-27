@@ -1,9 +1,10 @@
 import { positionNodes } from '@/shared/lib/positionNodes';
 import ExportFlow from '@/features/export-pdf/components/ExportFlow';
+import { getDisciplinesForGraph } from '@/server/actions/discipline.actions';
 
 export default async function ExportPage() {
-    // TODO: fetch disciplines from Prisma and map to GraphDisciplineNode[]
-    const initialNodes = positionNodes([]);
+    const disciplines = await getDisciplinesForGraph();
+    const initialNodes = positionNodes(disciplines);
 
     return (
         <div className="export-page">

@@ -290,3 +290,72 @@ export async function getDisciplineRelationGraph() {
 
   return { disciplines, relations };
 }
+
+// ─── Дані для графа навчального плану (positionNodes) ────────────────────────
+
+/** Повертає дисципліни, підготовлені для positionNodes (GraphDisciplineNode[]) */
+export async function getDisciplinesForGraph() {
+  const [disciplines, relations] = await Promise.all([
+    prisma.discipline.findMany({
+      include: {
+        electiveGroup: true,
+        semesters:     { select: { semester: true }, orderBy: { semester: 'asc' } },
+      },
+      orderBy: { code: 'asc' },
+    }),
+    prisma.disciplineRelation.findMany({
+      select: {
+        subjectId:   true,
+        dependsOnId: true,
+        dependsOn:   { select: { code: true } },
+        subject:     { select: { code: true } },
+      },
+    }),
+  ]);
+
+  // Побудуємо мапи пре/пост-реквізитів по id дисципліни
+  const prerequisitesMap = new Map<string, { code: string | null }[]>();
+  const postrequisitesMap = new Map<string, { code: string | null }[]>();
+
+  for (const rel of relations) {
+    // subject залежить від dependsOn → dependsOn є пререквізитом для subject
+    if (!prerequisitesMap.has(rel.subjectId)) prerequisitesMap.set(rel.subjectId, []);
+    prerequisitesMap.get(rel.subjectId)!.push({ code: rel.dependsOn.code });
+
+    if (!postrequisitesMap.has(rel.dependsOnId)) postrequisitesMap.set(rel.dependsOnId, []);
+    postrequisitesMap.get(rel.dependsOnId)!.push({ code: rel.subject.code });
+  }
+
+  return disciplines.map((d) => ({
+    ...d,
+    currentSemester: d.semesters[0]?.semester ?? 1,
+    prerequisites:   prerequisitesMap.get(d.id) ?? [],
+    postrequisites:  postrequisitesMap.get(d.id) ?? [],
+  }));
+}
+
+// ─── Дані для матриць (компетентності / результати навчання) ─────────────────
+
+/** Повертає дисципліни з розгорнутими competencies та learningOutcomes */
+export async function getDisciplinesForMatrix() {
+  const disciplines = await prisma.discipline.findMany({
+    orderBy: { code: 'asc' },
+    include: {
+      competencies: {
+        include: { competency: true },
+      },
+      outcomes: {
+        include: { outcome: true },
+      },
+    },
+  });
+
+  return disciplines.map((d) => ({
+    id:               d.id,
+    code:             d.code,
+    name:             d.name,
+    shortName:        d.shortName,
+    competencies:     d.competencies.map((c) => c.competency),
+    learningOutcomes: d.outcomes.map((o) => o.outcome),
+  }));
+}

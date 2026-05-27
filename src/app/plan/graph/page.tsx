@@ -1,5 +1,6 @@
 import { positionNodes } from '@/shared/lib/positionNodes';
 import StudyPlanCanvas from '@/features/study-plan/components/StudyPlanCanvas';
+import { getDisciplinesForGraph } from '@/server/actions/discipline.actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,8 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default async function GraphPage() {
-    // TODO: fetch disciplines from Prisma and map to GraphDisciplineNode[]
-    const initialNodes = positionNodes([]);
+    const disciplines = await getDisciplinesForGraph();
+    const initialNodes = positionNodes(disciplines);
     return (
         <>
             <StudyPlanCanvas initialNodes={initialNodes} />

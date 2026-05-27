@@ -1,4 +1,6 @@
 import { LearningResultsView } from '@/features/learning-results';
+import { getDisciplinesForMatrix } from '@/server/actions/discipline.actions';
+import { getLearningOutcomes } from '@/server/actions/learning-outcome.actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,9 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Results() {
-    // TODO: Implement actual data fetching without Payload
-    const disciplines: any[] = [];
-    const outcomes: any[] = [];
+    const [disciplines, outcomes] = await Promise.all([
+        getDisciplinesForMatrix(),
+        getLearningOutcomes(),
+    ]);
 
     return <LearningResultsView disciplines={disciplines} outcomes={outcomes} />;
 }
