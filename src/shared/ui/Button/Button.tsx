@@ -11,9 +11,10 @@ type ButtonProps = {
     disabled?: boolean;
     variant?: 'primary' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
+    type?: 'button' | 'submit' | 'reset';
 };
 
-export default function Button({ href, onClick, children, className, disabled, variant = 'primary', size = 'md' }: ButtonProps) {
+export default function Button({ href, onClick, children, className, disabled, variant = 'primary', size = 'md', type = 'button' }: ButtonProps) {
     const cn = [
         styles.button,
         variant === 'ghost' && styles['button--ghost'],
@@ -31,7 +32,7 @@ export default function Button({ href, onClick, children, className, disabled, v
     }
 
     return (
-        <button onClick={onClick} className={cn} disabled={disabled}>
+        <button onClick={onClick} className={cn} disabled={disabled} type={type}>
             {children}
         </button>
     );

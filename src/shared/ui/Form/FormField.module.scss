@@ -1,0 +1,43 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text);
+    user-select: none;
+}
+
+.required {
+    color: #ef4444;
+    margin-left: 0.125rem;
+}
+
+.description {
+    font-size: 0.75rem;
+    color: var(--color-subtle);
+    margin-top: -0.125rem;
+}
+
+.error {
+    font-size: 0.75rem;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: slideIn 0.15s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

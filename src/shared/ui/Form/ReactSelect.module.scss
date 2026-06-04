@@ -1,0 +1,186 @@
+.wrapper {
+    position: relative;
+
+    // ─── Control ─────────────────────────────────────────────
+    :global(.rs__control) {
+        min-height: 2.375rem;
+        padding: 0.125rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        background-color: var(--color-surface);
+        box-shadow: none;
+        cursor: pointer;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+
+        &:hover {
+            border-color: var(--color-subtle-mid);
+        }
+    }
+
+    :global(.rs__control--is-focused) {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-accent-s);
+
+        &:hover {
+            border-color: var(--color-primary);
+        }
+    }
+
+    :global(.rs__control--is-disabled) {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: var(--color-subtle-light);
+    }
+
+    // ─── Value container ─────────────────────────────────────
+    :global(.rs__value-container) {
+        padding: 0;
+        gap: 0.25rem;
+    }
+
+    :global(.rs__input-container) {
+        margin: 0;
+        padding: 0;
+        color: var(--color-text);
+    }
+
+    :global(.rs__placeholder) {
+        color: var(--color-subtle);
+    }
+
+    :global(.rs__single-value) {
+        color: var(--color-text);
+    }
+
+    // ─── Dropdown menu ───────────────────────────────────────
+    :global(.rs__menu) {
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        z-index: 50;
+    }
+
+    :global(.rs__menu-list) {
+        padding: 0.25rem;
+    }
+
+    :global(.rs__option) {
+        border-radius: calc(var(--radius-sm) - 2px);
+        padding: 0.375rem 0.625rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background-color 0.1s ease;
+    }
+
+    :global(.rs__option--is-focused) {
+        background-color: var(--color-accent-s);
+    }
+
+    :global(.rs__option--is-selected) {
+        background-color: var(--color-primary);
+        color: #fff;
+
+        &:active {
+            background-color: var(--color-primary-hover);
+        }
+    }
+
+    :global(.rs__option:not(.rs__option--is-selected):active) {
+        background-color: var(--color-subtle-light);
+    }
+
+    :global(.rs__no-options-message) {
+        font-size: 0.875rem;
+        color: var(--color-subtle);
+    }
+
+    // ─── Multi-value tags ────────────────────────────────────
+    :global(.rs__multi-value) {
+        background-color: var(--color-accent-s);
+        border-radius: calc(var(--radius-sm) - 2px);
+        border: 1px solid var(--color-primary);
+    }
+
+    :global(.rs__multi-value__label) {
+        color: var(--color-primary);
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.125rem 0.375rem;
+    }
+
+    :global(.rs__multi-value__remove) {
+        color: var(--color-primary);
+        border-radius: 0 calc(var(--radius-sm) - 2px) calc(var(--radius-sm) - 2px) 0;
+
+        &:hover {
+            background-color: var(--color-primary);
+            color: #fff;
+        }
+    }
+
+    // ─── Indicators ──────────────────────────────────────────
+    :global(.rs__indicator-separator) {
+        display: none;
+    }
+
+    :global(.rs__dropdown-indicator) {
+        padding: 0 0.25rem;
+        color: var(--color-subtle);
+        transition: transform 0.2s ease;
+
+        &:hover {
+            color: var(--color-text-muted);
+        }
+    }
+
+    :global(.rs__control--menu-is-open .rs__dropdown-indicator) {
+        transform: rotate(180deg);
+    }
+
+    :global(.rs__clear-indicator) {
+        padding: 0 0.25rem;
+        color: var(--color-subtle);
+
+        &:hover {
+            color: #ef4444;
+        }
+    }
+}
+
+// ─── Модифікатори ────────────────────────────────────────────
+
+.wrapper--error {
+    :global(.rs__control) {
+        border-color: #ef4444;
+    }
+
+    :global(.rs__control--is-focused) {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+
+        &:hover {
+            border-color: #ef4444;
+        }
+    }
+}
+
+.wrapper--sm {
+    :global(.rs__control) {
+        min-height: 2rem;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.8125rem;
+    }
+
+    :global(.rs__option) {
+        font-size: 0.8125rem;
+    }
+
+    :global(.rs__placeholder),
+    :global(.rs__single-value),
+    :global(.rs__input-container) {
+        font-size: 0.8125rem;
+    }
+}

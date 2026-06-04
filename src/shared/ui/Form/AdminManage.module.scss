@@ -1,0 +1,301 @@
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+
+    @media (max-width: 640px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.titleSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-dark, #1e293b);
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #64748b);
+}
+
+.card {
+    background: var(--color-bg-white, #ffffff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-md, 0.75rem);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.searchBar {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-sm, 0.375rem);
+    background: var(--color-bg, #f8fafc);
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+        border-color: var(--color-primary);
+    }
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.875rem;
+}
+
+.table th {
+    background: var(--color-bg, #f8fafc);
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #64748b);
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    color: var(--color-text, #334155);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background: var(--color-bg-light, #f1f5f9);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.badgePrimary {
+    background: var(--color-accent-s, #e0e7ff);
+    color: var(--color-primary, #4f46e5);
+}
+
+.badgeSecondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm, 0.375rem);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.editBtn {
+    background: #f1f5f9;
+    color: #475569;
+
+    &:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+}
+
+.deleteBtn {
+    background: #fee2e2;
+    color: #ef4444;
+
+    &:hover {
+        background: #fecaca;
+        color: #dc2626;
+    }
+}
+
+.emptyState {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--color-text-muted, #64748b);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// ─── Modal overlay ───────────────────────────────────────────
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modalContent {
+    background: var(--color-bg-white, #ffffff);
+    border-radius: var(--radius-md, 0.75rem);
+    border: 1px solid var(--color-border, #e2e8f0);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalContentLarge {
+    max-width: 800px;
+}
+
+@keyframes modalScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modalHeader {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-dark, #1e293b);
+}
+
+.modalClose {
+    font-size: 1.5rem;
+    color: var(--color-subtle, #94a3b8);
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover {
+        color: var(--color-text, #334155);
+    }
+}
+
+.modalBody {
+    padding: 1.5rem;
+}
+
+// ─── Pagination ──────────────────────────────────────────────
+
+.pagination {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--color-border, #e2e8f0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-bg, #f8fafc);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted, #64748b);
+
+    @media (max-width: 640px) {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+.paginationInfo {
+    font-weight: 500;
+}
+
+.paginationButtons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.pageBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: var(--radius-sm, 0.375rem);
+    border: 1px solid var(--color-border, #e2e8f0);
+    background: var(--color-bg-white, #ffffff);
+    color: var(--color-text, #334155);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: var(--color-accent-s, #e0e7ff);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.pageBtnActive {
+    background: var(--color-primary, #4f46e5);
+    color: #ffffff !important;
+    border-color: var(--color-primary, #4f46e5);
+}
+
