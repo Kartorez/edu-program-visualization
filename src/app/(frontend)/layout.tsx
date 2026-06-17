@@ -1,14 +1,10 @@
 import type { Metadata } from 'next';
 import { Barlow_Condensed, Inter } from 'next/font/google';
-import { SidebarProvider } from '@/shared/lib/SidebarContext';
-import { DisciplinesProvider } from '@/shared/lib/DisciplinesContext';
-import { Topbar } from '@/shared/ui/Sidebar/Topbar';
-import { NODE_H, NODE_W, SEMESTER_W } from '@/shared/constants/nodeLayout';
-import '@/shared/styles/global.scss';
-import { Sidebar } from '@/shared/ui/Sidebar/Sidebar';
 import NextTopLoader from 'nextjs-toploader';
-import { BackgroundGlow } from '@/shared/ui/Background/Background';
-import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
+import Background from '@/shared/ui/Background/Background';
+import '@/shared/styles/global.scss';
+import { NODE_H, NODE_W, SEMESTER_W } from '@/shared/constants/nodeLayout';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -46,8 +42,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { disciplines: docs } = await getProgramDisciplines();
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <html
@@ -73,18 +68,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           speed={200}
           shadow="0 0 10px var(--color-primary),0 0 5px var(--color-primary)"
         />
-        <BackgroundGlow />
-        <SidebarProvider>
-          <DisciplinesProvider disciplines={docs}>
-            <Topbar />
-            <div className="app-container">
-              <Sidebar />
-              <main className="main-content">
-                {children}
-              </main>
-            </div>
-          </DisciplinesProvider>
-        </SidebarProvider>
+        <Background />
+        {children}
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import styles from './ProgramWizard.module.scss';
 
@@ -38,6 +39,18 @@ export default function ProgramWizard({
   const [selectedSpecialtyCode, setSelectedSpecialtyCode] = useState<string | null>(null);
   const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward');
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('force-select') === 'true') return;
+
+    const saved = localStorage.getItem('programVersionId');
+    if (saved) {
+      router.replace(`/plan/${saved}/graph`);
+    }
+  }, [router, searchParams]);
+
   const goTo = (next: Step, dir: 'forward' | 'back' = 'forward') => {
     setAnimDir(dir);
     setStep(next);
@@ -49,8 +62,8 @@ export default function ProgramWizard({
   };
 
   const handleSelectVersion = (id: string) => {
-    document.cookie = `programVersionId=${id}; path=/; max-age=31536000`;
-    window.location.href = '/';
+    localStorage.setItem('programVersionId', id);
+    router.push(`/plan/${id}/graph`);
   };
 
   const handleBack = () => {

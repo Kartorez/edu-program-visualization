@@ -128,7 +128,6 @@ function TopicsAccordion({ topics, semesters }: Omit<TopicsAccordionProps, 'vari
     a === 'Загальні' ? 1 : b === 'Загальні' ? -1 : Number(a) - Number(b),
   );
 
-  // Single group — just render the flat list
   if (semKeys.length <= 1) {
     const items = semKeys.length === 1 ? grouped[semKeys[0]] : [];
     return (

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import { withPage } from './browser';
-import { readCache, writeCache, hashString, clearCache } from './cache';
+import { withPage } from '@/features/export-pdf/lib/browser';
+import { readCache, writeCache, hashString, clearCache } from '@/features/export-pdf/lib/cache';
 
 const PDF_HEADERS: Record<string, string> = {
   'Content-Type': 'application/pdf',

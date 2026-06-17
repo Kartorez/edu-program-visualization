@@ -3,10 +3,6 @@ import config from '@payload-config';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import ProgramWizard, { EducationalProgram } from '@/features/program-selection/components/ProgramWizard';
-import Hero from '@/views/home/section/Hero';
-import Marquee from '@/views/home/section/Marque';
-import About from '@/views/home/section/About';
-import type { ProgramOption } from '@/features/program-selection/components/ProgramSelector';
 import { sortByCode } from '@/shared/lib/sortByCode';
 import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
 
@@ -16,9 +12,6 @@ const degreeLabels: Record<string, string> = {
 };
 
 export default async function HomePage() {
-  const cookieStore = await cookies();
-  const programVersionId = cookieStore.get('programVersionId')?.value;
-
   const payload = await getPayload({ config });
 
   const { docs: rawPrograms } = await payload.find({
@@ -26,10 +19,6 @@ export default async function HomePage() {
     limit: 500,
     depth: 1,
   }) as { docs: any[] };
-
-  if (programVersionId && rawPrograms.find((p) => String(p.id) === String(programVersionId))) {
-    redirect('/plan');
-  }
 
   const departmentTitle =
     rawPrograms.length > 0 &&

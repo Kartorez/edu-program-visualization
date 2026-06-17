@@ -11,11 +11,14 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function GraphPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ programId: string }>;
   searchParams: Promise<{ semester?: string }>;
 }) {
-  const { disciplines: rawDisciplines } = await getProgramDisciplines();
+  const { programId } = await params;
+  const { disciplines: rawDisciplines } = await getProgramDisciplines(programId, false);
   const initialNodes = positionNodes(rawDisciplines);
   const resolvedParams = await searchParams;
   const initialSemester = resolvedParams.semester ? parseInt(resolvedParams.semester, 10) : null;

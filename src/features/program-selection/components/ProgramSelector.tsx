@@ -31,16 +31,16 @@ export default function ProgramSelector({ currentLabel, options }: ProgramSelect
     }, []);
 
     const handleSelect = (id: string | number) => {
-        document.cookie = `programVersionId=${id}; path=/; max-age=31536000`;
+        localStorage.setItem('programVersionId', String(id));
         setOpen(false);
-        window.location.reload();
+        router.push(`/plan/${id}`);
     };
 
     const handleBackToWizard = (e: React.MouseEvent) => {
         e.preventDefault();
-        document.cookie = 'programVersionId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+        localStorage.removeItem('programVersionId');
         setOpen(false);
-        window.location.href = '/';
+        router.push('/?force-select=true');
     };
 
     return (

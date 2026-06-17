@@ -1,0 +1,26 @@
+.next/dev/types/app/(frontend)/plan/layout.ts(2,24): error TS2307: Cannot find module '../../../../../../src/app/(frontend)/plan/layout.js' or its corresponding type declarations.
+.next/dev/types/app/(frontend)/plan/layout.ts(7,29): error TS2307: Cannot find module '../../../../../../src/app/(frontend)/plan/layout.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(170,39): error TS2307: Cannot find module '../../../src/app/my-route/route.js' or its corresponding type declarations.
+.next/dev/types/validator.ts(192,39): error TS2307: Cannot find module '../../../src/app/(frontend)/plan/layout.js' or its corresponding type declarations.
+src/app/(frontend)/api/export-pdf/route.ts(3,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(frontend)/layout.tsx(10,10): error TS2614: Module '"@/shared/ui/Background/Background"' has no exported member 'BackgroundGlow'. Did you mean to use 'import BackgroundGlow from "@/shared/ui/Background/Background"' instead?
+src/app/(frontend)/plan/competencies/page.tsx(2,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(frontend)/plan/page.tsx(2,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(frontend)/plan/results/page.tsx(2,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/admin/[[...segments]]/not-found.tsx(5,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/admin/[[...segments]]/page.tsx(5,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/api/[...slug]/route.ts(3,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/api/graphql-playground/route.ts(3,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/api/graphql/route.ts(3,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/app/(payload)/layout.tsx(3,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/collections/Disciplines.ts(53,17): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/collections/Disciplines.ts(63,17): error TS2322: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'.
+src/features/study-plan/components/DisciplineModal.tsx(93,25): error TS2322: Type 'ModalDisciplineNode[]' is not assignable to type 'SidebarDiscipline[]'.
+  Type 'ModalDisciplineNode' is not assignable to type 'SidebarDiscipline'.
+    Types of property 'id' are incompatible.
+      Type 'string | number' is not assignable to type 'string'.
+        Type 'number' is not assignable to type 'string'.
+src/shared/lib/getProgramDisciplines.ts(4,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.
+src/views/home/HomePage.tsx(2,20): error TS2307: Cannot find module '@payload-config' or its corresponding type declarations.

@@ -14,7 +14,7 @@ const formatAssessment = (val: string) => {
   return map[val] || val;
 };
 
-async function fetchProgramDisciplines(programVersionId: string | undefined) {
+async function fetchProgramDisciplines(programVersionId: string | undefined, light: boolean = false) {
   const payload = await getPayload({ config });
 
   let rawDisciplines: any[] = [];
@@ -25,7 +25,7 @@ async function fetchProgramDisciplines(programVersionId: string | undefined) {
       program = await payload.findByID({
         collection: 'educational-programs',
         id: programVersionId,
-        depth: 2,
+        depth: light ? 1 : 2,
       });
     } catch {
       programVersionId = undefined;
@@ -46,7 +46,7 @@ async function fetchProgramDisciplines(programVersionId: string | undefined) {
         collection: 'disciplines',
         where: { id: { in: unpopulatedIds } },
         limit: unpopulatedIds.length,
-        depth: 1,
+        depth: light ? 1 : 2,
       });
       extra = docs;
     }
@@ -54,11 +54,15 @@ async function fetchProgramDisciplines(programVersionId: string | undefined) {
     rawDisciplines = [...populated, ...extra];
   }
 
-  const { docs: relations } = await payload.find({
-    collection: 'discipline-relations',
-    limit: 5000,
-    depth: 0,
-  });
+  let relations: any[] = [];
+  if (!light) {
+    const { docs } = await payload.find({
+      collection: 'discipline-relations',
+      limit: 5000,
+      depth: 0,
+    });
+    relations = docs;
+  }
 
   const baseDiscMap = new Map(
     rawDisciplines.map((d) => [String(d.id), d])
@@ -88,56 +92,76 @@ async function fetchProgramDisciplines(programVersionId: string | undefined) {
   const finalDisciplines = disciplines.map((doc) => {
     const sid = String(doc.id);
 
-    const prerequisites = Array.from(new Map(relations
-      .filter(
-        (r: any) =>
-          String(
-            r.subject && typeof r.subject === 'object'
-              ? r.subject.id
-              : r.subject
-          ) === sid
-      )
-      .map((r: any) =>
-        baseDiscMap.get(
-          String(
-            r.dependsOn && typeof r.dependsOn === 'object'
-              ? r.dependsOn.id
-              : r.dependsOn
+    let prerequisites: any[] = [];
+    let postrequisites: any[] = [];
+
+    if (!light) {
+      prerequisites = Array.from(new Map(relations
+        .filter(
+          (r: any) =>
+            String(
+              r.subject && typeof r.subject === 'object'
+                ? r.subject.id
+                : r.subject
+            ) === sid
+        )
+        .map((r: any) =>
+          baseDiscMap.get(
+            String(
+              r.dependsOn && typeof r.dependsOn === 'object'
+                ? r.dependsOn.id
+                : r.dependsOn
+            )
           )
         )
-      )
-      .filter(Boolean)
-      .map((p: any) => [p.id, p])
-    ).values());
+        .filter(Boolean)
+        .map((p: any) => [p.id, p])
+      ).values());
 
-    const postrequisites = Array.from(new Map(relations
-      .filter(
-        (r: any) =>
-          String(
-            r.dependsOn && typeof r.dependsOn === 'object'
-              ? r.dependsOn.id
-              : r.dependsOn
-          ) === sid
-      )
-      .map((r: any) =>
-        baseDiscMap.get(
-          String(
-            r.subject && typeof r.subject === 'object'
-              ? r.subject.id
-              : r.subject
+      postrequisites = Array.from(new Map(relations
+        .filter(
+          (r: any) =>
+            String(
+              r.dependsOn && typeof r.dependsOn === 'object'
+                ? r.dependsOn.id
+                : r.dependsOn
+            ) === sid
+        )
+        .map((r: any) =>
+          baseDiscMap.get(
+            String(
+              r.subject && typeof r.subject === 'object'
+                ? r.subject.id
+                : r.subject
+            )
           )
         )
-      )
-      .filter(Boolean)
-      .map((p: any) => [p.id, p])
-    ).values());
+        .filter(Boolean)
+        .map((p: any) => [p.id, p])
+      ).values());
+    }
 
-    return {
+    const finalDoc = {
       ...doc,
       assessment: formatAssessment(doc.assessment),
       prerequisites,
       postrequisites,
     };
+
+    if (light) {
+      delete finalDoc.topics;
+      delete finalDoc.competencies;
+      delete finalDoc.learningOutcomes;
+      delete finalDoc.practiceBase;
+      delete finalDoc.practiceSupervisor;
+      delete finalDoc.practicePartners;
+      delete finalDoc.practiceReports;
+      delete finalDoc.thesisDiscipline;
+      delete finalDoc.thesisStructure;
+      delete finalDoc.thesisDeadlines;
+    }
+
+    return finalDoc;
   });
 
   return {
@@ -146,9 +170,6 @@ async function fetchProgramDisciplines(programVersionId: string | undefined) {
   };
 }
 
-export const getProgramDisciplines = cache(async function getProgramDisciplines() {
-  const cookieStore = await cookies();
-  const programVersionId = cookieStore.get('programVersionId')?.value;
-
-  return fetchProgramDisciplines(programVersionId);
+export const getProgramDisciplines = cache(async function getProgramDisciplines(programVersionId?: string, light: boolean = false) {
+  return fetchProgramDisciplines(programVersionId, light);
 });

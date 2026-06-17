@@ -1,0 +1,89 @@
+.onboarding {
+  padding: 2rem 0;
+  max-width: 1200px;
+
+  &__header {
+    margin-bottom: 2rem;
+    
+    h2 {
+      margin-bottom: 0.5rem;
+      color: var(--theme-elevation-800);
+    }
+    
+    p {
+      color: var(--theme-elevation-450);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  &__card {
+    padding: 1.5rem;
+    background: var(--theme-elevation-100);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: var(--theme-elevation-400);
+      transform: translateY(-2px);
+      background: var(--theme-elevation-150);
+    }
+  }
+
+  &__number {
+    position: absolute;
+    top: -12px;
+    left: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #6366f1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  &__title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--theme-elevation-900);
+    font-weight: 600;
+  }
+
+  &__desc {
+    font-size: 0.9rem;
+    color: var(--theme-elevation-500);
+    line-height: 1.4;
+  }
+
+  &__link {
+    margin-top: auto;
+    display: inline-block;
+    padding: 0.625rem 1rem;
+    background: var(--theme-elevation-200);
+    color: var(--theme-elevation-800);
+    border-radius: 6px;
+    text-decoration: none !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--theme-elevation-300);
+      color: var(--theme-elevation-900);
+    }
+  }
+}

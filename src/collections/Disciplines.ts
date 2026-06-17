@@ -50,7 +50,7 @@ export const Disciplines: CollectionConfig = {
 
               let groupId: string;
               if (existingGroups.docs && existingGroups.docs.length > 0) {
-                groupId = existingGroups.docs[0].id;
+                groupId = existingGroups.docs[0].id as string;
               } else {
                 const newGroup = await req.payload.create({
                   collection: 'elective-groups' as any,
@@ -60,7 +60,7 @@ export const Disciplines: CollectionConfig = {
                   },
                   req,
                 });
-                groupId = newGroup.id;
+                groupId = newGroup.id as string;
               }
 
               data.electiveGroup = groupId;
@@ -243,7 +243,7 @@ export const Disciplines: CollectionConfig = {
               type: 'ui',
               admin: {
                 position: 'sidebar',
-                components: { Field: '@/components/admin/ParseButton#default' }
+                components: { Field: '@/features/admin/parser/components/ParseButton#default' }
               },
             },
             {

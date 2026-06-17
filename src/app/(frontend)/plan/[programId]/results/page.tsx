@@ -12,12 +12,13 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function LearningOutcomesPage() {
+export default async function LearningOutcomesPage({ params }: { params: Promise<{ programId: string }> }) {
+  const { programId } = await params;
   const payload = await getPayload({ config });
 
   const [{ docs: outcomes }, { disciplines }] = await Promise.all([
     payload.find({ collection: 'learning-outcomes', limit: 1000 }),
-    getProgramDisciplines(),
+    getProgramDisciplines(programId, false),
   ]);
 
   const sortedOutcomes = outcomes.sort((a, b) => {

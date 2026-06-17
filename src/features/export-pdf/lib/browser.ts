@@ -1,42 +1,39 @@
-import puppeteerCore, { Browser, Page } from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import puppeteer, { Browser, Page } from 'puppeteer-core';
 
 let browser: Browser | null = null;
 
-const isDev = process.env.NODE_ENV === 'development';
-
 async function getBrowser(): Promise<Browser> {
-    if (!browser || !browser.connected) {
-        if (isDev) {
+  if (!browser || !browser.connected) {
+    const isVercel = process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
 
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const puppeteer = require('puppeteer');
-            browser = await puppeteer.launch({
-                headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            });
-        } else {
-            browser = await puppeteerCore.launch({
-                args: chromium.args,
-                defaultViewport: { width: 1920, height: 1080 },
-                executablePath: await chromium.executablePath(),
-                headless: true,
-            });
-        }
+    if (isVercel) {
+      const chromium = (await import('@sparticuz/chromium')).default;
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: true,
+      });
+    } else {
+      browser = await puppeteer.launch({
+        channel: 'chrome',
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
     }
-    if (!browser) throw new Error('Browser failed to launch');
-    return browser;
+  }
+  return browser;
 }
 
 const pool: Page[] = [];
 
 export async function withPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
-    const b = await getBrowser();
-    const page = pool.pop() ?? (await b.newPage());
-    try {
-        return await fn(page);
-    } finally {
-        await page.goto('about:blank');
-        pool.push(page);
-    }
+  const b = await getBrowser();
+  const page = pool.pop() ?? (await b.newPage());
+  try {
+    return await fn(page);
+  } finally {
+    await page.goto('about:blank');
+    pool.push(page);
+  }
 }

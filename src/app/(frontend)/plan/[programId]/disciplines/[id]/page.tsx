@@ -8,12 +8,12 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ programId: string; id: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const decodedId = decodeURIComponent(resolvedParams.id);
-  const { disciplines } = await getProgramDisciplines();
-  const doc = disciplines.find((d: any) => d.id === decodedId);
+  const { disciplines } = await getProgramDisciplines(resolvedParams.programId, false);
+  const doc = disciplines.find((d: any) => String(d.id) === decodedId);
 
   if (!doc) {
     return { title: 'Дисципліна не знайдена' };
@@ -28,17 +28,16 @@ export async function generateMetadata({
 export default async function DisciplinePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ programId: string; id: string }>;
 }) {
   const resolvedParams = await params;
   const decodedId = decodeURIComponent(resolvedParams.id);
-  const { disciplines } = await getProgramDisciplines();
+  const { disciplines } = await getProgramDisciplines(resolvedParams.programId, false);
+  const doc = disciplines.find((d: any) => String(d.id) === decodedId);
 
-  const discipline = disciplines.find((d: any) => d.id === decodedId);
-
-  if (!discipline) {
+  if (!doc) {
     notFound();
   }
 
-  return <DisciplineView discipline={discipline} />;
+  return <DisciplineView discipline={doc} />;
 }

@@ -1,9 +1,9 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
 import { sortByCode } from '@/shared/lib/sortByCode';
-import Hero from '@/views/home/section/Hero';
-import Marquee from '@/views/home/section/Marque';
-import About from '@/views/home/section/About';
+import Hero from '@/views/plan/section/Hero';
+import Marquee from '@/views/plan/section/Marque';
+import About from '@/views/plan/section/About';
 import type { ProgramOption } from '@/features/program-selection/components/ProgramSelector';
 import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
 
@@ -14,12 +14,13 @@ const degreeLabels: Record<string, string> = {
   master: 'Магістр',
 };
 
-export default async function PlanLandingPage() {
+export default async function PlanLandingPage({ params }: { params: Promise<{ programId: string }> }) {
+  const { programId } = await params;
   const payload = await getPayload({ config });
 
   const [{ docs: programs }, { disciplines: rawDisciplines, programVersionId }] = await Promise.all([
     payload.find({ collection: 'educational-programs', limit: 500, depth: 1 }) as Promise<{ docs: any[] }>,
-    getProgramDisciplines(),
+    getProgramDisciplines(programId, true),
   ]);
 
   const sorted = sortByCode(rawDisciplines);

@@ -1,15 +1,23 @@
-import { Badge, PageHeader, Stat } from '@/shared/ui';
-import Accordion, { type BadgeItem } from './Accordion';
+import { PageHeader, Stat, Accordion, type BadgeVariant } from '@/shared/ui';
 import { sortByCode } from '@/shared/lib/sortByCode';
-import styles from './DisciplineView.module.scss';
-import type { BadgeVariant } from '@/shared/ui';
+import './DisciplineView.scss';
 
-import Link from 'next/link';
+import StandardBlock from './StandardBlock';
+import PracticeBlock from './PracticeBlock';
+import ThesisBlock from './ThesisBlock';
+import RequisitesBlock from './RequisitesBlock';
+
+const ASSESSMENT_LABEL: Record<string, string> = {
+  exam: 'Іспит',
+  credit: 'Залік',
+  exam_credit: 'Іспит/Залік',
+};
 
 export default function DisciplineView({ discipline }: { discipline: any }) {
+  const category: 'standard' | 'practice' | 'thesis' = discipline.category ?? 'standard';
   const competencies = discipline.competencies || [];
-  const topics = discipline.topics || [];
-  const results = discipline.learningOutcomes || [];
+  const results = sortByCode(discipline.learningOutcomes || []);
+  const reports = discipline.practiceReports || [];
 
   const prerequisites = sortByCode(
     (discipline.prerequisites || [])
@@ -21,99 +29,88 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
       .filter((d: any) => d && typeof d === 'object' && !d.code?.startsWith('ВК'))
   );
 
-  const zk = competencies.filter((c: any) => c.type === 'zk');
-  const sk = competencies.filter((c: any) => c.type === 'sk');
+  const zk = sortByCode(competencies.filter((c: any) => c.type === 'zk'));
+  const sk = sortByCode(competencies.filter((c: any) => c.type === 'sk'));
+
+  const typeLabel = discipline.type === 'elective' ? 'Вибіркова' : 'Обовʼязкова';
+  const assessmentLabel = ASSESSMENT_LABEL[discipline.assessment] ?? discipline.assessment ?? '';
 
   return (
-    <div className={styles['discipline-view']}>
+    <div className="discipline-view">
+      
       <PageHeader
-        code={`${discipline.code} · ${discipline.type === 'elective' ? 'Вибіркова' : 'Обовʼязкова'}`}
+        code={`${discipline.code} · ${typeLabel}`}
         title={discipline.name}
         description={discipline.description}
         stats={
           <>
             <Stat label="Кредити" value={`${discipline.credits} ЄКТС`} variant="card" isAccent />
             <Stat label="Семестр" value={`${(discipline.semesters || []).join(', ')} з 8`} variant="card" />
-            {discipline.assessment && (
-              <Stat label="Контроль" value={discipline.assessment === 'exam' ? 'Іспит' : discipline.assessment === 'credit' ? 'Залік' : 'Іспит/Залік'} variant="card" />
+            {assessmentLabel && (
+              <Stat label="Контроль" value={assessmentLabel} variant="card" />
             )}
             <Stat label="Компетентності" value={competencies.length} variant="card" />
           </>
         }
       />
 
-      <div className={styles['discipline-view__grid']}>
-        <div className={styles['discipline-view__card']}>
-          <div className={styles['discipline-view__section-title']}>
-            {discipline.category === 'practice' ? 'Організація практики' :
-              discipline.category === 'thesis' ? 'Виконання роботи' :
-                'Теми курсу'}
-          </div>
+      
+      <div className="discipline-view__grid">
 
-          {(discipline.category === 'practice' || discipline.category === 'thesis') ? (
-            <div className={styles['discipline-view__custom-info']}>
-              {discipline.description ? (
-                <div className={styles['discipline-view__description-full']}>{discipline.description}</div>
-              ) : (
-                <span className={styles['discipline-view__empty']}>
-                  Детальна інформація міститься у відповідних методичних вказівках кафедри.
-                </span>
-              )}
-            </div>
-          ) : topics.length > 0 ? (
-            <Accordion variant="topics" topics={topics} semesters={discipline.semesters || []} />
-          ) : (
-            <span className={styles['discipline-view__empty']}>Теми не вказані</span>
+        
+        <div className="discipline-view__side">
+          {category === 'practice' && (
+            <PracticeBlock discipline={discipline} />
+          )}
+          {category === 'thesis' && (
+            <ThesisBlock discipline={discipline} />
+          )}
+          {category === 'standard' && (
+            <StandardBlock discipline={discipline} />
           )}
         </div>
 
-        <div className={styles['discipline-view__card']}>
-          <div className={styles['discipline-view__section-title']}>Пререквізити та Постреквізити</div>
-          <div className={styles['discipline-view__requisites']}>
-            <div className={styles['discipline-view__requisites-section']}>
-              <span className={styles['discipline-view__requisites-label']}>Пререквізити</span>
-              <div className={styles['discipline-view__requisites-row']}>
-                {prerequisites.map((p: any) => (
-                  <Link key={p.id} href={`/plan/disciplines/${p.id}`} className={styles['discipline-view__link']}>
-                    <Badge variant="previous">
-                      {p.code} {p.shortName ?? p.name}
-                    </Badge>
-                  </Link>
+        
+        <div className="discipline-view__side">
+          <RequisitesBlock
+            discipline={discipline}
+            prerequisites={prerequisites}
+            postrequisites={postrequisites}
+          />
+
+          
+          {category === 'practice' && reports.length > 0 && (
+            <div className="discipline-view__card">
+              <div className="discipline-view__section-title">Звітні матеріали</div>
+              <ul className="discipline-view__reports-list">
+                {reports.map((r: any, i: number) => (
+                  <li key={r.id ?? i} className="discipline-view__report-item">
+                    <span className="discipline-view__report-name">{r.name}</span>
+                    {r.description && (
+                      <span className="discipline-view__report-desc">{r.description}</span>
+                    )}
+                  </li>
                 ))}
-                {prerequisites.length === 0 && <span className={styles['discipline-view__empty']}>—</span>}
-              </div>
+              </ul>
             </div>
-            <div className={styles['discipline-view__requisites-divider']} />
-            <div className={styles['discipline-view__requisites-section']}>
-              <span className={styles['discipline-view__requisites-label']}>Постреквізити</span>
-              <div className={styles['discipline-view__requisites-row']}>
-                {postrequisites.map((p: any) => (
-                  <Link key={p.id} href={`/plan/disciplines/${p.id}`} className={styles['discipline-view__link']}>
-                    <Badge variant="next">
-                      {p.code} {p.shortName ?? p.name}
-                    </Badge>
-                  </Link>
-                ))}
-                {postrequisites.length === 0 && <span className={styles['discipline-view__empty']}>—</span>}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <div className={styles['discipline-view__card']}>
+      
+      <div className="discipline-view__card">
         <Accordion
-          variant="badge-list"
           title="Компетентності"
+          variant="badge-list"
           badgeVariant="zk"
           items={[
-            ...zk.map((c: any): BadgeItem => ({
+            ...zk.map((c: any) => ({
               badge: c.code,
               text: c.description,
               variant: 'zk' as BadgeVariant,
               link: `/plan/competencies#comp-${c.code}`,
             })),
-            ...sk.map((c: any): BadgeItem => ({
+            ...sk.map((c: any) => ({
               badge: c.code,
               text: c.description,
               variant: 'sk' as BadgeVariant,
@@ -123,12 +120,12 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
         />
       </div>
 
-      <div className={styles['discipline-view__card']}>
+      <div className="discipline-view__card">
         <Accordion
-          variant="badge-list"
           title="Результати навчання"
+          variant="badge-list"
           badgeVariant="rn"
-          items={results.map((r: any): BadgeItem => ({
+          items={results.map((r: any) => ({
             badge: r.code,
             text: r.description,
             link: `/plan/results#res-${r.code}`,

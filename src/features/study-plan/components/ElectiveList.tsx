@@ -4,7 +4,7 @@ import type { SidebarDiscipline } from '@/shared/lib/DisciplinesContext';
 export default function ElectiveList({
   variants,
 }: {
-  variants: SidebarDiscipline[];
+  variants: { id?: string | number | null; code?: string | null; name?: string | null }[];
 }) {
   return (
     <div className="elective-variants">

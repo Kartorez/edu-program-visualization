@@ -12,12 +12,13 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function CompetenciesPage() {
+export default async function CompetenciesPage({ params }: { params: Promise<{ programId: string }> }) {
+  const { programId } = await params;
   const payload = await getPayload({ config });
 
   const [{ docs: competencies }, { disciplines }] = await Promise.all([
     payload.find({ collection: 'competencies', limit: 1000 }),
-    getProgramDisciplines(),
+    getProgramDisciplines(programId, false),
   ]);
 
   const sortedComps = competencies.sort((a, b) => {
