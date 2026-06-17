@@ -1,6 +1,5 @@
 import { SidebarProvider } from '@/shared/lib/SidebarContext';
 import { DisciplinesProvider } from '@/shared/lib/DisciplinesContext';
-import { Topbar } from '@/shared/ui/Sidebar/Topbar';
 import { Sidebar } from '@/shared/ui/Sidebar/Sidebar';
 import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
 import { notFound } from 'next/navigation';
@@ -31,7 +30,6 @@ export default async function PlanLayout({
   return (
     <SidebarProvider>
       <DisciplinesProvider disciplines={docs}>
-        <Topbar logoHref="/" navLinks={navLinks} ctaHref={`/plan/${programId}/graph`} />
         <div className="app-container">
           <Sidebar sections={[
             { href: '/', label: 'Змінити програму' },

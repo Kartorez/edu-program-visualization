@@ -15,13 +15,10 @@ export type TopbarNavLink = {
 };
 
 type TopbarProps = {
-  /** Logo text. Defaults to "КН · ВНАУ" with em on second part. */
   logoHref?: string;
   logoLabel?: string;
   logoAccent?: string;
-  /** Navigation links for breadcrumb resolution. Provide for public layout. */
   navLinks?: TopbarNavLink[];
-  /** CTA button shown on landing page when a program cookie is set. */
   ctaHref?: string;
   ctaLabel?: string;
 };
@@ -76,20 +73,33 @@ export function Topbar({
   logoHref = '/',
   logoLabel = 'Освітня програма',
   logoAccent = 'ВНАУ',
-  navLinks = DEFAULT_NAV,
-  ctaHref = '/plan/graph',
-  ctaLabel = 'Навчальний план',
 }: TopbarProps) {
   const pathname = usePathname();
   const { open, toggle } = useSidebar();
-  const crumbs = useBreadcrumbs(navLinks, logoHref, logoLabel);
+
+  const match = pathname.match(/^\/plan\/([^\/]+)/);
+  const programId = match ? match[1] : null;
+
+  const dynamicNavLinks = programId ? [
+    { match: `/plan/${programId}/graph`, label: 'Навчальний план' },
+    { match: `/plan/${programId}/competencies`, label: 'Матриця компетентностей' },
+    { match: `/plan/${programId}/results`, label: 'Результати навчання' },
+    { match: `/plan/${programId}`, label: 'Освітня програма' },
+  ] : [];
+
+  const crumbs = useBreadcrumbs(dynamicNavLinks, logoHref, logoLabel);
 
   const isLanding = pathname === logoHref;
 
-  const [hasProgram, setHasProgram] = useState(false);
+  const [hasProgram, setHasProgram] = useState<string | null>(null);
   useEffect(() => {
-    setHasProgram(document.cookie.includes('programVersionId='));
+    // get from localStorage
+    const saved = localStorage.getItem('programVersionId');
+    if (saved) setHasProgram(saved);
   }, [pathname]);
+
+  const ctaHref = hasProgram ? `/plan/${hasProgram}/graph` : undefined;
+  const ctaLabel = 'Навчальний план';
 
   // Split logo label into base + accent
   const logoParts = `КН · ${logoAccent}`;

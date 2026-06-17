@@ -4,6 +4,8 @@ import NextTopLoader from 'nextjs-toploader';
 import Background from '@/shared/ui/Background/Background';
 import '@/shared/styles/global.scss';
 import { NODE_H, NODE_W, SEMESTER_W } from '@/shared/constants/nodeLayout';
+import { SidebarProvider } from '@/shared/lib/SidebarContext';
+import { Topbar } from '@/shared/ui/Sidebar/Topbar';
 
 
 export const dynamic = 'force-dynamic';
@@ -69,7 +71,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           shadow="0 0 10px var(--color-primary),0 0 5px var(--color-primary)"
         />
         <Background />
-        {children}
+        <SidebarProvider>
+          <Topbar />
+          {children}
+        </SidebarProvider>
       </body>
     </html>
   );

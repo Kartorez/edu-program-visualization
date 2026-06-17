@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import './ScrollReveal.scss';
+import './ScrollReval.scss';
 
 interface ScrollRevealProps {
     children: React.ReactNode;
