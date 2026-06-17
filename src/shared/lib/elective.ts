@@ -1,7 +1,9 @@
-import type { Discipline, ElectiveGroup } from '@prisma/client';
-
-export type DisciplineWithElectiveGroup = Discipline & {
-  electiveGroup?: ElectiveGroup | null;
+export type DisciplineWithElectiveGroup = {
+  id: string | number;
+  code?: string | null;
+  name?: string | null;
+  shortName?: string | null;
+  electiveGroup?: { code?: string | null; name?: string | null } | string | number | null;
 };
 
 export const getElectiveGroupCode = (node: DisciplineWithElectiveGroup): string | null => {

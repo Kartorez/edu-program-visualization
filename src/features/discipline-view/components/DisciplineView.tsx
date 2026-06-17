@@ -74,7 +74,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
               <span className={styles['discipline-view__requisites-label']}>Пререквізити</span>
               <div className={styles['discipline-view__requisites-row']}>
                 {prerequisites.map((p: any) => (
-                  <Link key={p.id} href={`/plan/disciplines/${encodeURIComponent(p.code)}`} className={styles['discipline-view__link']}>
+                  <Link key={p.id} href={`/plan/disciplines/${p.id}`} className={styles['discipline-view__link']}>
                     <Badge variant="previous">
                       {p.code} {p.shortName ?? p.name}
                     </Badge>
@@ -88,7 +88,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
               <span className={styles['discipline-view__requisites-label']}>Постреквізити</span>
               <div className={styles['discipline-view__requisites-row']}>
                 {postrequisites.map((p: any) => (
-                  <Link key={p.id} href={`/plan/disciplines/${encodeURIComponent(p.code)}`} className={styles['discipline-view__link']}>
+                  <Link key={p.id} href={`/plan/disciplines/${p.id}`} className={styles['discipline-view__link']}>
                     <Badge variant="next">
                       {p.code} {p.shortName ?? p.name}
                     </Badge>

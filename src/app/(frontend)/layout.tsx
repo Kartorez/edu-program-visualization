@@ -1,0 +1,91 @@
+import type { Metadata } from 'next';
+import { Barlow_Condensed, Inter } from 'next/font/google';
+import { SidebarProvider } from '@/shared/lib/SidebarContext';
+import { DisciplinesProvider } from '@/shared/lib/DisciplinesContext';
+import { Topbar } from '@/shared/ui/Sidebar/Topbar';
+import { NODE_H, NODE_W, SEMESTER_W } from '@/shared/constants/nodeLayout';
+import '@/shared/styles/global.scss';
+import { Sidebar } from '@/shared/ui/Sidebar/Sidebar';
+import NextTopLoader from 'nextjs-toploader';
+import { BackgroundGlow } from '@/shared/ui/Background/Background';
+import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
+
+export const dynamic = 'force-dynamic';
+
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | КН ВНАУ',
+    default: 'Освітня програма | КН ВНАУ',
+  },
+  description: 'Інтерактивна візуалізація освітньої програми, матриць компетентностей та результатів навчання кафедри Комп\'ютерних наук ВНАУ.',
+  keywords: ['ВНАУ', 'Освітня програма', 'Комп\'ютерні науки', 'Навчальний план', 'Матриця компетентностей'],
+  openGraph: {
+    title: 'Освітня програма | КН ВНАУ',
+    description: 'Інтерактивна візуалізація освітньої програми, матриць компетентностей та результатів навчання.',
+    url: 'https://kn-vnau.edu.ua',
+    siteName: 'КН ВНАУ',
+    locale: 'uk_UA',
+    type: 'website',
+  },
+  icons: {
+    icon: '/favicon.png',
+  },
+};
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { disciplines: docs } = await getProgramDisciplines();
+
+  return (
+    <html
+      lang="uk"
+      data-scroll-behavior="smooth"
+      style={
+        {
+          '--node-w': `${NODE_W}px`,
+          '--node-h': `${NODE_H}px`,
+          '--semester-w': `${SEMESTER_W}px`,
+        } as React.CSSProperties
+      }
+    >
+      <body className={`${barlowCondensed.variable} ${inter.variable}`}>
+        <NextTopLoader
+          color="var(--color-primary)"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px var(--color-primary),0 0 5px var(--color-primary)"
+        />
+        <BackgroundGlow />
+        <SidebarProvider>
+          <DisciplinesProvider disciplines={docs}>
+            <Topbar />
+            <div className="app-container">
+              <Sidebar />
+              <main className="main-content">
+                {children}
+              </main>
+            </div>
+          </DisciplinesProvider>
+        </SidebarProvider>
+      </body>
+    </html>
+  );
+}

@@ -13,7 +13,7 @@ export default function ElectiveList({
         {variants.map((v) => (
           <li key={v.code} className="elective-variants__item">
             <Link
-              href={`/plan/disciplines/${encodeURIComponent(v.code ?? '')}`}
+              href={`/plan/disciplines/${v.id}`}
               className="elective-variants__link"
             >
               <span className="elective-variants__code">{v.code}</span>

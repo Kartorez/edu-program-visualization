@@ -27,7 +27,7 @@ const MatrixRow = memo(({
 }: MatrixRowProps) => {
     const selectedColsSet = useMemo(() => new Set(selectedColsArray), [selectedColsArray]);
     const disciplineItems = discipline[itemsKey] || [];
-    const url = `/plan/disciplines/${encodeURIComponent(discipline.code)}`;
+    const url = `/plan/disciplines/${discipline.id}`;
 
     return (
         <tr

@@ -174,7 +174,7 @@ export function MainSidebar({
                         return (
                           <Link
                             key={d.code}
-                            href={`/plan/disciplines/${encodeURIComponent(d.code ?? '')}?semester=${n}`}
+                            href={`/plan/disciplines/${d.id}?semester=${n}`}
                             className={`sidebar__subject-item ${isActive ? 'sidebar__subject-item--active' : ''}`}
                           >
                             <div
@@ -218,7 +218,7 @@ export function MainSidebar({
                                   return (
                                     <Link
                                       key={d.code}
-                                      href={`/plan/disciplines/${encodeURIComponent(d.code ?? '')}?semester=${n}`}
+                                      href={`/plan/disciplines/${d.id}?semester=${n}`}
                                       className={`sidebar__subject-item sidebar__subject-item--elective-variant ${isActive ? 'sidebar__subject-item--active' : ''}`}
                                     >
                                       <span className="sidebar__subject-code">{d.code}</span>

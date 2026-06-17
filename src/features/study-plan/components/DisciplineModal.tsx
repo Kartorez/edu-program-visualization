@@ -109,7 +109,7 @@ export default function DisciplineModal({
               />
             </div>
             <Button
-              href={`/plan/disciplines/${encodeURIComponent(node.code ?? '')}`}
+              href={`/plan/disciplines/${node.id}`}
               className="discipline-modal__details-button button--lg"
             >
               Детальніше
