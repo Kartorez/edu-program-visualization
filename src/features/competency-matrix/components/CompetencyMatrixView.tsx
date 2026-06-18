@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { PageHeader, StatPanel } from '@/shared/ui/PageHaeder';
 import { useMatrixState, MatrixRow, MatrixSearch } from '@/features/matrix';
 import styles from '@/features/matrix/components/Matrix.module.scss';
@@ -13,6 +13,8 @@ interface Props {
 
 export default function CompetencyMatrixView({ disciplines, competencies }: Props) {
     const router = useRouter();
+    const params = useParams();
+    const programId = params?.programId as string | undefined;
     const [visibleTypes, setVisibleTypes] = useState<string[]>(['zk', 'sk']);
 
     const {
@@ -30,6 +32,10 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
         handleCellClick,
         clearSelection,
         hasSelection,
+        isDragging,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUpOrLeave,
     } = useMatrixState({ disciplines, hashPrefix: '#comp-' });
 
     const toggleType = (type: string) =>
@@ -55,21 +61,21 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
                                 ? `${filteredDisciplines.length} з ${disciplines.length}`
                                 : disciplines.length,
                             isAccent: true,
-                            onClick: () => router.push('/plan/graph'),
+                            onClick: () => router.push(programId ? `/plan/${programId}/graph` : '/plan/graph'),
                             title: 'Переглянути граф',
                         },
                         {
                             label: 'Загальні (ЗК)',
                             value: competencies.filter(c => c.type === 'zk').length,
                             onClick: () => toggleType('zk'),
-                            className: visibleTypes.includes('zk') ? '' : 'is-inactive',
+                            inactive: !visibleTypes.includes('zk'),
                             title: 'Перемкнути видимість ЗК',
                         },
                         {
                             label: 'Спеціальні (СК)',
                             value: competencies.filter(c => c.type === 'sk').length,
                             onClick: () => toggleType('sk'),
-                            className: visibleTypes.includes('sk') ? '' : 'is-inactive',
+                            inactive: !visibleTypes.includes('sk'),
                             title: 'Перемкнути видимість СК',
                         },
                     ]} />
@@ -101,7 +107,13 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
                 )}
             </div>
 
-            <div className={styles.matrixWrap}>
+            <div 
+                className={`${styles.matrixWrap} ${isDragging ? styles.dragging : ''}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUpOrLeave}
+                onMouseLeave={handleMouseUpOrLeave}
+            >
                 <table className={styles.matrix}>
                     <thead>
                         <tr>
@@ -116,6 +128,7 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
                                     <div className={styles.thContent}>{c.code}</div>
                                 </th>
                             ))}
+                            <th className={styles.emptySpace}></th>
                         </tr>
                     </thead>
                     <tbody>

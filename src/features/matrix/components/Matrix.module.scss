@@ -22,11 +22,16 @@
   min-width: 200px;
   max-width: 300px;
 
-  svg {
+  .iconWrap {
     position: absolute;
     left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--color-subtle);
     pointer-events: none;
   }
@@ -101,24 +106,34 @@
 
 .matrixWrap {
   overflow: auto;
-  max-height: calc(100vh - 180px);
+  height: calc(100vh - 180px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: white;
   box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.04);
+  cursor: grab;
+
+  overflow-anchor: none;
+
+  &.dragging {
+    cursor: grabbing;
+    user-select: none;
+  }
 
   &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 10px;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent;
+    background: #f1f5f9;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
+    border: 2px solid #f1f5f9;
 
     &:hover {
       background: #94a3b8;
@@ -140,13 +155,22 @@
   }
 }
 
+.emptySpace {
+  width: auto;
+  border-right: none !important;
+  background: transparent !important;
+  pointer-events: none;
+}
+
 .thClickable {
   cursor: pointer;
   background: #ffffff;
   color: #334155;
   vertical-align: middle;
   height: 75px;
-  min-width: 38px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -195,6 +219,7 @@
   border-left: 0.5px solid var(--color-border);
   border-bottom: 2px solid #cbd5e1;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.02);
+  will-change: transform;
 
   @media (max-width: 768px) {
     width: 180px;
@@ -210,6 +235,7 @@
   text-align: left !important;
   padding: 0 !important;
   border-left: 0.5px solid var(--color-border);
+  will-change: transform;
 
   .disciplineCellContent {
     display: flex;
@@ -263,6 +289,12 @@
 
 .matrixRow {
   cursor: pointer;
+  transition: opacity 0.2s ease;
+  opacity: 1;
+
+  @starting-style {
+    opacity: 0;
+  }
 
   &:hover td {
     background: #f8fafc;
@@ -282,6 +314,8 @@
 
 .matrixCell {
   width: 40px;
+  min-width: 40px;
+  max-width: 40px;
   height: 40px;
 
   &Highlight {
@@ -318,6 +352,12 @@
     border-radius: var(--radius-sm);
     background: #fa5a1bd7;
     border: 1px solid #fed7aa;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matrixRow {
+    transition: none;
   }
 }
 

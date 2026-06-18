@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import styles from './Matrix.module.scss';
 
 interface MatrixRowProps {
@@ -27,7 +28,9 @@ const MatrixRow = memo(({
 }: MatrixRowProps) => {
     const selectedColsSet = useMemo(() => new Set(selectedColsArray), [selectedColsArray]);
     const disciplineItems = discipline[itemsKey] || [];
-    const url = `/plan/disciplines/${discipline.id}`;
+    const params = useParams();
+    const programId = params?.programId as string | undefined;
+    const url = programId ? `/plan/${programId}/disciplines/${discipline.id}` : `/plan/disciplines/${discipline.id}`;
 
     return (
         <tr
@@ -85,6 +88,7 @@ const MatrixRow = memo(({
                     </td>
                 );
             })}
+            <td className={styles.emptySpace}></td>
         </tr>
     );
 });

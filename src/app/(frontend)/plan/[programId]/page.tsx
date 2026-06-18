@@ -20,7 +20,7 @@ export default async function PlanLandingPage({ params }: { params: Promise<{ pr
 
   const [{ docs: programs }, { disciplines: rawDisciplines, programVersionId }] = await Promise.all([
     payload.find({ collection: 'educational-programs', limit: 500, depth: 1 }) as Promise<{ docs: any[] }>,
-    getProgramDisciplines(programId, true),
+    getProgramDisciplines(programId, true, true),
   ]);
 
   const sorted = sortByCode(rawDisciplines);
@@ -55,7 +55,9 @@ export default async function PlanLandingPage({ params }: { params: Promise<{ pr
     : "122 Комп'ютерні науки · Бакалавр · 2024";
 
   const dynamicTitle = 'Освітня програма';
-  const dynamicSubtitle = activeProg ? activeProg.title : 'кафедри КН';
+  const dynamicSubtitle = activeProg?.department && typeof activeProg.department === 'object' 
+    ? `кафедри ${(activeProg.department as any).shortName || 'КН'}` 
+    : 'кафедри КН';
   const totalCredits = activeProg?.totalCredits ?? 240;
 
   return (
@@ -71,7 +73,7 @@ export default async function PlanLandingPage({ params }: { params: Promise<{ pr
         programOptions={programOptions}
       />
       <Marquee disciplines={sorted} />
-      <About disciplines={sorted} />
+      <About disciplines={sorted} programId={programId} />
     </>
   );
 }

@@ -30,9 +30,12 @@ export default async function CompetenciesPage({ params }: { params: Promise<{ p
     return numA - numB;
   });
 
+  const uniqueDisciplines = Array.from(new Map(disciplines.map((d: any) => [String(d.id), d])).values()) as any[];
+  const requiredDisciplines = uniqueDisciplines.filter((d: any) => d.type === 'required');
+
   return (
     <CompetenciesMatrixView
-      disciplines={sortByCode(disciplines)}
+      disciplines={sortByCode(requiredDisciplines)}
       competencies={sortedComps}
     />
   );

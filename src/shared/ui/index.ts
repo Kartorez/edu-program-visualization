@@ -4,7 +4,6 @@ export * from './Background';
 export * from './ScrollReval';
 export * from './Skeleton';
 export * from './PageHaeder';
-export * from './Sidebar';
 
 export { default as Accordion } from './Accordion/Accordion';
 export type { BadgeItem, TopicItem, AccordionProps } from './Accordion/Accordion';

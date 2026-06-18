@@ -5,9 +5,10 @@ type Props = {
   discipline: any;
   prerequisites: any[];
   postrequisites: any[];
+  programId: string;
 };
 
-export default function RequisitesBlock({ discipline, prerequisites, postrequisites }: Props) {
+export default function RequisitesBlock({ discipline, prerequisites, postrequisites, programId }: Props) {
   const thesisDiscipline =
     discipline.thesisDiscipline && typeof discipline.thesisDiscipline === 'object'
       ? discipline.thesisDiscipline
@@ -25,7 +26,7 @@ export default function RequisitesBlock({ discipline, prerequisites, postrequisi
               <span className="discipline-view__requisites-label">Базова дисципліна</span>
               <div className="discipline-view__requisites-row">
                 <Link
-                  href={`/plan/disciplines/${thesisDiscipline.id}`}
+                  href={`/plan/${programId}/disciplines/${thesisDiscipline.id}`}
                   className="discipline-view__link"
                 >
                   <Badge variant="previous">
@@ -42,7 +43,7 @@ export default function RequisitesBlock({ discipline, prerequisites, postrequisi
           <span className="discipline-view__requisites-label">Пререквізити</span>
           <div className="discipline-view__requisites-row">
             {prerequisites.map((p: any) => (
-              <Link key={p.id} href={`/plan/disciplines/${p.id}`} className="discipline-view__link">
+              <Link key={p.id} href={`/plan/${programId}/disciplines/${p.id}`} className="discipline-view__link">
                 <Badge variant="previous">
                   {p.code} {p.shortName ?? p.name}
                 </Badge>
@@ -58,7 +59,7 @@ export default function RequisitesBlock({ discipline, prerequisites, postrequisi
           <span className="discipline-view__requisites-label">Постреквізити</span>
           <div className="discipline-view__requisites-row">
             {postrequisites.map((p: any) => (
-              <Link key={p.id} href={`/plan/disciplines/${p.id}`} className="discipline-view__link">
+              <Link key={p.id} href={`/plan/${programId}/disciplines/${p.id}`} className="discipline-view__link">
                 <Badge variant="next">
                   {p.code} {p.shortName ?? p.name}
                 </Badge>

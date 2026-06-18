@@ -9,12 +9,13 @@ interface StatProps {
   onClick?: () => void;
   className?: string;
   title?: string;
+  inactive?: boolean;
 }
 
-export default function Stat({ label, value, variant = 'default', isAccent, onClick, className, title }: StatProps) {
+export default function Stat({ label, value, variant = 'default', isAccent, onClick, className, title, inactive }: StatProps) {
   return (
     <div
-      className={`${styles.stat} ${styles[variant]} ${onClick ? styles.clickable : ''} ${className || ''}`}
+      className={`${styles.stat} ${styles[variant]} ${onClick ? styles.clickable : ''} ${inactive ? styles['is-inactive'] : ''} ${className || ''}`}
       onClick={onClick}
       title={title}
     >

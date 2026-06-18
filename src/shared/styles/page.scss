@@ -1,0 +1,40 @@
+.nav__logo,
+.stat__num,
+.big-num,
+.about-section__title,
+.card__title,
+.chip,
+.hero__title,
+.flow-node {
+  font-family: var(--font-display);
+}
+
+.topbar:has(~ .export-page),
+body:has(.export-page) .topbar {
+  display: none !important;
+}
+
+body:has(.export-page) {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: white !important;
+  width: 1123px !important;
+  height: 794px !important;
+  max-height: 794px !important;
+}
+
+html:has(.export-page) {
+  background: white !important;
+  overflow: hidden !important;
+}
+
+.export-page {
+  width: 1123px;
+  height: 794px;
+  overflow: hidden;
+  background: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+}

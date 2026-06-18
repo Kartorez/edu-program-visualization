@@ -1,22 +1,23 @@
 import { ScrollReveal } from '@/shared/ui';
+import Link from 'next/link';
 import styles from './About.module.scss';
 import ReqList from '@/shared/ui/CustomNodes/ReqList';
 import nodeStyles from '@/shared/ui/CustomNodes/Node.module.scss';
 import { getElectiveGroupCode } from '@/shared/lib/elective';
 
-export default function About({ disciplines }: { disciplines: any[] }) {
+export default function About({ disciplines, programId }: { disciplines: any[], programId: string }) {
     const unique = Array.from(new Map((disciplines || []).map((d) => [String(d.id), d])).values());
 
     const okDisciplines = unique.filter((d: any) => !getElectiveGroupCode(d));
 
     const mid = unique.find(
-        (d: any) => (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
+        (d: any) => d.code?.startsWith('ОК') && (d.prerequisites?.length ?? 0) > 0 && (d.postrequisites?.length ?? 0) > 0
     ) || okDisciplines[5];
 
     const electiveGroupMap = new Map(
         unique
             .filter((d: any) => d.code?.match(/^ВК\s*\d+\.1/))
-            .map((d: any) => [d.code?.match(/^ВК\s*\d+/)?.[0], d.shortName ?? d.name])
+            .map((d: any) => [d.code?.match(/^ВК\s*\d+/)?.[0], { id: d.id, label: d.shortName ?? d.name }])
     );
     const electiveTags = [...electiveGroupMap.values()];
 
@@ -47,7 +48,7 @@ export default function About({ disciplines }: { disciplines: any[] }) {
         return { sem, count };
     });
 
-    const getCodes = (list: any[]) => (list || []).map(p => p.code).filter(Boolean);
+    const getCodes = (list: any[]) => (list || []).map(p => p.code).filter(c => c && !c.startsWith('ВК'));
 
     const midPrereqs = getCodes(mid?.prerequisites as any);
     const midPostreqs = getCodes(mid?.postrequisites as any);
@@ -104,10 +105,10 @@ export default function About({ disciplines }: { disciplines: any[] }) {
                     <div className={styles['card__eyebrow']}>Семестри</div>
                     <div className={styles['sem-list']}>
                         {semesterLabels.map(({ sem, count }) => (
-                            <div key={sem} className={styles['sem-item']}>
+                            <Link key={sem} href={`/plan/${programId}/graph?semester=${sem}`} className={`${styles['sem-item']} ${styles['sem-item--link']}`}>
                                 <span className={styles['sem-dot']} />
                                 Семестр {sem} · {count} дисциплін
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </ScrollReveal>
@@ -120,10 +121,10 @@ export default function About({ disciplines }: { disciplines: any[] }) {
                         цікавлять саме тебе.
                     </div>
                     <div className={styles['tag-list']}>
-                        {electiveTags.map((label, i) => (
-                            <span key={i} className={styles.tag}>
-                                {label}
-                            </span>
+                        {electiveTags.map((tag: any, i) => (
+                            <Link key={i} href={`/plan/${programId}/disciplines/${tag.id}`} className={styles.tag}>
+                                {tag.label}
+                            </Link>
                         ))}
                     </div>
                 </ScrollReveal>

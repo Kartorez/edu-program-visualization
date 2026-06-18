@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useParams } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { useDisciplines, SidebarDiscipline } from '@/shared/lib/DisciplinesContext';
 import { sortByCode } from '@/shared/lib/sortByCode';
@@ -32,13 +32,15 @@ export function MainSidebar({
 }: MainSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const programId = params?.programId as string | undefined;
   const semesterParam = searchParams.get('semester');
 
   // Allow overriding disciplines from context via prop
   const contextDisciplines = useDisciplines();
   const disciplines = disciplinesProp ?? contextDisciplines;
 
-  const isDisciplinePage = pathname.startsWith('/plan/disciplines/');
+  const isDisciplinePage = pathname.includes('/disciplines/');
   const currentDisciplineCode = isDisciplinePage
     ? decodeURIComponent(pathname.split('/').pop() ?? '')
     : null;
@@ -174,7 +176,7 @@ export function MainSidebar({
                         return (
                           <Link
                             key={d.code}
-                            href={`/plan/disciplines/${d.id}?semester=${n}`}
+                            href={programId ? `/plan/${programId}/disciplines/${d.id}?semester=${n}` : `/plan/disciplines/${d.id}?semester=${n}`}
                             className={`sidebar__subject-item ${isActive ? 'sidebar__subject-item--active' : ''}`}
                           >
                             <div
@@ -218,7 +220,7 @@ export function MainSidebar({
                                   return (
                                     <Link
                                       key={d.code}
-                                      href={`/plan/disciplines/${d.id}?semester=${n}`}
+                                      href={programId ? `/plan/${programId}/disciplines/${d.id}?semester=${n}` : `/plan/disciplines/${d.id}?semester=${n}`}
                                       className={`sidebar__subject-item sidebar__subject-item--elective-variant ${isActive ? 'sidebar__subject-item--active' : ''}`}
                                     >
                                       <span className="sidebar__subject-code">{d.code}</span>

@@ -73,7 +73,7 @@
   }
 }
 
-:global(.is-inactive) {
+.is-inactive {
   opacity: 0.5;
   filter: grayscale(1);
   background: #f1f5f9 !important;

@@ -27,9 +27,12 @@ export default async function LearningOutcomesPage({ params }: { params: Promise
     return numA - numB;
   });
 
+  const uniqueDisciplines = Array.from(new Map(disciplines.map((d: any) => [String(d.id), d])).values()) as any[];
+  const requiredDisciplines = uniqueDisciplines.filter((d: any) => d.type === 'required');
+
   return (
     <LearningResultsView
-      disciplines={sortByCode(disciplines)}
+      disciplines={sortByCode(requiredDisciplines)}
       outcomes={sortedOutcomes}
     />
   );

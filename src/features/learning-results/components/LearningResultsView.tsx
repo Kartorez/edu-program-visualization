@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { PageHeader, StatPanel } from '@/shared/ui/PageHaeder';
 import { useMatrixState, MatrixRow, MatrixSearch } from '@/features/matrix';
 import styles from '@/features/matrix/components/Matrix.module.scss';
@@ -12,6 +12,8 @@ interface Props {
 
 export default function LearningResultsView({ disciplines, outcomes }: Props) {
     const router = useRouter();
+    const params = useParams();
+    const programId = params?.programId as string | undefined;
 
     const {
         inputValue,
@@ -28,6 +30,10 @@ export default function LearningResultsView({ disciplines, outcomes }: Props) {
         handleCellClick,
         clearSelection,
         hasSelection,
+        isDragging,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUpOrLeave,
     } = useMatrixState({ disciplines, hashPrefix: '#res-' });
 
     return (
@@ -44,7 +50,7 @@ export default function LearningResultsView({ disciplines, outcomes }: Props) {
                                 ? `${filteredDisciplines.length} з ${disciplines.length}`
                                 : disciplines.length,
                             isAccent: true,
-                            onClick: () => router.push('/plan/graph'),
+                            onClick: () => router.push(programId ? `/plan/${programId}/graph` : '/plan/graph'),
                             title: 'Переглянути граф',
                         },
                         {
@@ -64,7 +70,13 @@ export default function LearningResultsView({ disciplines, outcomes }: Props) {
                 )}
             </div>
 
-            <div className={styles.matrixWrap}>
+            <div 
+                className={`${styles.matrixWrap} ${isDragging ? styles.dragging : ''}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUpOrLeave}
+                onMouseLeave={handleMouseUpOrLeave}
+            >
                 <table className={styles.matrix}>
                     <thead>
                         <tr>
@@ -79,6 +91,7 @@ export default function LearningResultsView({ disciplines, outcomes }: Props) {
                                     <div className={styles.thContent}>{o.code}</div>
                                 </th>
                             ))}
+                            <th className={styles.emptySpace}></th>
                         </tr>
                     </thead>
                     <tbody>

@@ -13,7 +13,7 @@ const ASSESSMENT_LABEL: Record<string, string> = {
   exam_credit: 'Іспит/Залік',
 };
 
-export default function DisciplineView({ discipline }: { discipline: any }) {
+export default function DisciplineView({ discipline, programId }: { discipline: any; programId: string }) {
   const category: 'standard' | 'practice' | 'thesis' = discipline.category ?? 'standard';
   const competencies = discipline.competencies || [];
   const results = sortByCode(discipline.learningOutcomes || []);
@@ -76,6 +76,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
             discipline={discipline}
             prerequisites={prerequisites}
             postrequisites={postrequisites}
+            programId={programId}
           />
 
           
@@ -108,13 +109,13 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
               badge: c.code,
               text: c.description,
               variant: 'zk' as BadgeVariant,
-              link: `/plan/competencies#comp-${c.code}`,
+              link: `/plan/${programId}/competencies#comp-${c.code}`,
             })),
             ...sk.map((c: any) => ({
               badge: c.code,
               text: c.description,
               variant: 'sk' as BadgeVariant,
-              link: `/plan/competencies#comp-${c.code}`,
+              link: `/plan/${programId}/competencies#comp-${c.code}`,
             })),
           ]}
         />
@@ -128,7 +129,7 @@ export default function DisciplineView({ discipline }: { discipline: any }) {
           items={results.map((r: any) => ({
             badge: r.code,
             text: r.description,
-            link: `/plan/results#res-${r.code}`,
+            link: `/plan/${programId}/results#res-${r.code}`,
           }))}
         />
       </div>

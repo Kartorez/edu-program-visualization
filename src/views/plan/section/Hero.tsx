@@ -30,6 +30,19 @@ export default function Hero({
         { value: countElective, label: 'вибіркових' },
     ];
 
+    const getSemesterWord = (count: number) => {
+        switch (count) {
+            case 2: return 'другого';
+            case 3: return 'третього';
+            case 4: return 'четвертого';
+            case 5: return 'пʼятого';
+            case 6: return 'шостого';
+            case 7: return 'сьомого';
+            case 8: return 'восьмого';
+            default: return `${count}-го`;
+        }
+    };
+
     return (
         <section className={styles.hero}>
             <div className={styles.hero__grid} />
@@ -50,7 +63,7 @@ export default function Hero({
                 <ScrollReveal delay={400}>
                     <p className={styles.hero__subtitle}>
                         Інтерактивна візуалізація навчального плану — дисципліни, звязки між предметами та шлях
-                        від першого до восьмого семестру.
+                        від першого до {getSemesterWord(countSemester)} семестру.
                     </p>
                 </ScrollReveal>
 

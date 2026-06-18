@@ -17,6 +17,7 @@ export type EducationalProgram = {
 interface ProgramWizardProps {
   programs: EducationalProgram[];
   departmentTitle: string;
+  departmentShortName?: string;
 }
 
 type Step = 'specialties' | 'programs';
@@ -34,6 +35,7 @@ const degreeDuration: Record<string, string> = {
 export default function ProgramWizard({
   programs,
   departmentTitle,
+  departmentShortName,
 }: ProgramWizardProps) {
   const [step, setStep] = useState<Step>('specialties');
   const [selectedSpecialtyCode, setSelectedSpecialtyCode] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export default function ProgramWizard({
 
     const saved = localStorage.getItem('programVersionId');
     if (saved) {
-      router.replace(`/plan/${saved}/graph`);
+      router.replace(`/plan/${saved}`);
     }
   }, [router, searchParams]);
 
@@ -63,7 +65,7 @@ export default function ProgramWizard({
 
   const handleSelectVersion = (id: string) => {
     localStorage.setItem('programVersionId', id);
-    router.push(`/plan/${id}/graph`);
+    router.push(`/plan/${id}`);
   };
 
   const handleBack = () => {
@@ -114,7 +116,7 @@ export default function ProgramWizard({
             <h1 className={styles.title}>
               Освітні програми
               <br />
-              <em>кафедри КН</em>
+              <em>кафедри {departmentShortName || 'КН'}</em>
             </h1>
 
             <p className={styles.subtitle}>

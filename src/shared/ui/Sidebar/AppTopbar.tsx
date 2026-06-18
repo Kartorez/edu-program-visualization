@@ -38,12 +38,13 @@ function useBreadcrumbs(navLinks: TopbarNavLink[], logoHref: string, logoLabel: 
 
   if (pathname === logoHref) return [];
 
-  if (pathname.startsWith('/plan/disciplines/')) {
-    const code = decodeURIComponent(pathname.split('/').pop() ?? '');
-    const discipline = disciplines.find((d) => d.code === code);
+  const disciplineMatch = pathname.match(/^\/plan\/[^\/]+\/disciplines\/(.+)$/);
+  if (disciplineMatch) {
+    const id = decodeURIComponent(disciplineMatch[1] ?? '');
+    const discipline = disciplines.find((d) => String(d.id) === String(id) || String(d.code) === String(id));
     return [
       ...base,
-      { href: pathname, label: discipline?.shortName ?? discipline?.name ?? code },
+      { href: pathname, label: discipline?.shortName ?? discipline?.name ?? id },
     ];
   }
 
@@ -69,7 +70,7 @@ function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
   );
 }
 
-export function Topbar({
+export default function AppTopbar({
   logoHref = '/',
   logoLabel = 'Освітня програма',
   logoAccent = 'ВНАУ',
@@ -89,33 +90,35 @@ export function Topbar({
 
   const crumbs = useBreadcrumbs(dynamicNavLinks, logoHref, logoLabel);
 
-  const isLanding = pathname === logoHref;
+  const isWizard = pathname === '/';
+  const isHero = match && pathname === `/plan/${programId}`;
+  const isLanding = isWizard || isHero;
 
   const [hasProgram, setHasProgram] = useState<string | null>(null);
   useEffect(() => {
-    // get from localStorage
     const saved = localStorage.getItem('programVersionId');
     if (saved) setHasProgram(saved);
   }, [pathname]);
 
-  const ctaHref = hasProgram ? `/plan/${hasProgram}/graph` : undefined;
+  const ctaHref = programId ? `/plan/${programId}/graph` : hasProgram ? `/plan/${hasProgram}/graph` : undefined;
   const ctaLabel = 'Навчальний план';
 
-  // Split logo label into base + accent
   const logoParts = `КН · ${logoAccent}`;
 
   return (
     <header className="topbar">
       <div className="topbar__left">
-        <button
-          onClick={toggle}
-          className={`burger burger--desktop ${open ? 'burger--open' : ''}`}
-          aria-label="Меню"
-        >
-          <span className="burger__line" />
-          <span className="burger__line" />
-          <span className="burger__line" />
-        </button>
+        {!isWizard && (
+          <button
+            onClick={toggle}
+            className={`burger burger--desktop ${open ? 'burger--open' : ''}`}
+            aria-label="Меню"
+          >
+            <span className="burger__line" />
+            <span className="burger__line" />
+            <span className="burger__line" />
+          </button>
+        )}
 
         <Link href={logoHref} className="logo">
           КН · <em>{logoAccent}</em>
@@ -125,21 +128,23 @@ export function Topbar({
       </div>
 
       <div className="topbar__right">
-        {isLanding && hasProgram && ctaHref && (
+        {isHero && ctaHref && (
           <Button href={ctaHref} className="topbar__btn">
             <span className="topbar__btn-text">{ctaLabel}</span>
             <ArrowRight size={16} />
           </Button>
         )}
-        <button
-          onClick={toggle}
-          className={`burger burger--mobile ${open ? 'burger--open' : ''}`}
-          aria-label="Меню"
-        >
-          <span className="burger__line" />
-          <span className="burger__line" />
-          <span className="burger__line" />
-        </button>
+        {!isWizard && (
+          <button
+            onClick={toggle}
+            className={`burger burger--mobile ${open ? 'burger--open' : ''}`}
+            aria-label="Меню"
+          >
+            <span className="burger__line" />
+            <span className="burger__line" />
+            <span className="burger__line" />
+          </button>
+        )}
       </div>
     </header>
   );

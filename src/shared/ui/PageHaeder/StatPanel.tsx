@@ -10,6 +10,7 @@ export interface StatPanelItem {
     onClick?: () => void;
     title?: string;
     className?: string;
+    inactive?: boolean;
 }
 
 interface StatPanelProps {
@@ -18,10 +19,10 @@ interface StatPanelProps {
 
 export function StatPanel({ items }: StatPanelProps) {
     return (
-        <div className={styles.root}>
+        <>
             {items.map(({ label, ...statProps }) => (
                 <Stat key={label} label={label} {...statProps} />
             ))}
-        </div>
+        </>
     );
 }

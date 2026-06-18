@@ -14,7 +14,7 @@ const formatAssessment = (val: string) => {
   return map[val] || val;
 };
 
-async function fetchProgramDisciplines(programVersionId: string | undefined, light: boolean = false) {
+async function fetchProgramDisciplines(programVersionId: string | undefined, light: boolean = false, includeRelations: boolean = false) {
   const payload = await getPayload({ config });
 
   let rawDisciplines: any[] = [];
@@ -55,7 +55,7 @@ async function fetchProgramDisciplines(programVersionId: string | undefined, lig
   }
 
   let relations: any[] = [];
-  if (!light) {
+  if (!light || includeRelations) {
     const { docs } = await payload.find({
       collection: 'discipline-relations',
       limit: 5000,
@@ -95,7 +95,7 @@ async function fetchProgramDisciplines(programVersionId: string | undefined, lig
     let prerequisites: any[] = [];
     let postrequisites: any[] = [];
 
-    if (!light) {
+    if (!light || includeRelations) {
       prerequisites = Array.from(new Map(relations
         .filter(
           (r: any) =>
@@ -170,6 +170,6 @@ async function fetchProgramDisciplines(programVersionId: string | undefined, lig
   };
 }
 
-export const getProgramDisciplines = cache(async function getProgramDisciplines(programVersionId?: string, light: boolean = false) {
-  return fetchProgramDisciplines(programVersionId, light);
+export const getProgramDisciplines = cache(async function getProgramDisciplines(programVersionId?: string, light: boolean = false, includeRelations: boolean = false) {
+  return fetchProgramDisciplines(programVersionId, light, includeRelations);
 });

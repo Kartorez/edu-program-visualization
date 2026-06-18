@@ -39,5 +39,5 @@ export default async function DisciplinePage({
     notFound();
   }
 
-  return <DisciplineView discipline={doc} />;
+  return <DisciplineView discipline={doc} programId={resolvedParams.programId} />;
 }

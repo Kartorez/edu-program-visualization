@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import RequisiteList from './RequisiteList';
 import ElectiveList from './ElectiveList';
 import './DisciplineModal.scss';
@@ -35,6 +36,9 @@ export default function DisciplineModal({
   onClose: () => void;
   onFocusNode: (code: string) => void;
 }) {
+  const params = useParams();
+  const programId = params.programId;
+
   const labelMap = useMemo(() => buildLabelMap(allNodes), [allNodes]);
 
   const electiveVariants = useMemo(() => {
@@ -109,7 +113,7 @@ export default function DisciplineModal({
               />
             </div>
             <Button
-              href={`/plan/disciplines/${node.id}`}
+              href={`/plan/${programId}/disciplines/${node.id}`}
               className="discipline-modal__details-button button--lg"
             >
               Детальніше

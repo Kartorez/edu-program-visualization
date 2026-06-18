@@ -5,7 +5,7 @@ import styles from './Background.module.scss';
 export default function Background() {
     const pathname = usePathname();
 
-    if (pathname === '/export' || pathname === '/plan/graph') {
+    if (pathname === '/export' || pathname?.endsWith('/graph')) {
         return null;
     }
 

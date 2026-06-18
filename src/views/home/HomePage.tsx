@@ -1,10 +1,7 @@
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import ProgramWizard, { EducationalProgram } from '@/features/program-selection/components/ProgramWizard';
-import { sortByCode } from '@/shared/lib/sortByCode';
-import { getProgramDisciplines } from '@/shared/lib/getProgramDisciplines';
+import AppTopbar from '@/shared/ui/Sidebar/AppTopbar';
 
 const degreeLabels: Record<string, string> = {
   bachelor: 'Бакалавр',
@@ -27,6 +24,13 @@ export default async function HomePage() {
       ? (rawPrograms[0].department as any).title ?? ''
       : '';
 
+  const departmentShortName =
+    rawPrograms.length > 0 &&
+      rawPrograms[0]?.department &&
+      typeof rawPrograms[0].department === 'object'
+      ? (rawPrograms[0].department as any).shortName ?? ''
+      : '';
+
   const programs: EducationalProgram[] = rawPrograms.map((p) => ({
     id: String(p.id),
     title: p.title as string,
@@ -37,9 +41,17 @@ export default async function HomePage() {
   }));
 
   return (
-    <ProgramWizard
-      programs={programs}
-      departmentTitle={departmentTitle}
-    />
+    <>
+      <AppTopbar />
+      <div className="app-container">
+        <main className="main-content">
+          <ProgramWizard
+            programs={programs}
+            departmentTitle={departmentTitle}
+            departmentShortName={departmentShortName}
+          />
+        </main>
+      </div>
+    </>
   );
 }
