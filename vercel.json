@@ -1,0 +1,16 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "functions": {
+    "src/app/(payload)/api/[...slug]/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/(payload)/api/graphql/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/(frontend)/api/export-pdf/route.ts": {
+      "maxDuration": 60
+    }
+  }
+}
