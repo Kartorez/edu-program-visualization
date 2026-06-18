@@ -118,6 +118,9 @@ export const EducationalPrograms: CollectionConfig = {
               hasMany: true,
               admin: {
                 description: 'Виберіть усі дисципліни, що входять до цієї програми. Семестри будуть взяті з налаштувань самих дисциплін.',
+                components: {
+                  Field: '@/features/admin/discipline-selector/components/DisciplineSelector/DisciplineSelector#default',
+                },
               },
             },
           ],
