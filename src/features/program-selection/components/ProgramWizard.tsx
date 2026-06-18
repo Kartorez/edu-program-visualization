@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTopLoader } from 'nextjs-toploader';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import styles from './ProgramWizard.module.scss';
 
@@ -43,6 +44,17 @@ export default function ProgramWizard({
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const topLoader = useTopLoader();
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!isPending) {
+      topLoader.done();
+    }
+    return () => {
+      topLoader.done();
+    };
+  }, [isPending, topLoader]);
 
   useEffect(() => {
     if (searchParams.get('force-select') === 'true') return;
@@ -64,8 +76,11 @@ export default function ProgramWizard({
   };
 
   const handleSelectVersion = (id: string) => {
+    topLoader.start();
     localStorage.setItem('programVersionId', id);
-    router.push(`/plan/${id}`);
+    startTransition(() => {
+      router.push(`/plan/${id}`);
+    });
   };
 
   const handleBack = () => {

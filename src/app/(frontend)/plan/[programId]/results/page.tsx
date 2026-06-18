@@ -17,7 +17,7 @@ export default async function LearningOutcomesPage({ params }: { params: Promise
   const payload = await getPayload({ config });
 
   const [{ docs: outcomes }, { disciplines }] = await Promise.all([
-    payload.find({ collection: 'learning-outcomes', limit: 1000 }),
+    payload.find({ collection: 'learning-outcomes', limit: 200, pagination: false }),
     getProgramDisciplines(programId, false),
   ]);
 

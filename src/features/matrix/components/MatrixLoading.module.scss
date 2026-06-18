@@ -1,0 +1,96 @@
+.matrixPage {
+  &.loading {
+    .loadingHeader {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+  
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+      }
+  
+      &Left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+      }
+  
+      &Code {
+        margin-bottom: 0.125rem;
+      }
+  
+      &Title {
+        margin-bottom: 0.125rem;
+      }
+  
+      &Desc2 {
+        margin-top: -0.25rem;
+      }
+  
+      &Right {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        min-width: 200px;
+        background: var(--color-bg2);
+        padding: 0.875rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+  
+        @media (max-width: 768px) {
+          min-width: unset;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.625rem;
+          padding: 0.625rem;
+        }
+  
+        @media (max-width: 480px) {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+  
+    .loadingStat {
+      width: 100%;
+    }
+  
+    .loadingControls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+  
+    .loadingSearch {
+      flex: 1;
+      min-width: 140px;
+      max-width: 300px;
+    }
+  
+    .loadingMatrix {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: white;
+  
+      &Row {
+        width: 100%;
+        display: block;
+        border-bottom: 1px solid var(--color-border);
+  
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+}

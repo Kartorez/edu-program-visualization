@@ -1,0 +1,35 @@
+.graphLoading {
+  width: 100%;
+  height: calc(100vh - 3.25rem);
+  overflow: hidden;
+  box-sizing: border-box;
+  background: transparent;
+  padding: 24px 32px;
+
+  &Header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  &Rows {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  &Row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  &Disciplines {
+    display: flex;
+    gap: 16px;
+    background: rgba(253, 246, 218, 0.4);
+    padding: 16px;
+    border-radius: 12px;
+    flex: 1;
+  }
+}

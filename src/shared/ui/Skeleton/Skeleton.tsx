@@ -7,6 +7,7 @@ interface SkeletonProps {
     height?: string | number;
     borderRadius?: string | number;
     variant?: 'text' | 'rect' | 'circle';
+    style?: React.CSSProperties;
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
@@ -15,11 +16,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     height,
     borderRadius,
     variant = 'rect',
+    style: externalStyle,
 }) => {
     const style: React.CSSProperties = {
         width,
         height,
         borderRadius: borderRadius || (variant === 'circle' ? '50%' : '4px'),
+        ...externalStyle,
     };
 
     return (

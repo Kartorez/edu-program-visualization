@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { PageHeader, StatPanel } from '@/shared/ui/PageHaeder';
 import { useMatrixState, MatrixRow, MatrixSearch } from '@/features/matrix';
@@ -43,9 +43,13 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
             prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type],
         );
 
-    const zkList = competencies.filter(c => c.type === 'zk' && visibleTypes.includes('zk'));
-    const skList = competencies.filter(c => c.type === 'sk' && visibleTypes.includes('sk'));
-    const allVisibleComps = [...zkList, ...skList];
+    const allVisibleComps = useMemo(() => {
+        const zkList = competencies.filter(c => c.type === 'zk' && visibleTypes.includes('zk'));
+        const skList = competencies.filter(c => c.type === 'sk' && visibleTypes.includes('sk'));
+        return [...zkList, ...skList];
+    }, [competencies, visibleTypes]);
+
+    const getDotClass = useCallback((c: any) => `dot-${c.type}`, []);
 
     return (
         <div className={styles.matrixPage}>
@@ -138,7 +142,7 @@ export default function CompetencyMatrixView({ disciplines, competencies }: Prop
                                 discipline={d}
                                 columns={allVisibleComps}
                                 itemsKey="competencies"
-                                dotClass={(c: any) => `dot-${c.type}`}
+                                dotClass={getDotClass}
                                 isSelected={selectedRows.has(d.id)}
                                 selectedColsArray={selectedColsArray}
                                 highlightedCol={highlightedCol}

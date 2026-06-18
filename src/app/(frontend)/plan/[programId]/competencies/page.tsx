@@ -17,7 +17,7 @@ export default async function CompetenciesPage({ params }: { params: Promise<{ p
   const payload = await getPayload({ config });
 
   const [{ docs: competencies }, { disciplines }] = await Promise.all([
-    payload.find({ collection: 'competencies', limit: 1000 }),
+    payload.find({ collection: 'competencies', limit: 200, pagination: false }),
     getProgramDisciplines(programId, false),
   ]);
 
