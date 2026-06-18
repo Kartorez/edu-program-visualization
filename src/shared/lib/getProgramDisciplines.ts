@@ -1,8 +1,7 @@
-import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 
 import { getPayload } from 'payload';
 import config from '@payload-config';
-import { cookies } from 'next/headers';
 
 const formatAssessment = (val: string) => {
   const map: Record<string, string> = {
@@ -170,6 +169,10 @@ async function fetchProgramDisciplines(programVersionId: string | undefined, lig
   };
 }
 
-export const getProgramDisciplines = cache(async function getProgramDisciplines(programVersionId?: string, light: boolean = false, includeRelations: boolean = false) {
-  return fetchProgramDisciplines(programVersionId, light, includeRelations);
-});
+export const getProgramDisciplines = unstable_cache(
+  async function getProgramDisciplines(programVersionId?: string, light: boolean = false, includeRelations: boolean = false) {
+    return fetchProgramDisciplines(programVersionId, light, includeRelations);
+  },
+  ['program-disciplines'],
+  { revalidate: 3600, tags: ['disciplines'] }
+);
